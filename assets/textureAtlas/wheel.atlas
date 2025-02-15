@@ -1,0 +1,139 @@
+
+wheel.png
+size: 1024, 1024
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+center_shield
+  rotate: false
+  xy: 868, 825
+  size: 76, 76
+  orig: 76, 76
+  offset: 0, 0
+  index: -1
+dot
+  rotate: false
+  xy: 2, 2
+  size: 19, 21
+  orig: 19, 21
+  offset: 0, 0
+  index: -1
+lightDot
+  rotate: false
+  xy: 556, 374
+  size: 40, 40
+  orig: 40, 40
+  offset: 0, 0
+  index: -1
+reward_coin
+  rotate: false
+  xy: 2, 181
+  size: 254, 233
+  orig: 254, 233
+  offset: 0, 0
+  index: -1
+reward_item_1
+  rotate: false
+  xy: 2, 25
+  size: 147, 154
+  orig: 147, 154
+  offset: 0, 0
+  index: -1
+reward_item_2
+  rotate: false
+  xy: 258, 265
+  size: 147, 149
+  orig: 147, 149
+  offset: 0, 0
+  index: -1
+reward_item_3
+  rotate: false
+  xy: 407, 266
+  size: 147, 148
+  orig: 147, 148
+  offset: 0, 0
+  index: -1
+reward_item_4
+  rotate: false
+  xy: 598, 752
+  size: 147, 149
+  orig: 147, 149
+  offset: 0, 0
+  index: -1
+spin
+  rotate: false
+  xy: 2, 416
+  size: 594, 594
+  orig: 594, 594
+  offset: 0, 0
+  index: -1
+spin_frm_title
+  rotate: false
+  xy: 598, 903
+  size: 322, 107
+  orig: 322, 107
+  offset: 0, 0
+  index: -1
+spin_item_1
+  rotate: false
+  xy: 922, 907
+  size: 98, 103
+  orig: 98, 103
+  offset: 0, 0
+  index: -1
+spin_item_2
+  rotate: false
+  xy: 598, 529
+  size: 98, 100
+  orig: 98, 100
+  offset: 0, 0
+  index: -1
+spin_item_3
+  rotate: false
+  xy: 258, 164
+  size: 98, 99
+  orig: 98, 99
+  offset: 0, 0
+  index: -1
+spin_item_4
+  rotate: false
+  xy: 598, 427
+  size: 98, 100
+  orig: 98, 100
+  offset: 0, 0
+  index: -1
+spin_item_5
+  rotate: false
+  xy: 233, 67
+  size: 96, 95
+  orig: 96, 95
+  offset: 0, 0
+  index: -1
+spin_item_7
+  rotate: false
+  xy: 747, 797
+  size: 119, 104
+  orig: 119, 104
+  offset: 0, 0
+  index: -1
+spin_item_6
+  rotate: false
+  xy: 747, 797
+  size: 119, 104
+  orig: 119, 104
+  offset: 0, 0
+  index: -1
+spin_item_8
+  rotate: false
+  xy: 598, 631
+  size: 129, 119
+  orig: 129, 119
+  offset: 0, 0
+  index: -1
+spin_pointer
+  rotate: false
+  xy: 151, 57
+  size: 80, 122
+  orig: 80, 122
+  offset: 0, 0
+  index: -1
