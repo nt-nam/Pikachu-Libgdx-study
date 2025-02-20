@@ -24,7 +24,7 @@ public class Demo extends Game {
   Stage stage;
   Image img;
 
-  UiPopup group;
+  UiPopup winPopup;
 
   @Override
   public void create() {
@@ -49,7 +49,7 @@ public class Demo extends Game {
     assetManager.load("sound/bubble_fall.mp3", Sound.class);
     assetManager.load("font/arial_uni_30.fnt", BitmapFont.class);
     assetManager.finishLoading();
-    group = new UiPopup(assetManager);
+    winPopup = new UiPopup(assetManager,true);
 
     TextureAtlas animals = assetManager.get("textureAtlas/animals.atlas");
     img = new Image(new TextureRegion(animals.findRegion("cucxilau1"))) {
@@ -61,8 +61,9 @@ public class Demo extends Game {
       }
     };
     img.setOrigin(Align.center);
-    group.setPosition(worldWidth/2 - group.getCenterX(),worldHeight/2 - group.getCenterY());
-    stage.addActor(group);
+    winPopup.scaleBy(0.5f,0.5f);
+    winPopup.setPosition(worldWidth/2 - winPopup.getCenterX(),worldHeight/2 - winPopup.getCenterY());
+    stage.addActor(winPopup);
 
   }
 
