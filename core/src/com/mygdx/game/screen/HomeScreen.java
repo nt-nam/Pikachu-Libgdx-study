@@ -2,6 +2,7 @@ package com.mygdx.game.screen;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
@@ -17,31 +18,38 @@ import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
+import com.mygdx.game.PikachuGame;
+import com.mygdx.game.helper.AssetHelper;
 
 public class HomeScreen implements Screen {
-    private Game game;
+    private PikachuGame game;
     int maxLevel = 100;
+    Preferences prefs = Gdx.app.getPreferences("Pika_vip");
     private Stage stage;
-    private AssetManager assetManager;
+    private AssetManager assetHelper;
     private Image btnProfile, blockLevel, btnStartLevel, btnSetting;
     private float centerX, centerY;
     private BitmapFont bitmapFont;
     private Label labelLevel;
     private boolean isdraw;
 
-    public HomeScreen(Game game, AssetManager assetManager, Stage stage) {
+    public HomeScreen(PikachuGame game, AssetManager assetManager,Stage stage) {
         this.game = game;
         this.stage = stage;
-        this.assetManager = assetManager;
+//        this.assetHelper = AssetHelper.getInstance();
+        this.assetHelper = assetManager;
         centerX = stage.getWidth() / 2;
         centerY = stage.getHeight() / 2;
         createAssetHome();
         isdraw = true;
+        if(prefs.getInteger("level",-1) != -1 ){
+            game.setScreen(game.getLoadingScreen());
+        }
     }
-
+    int numberLevel =0;
     private void createAssetHome() {
-        TextureAtlas ui = assetManager.get("textureAtlas/ui.atlas");
-        bitmapFont = assetManager.get("font/arial_uni_30.fnt");
+        TextureAtlas ui = assetHelper.get("textureAtlas/ui.atlas");
+        bitmapFont = assetHelper.get("font/arial_uni_30.fnt");
         Label.LabelStyle style = new Label.LabelStyle();
         style.font = bitmapFont;
 
@@ -51,7 +59,7 @@ public class HomeScreen implements Screen {
         label.setBounds(10, centerY * 2 - 100, 100, 100);
         stage.addActor(btnProfile);
         stage.addActor(label);
-
+        prefs.putInteger("level",numberLevel);
 //        Group levelGroup = new Group();
         Table table = new Table();
 
@@ -96,7 +104,7 @@ public class HomeScreen implements Screen {
             blockLevel.setX(x * 110 + centerX - 220);
 //            blockLevel.setWidth(100);
             labelLevel = new Label("" + n, style);
-            labelLevel.setX(blockLevel.getX());
+            labelLevel.setBounds(blockLevel.getX(),blockLevel.getY(),blockLevel.getWidth(),blockLevel.getHeight());
             labelLevel.setFontScale(2f);
             labelLevel.setAlignment(Align.center);
             level.addActor(blockLevel);
@@ -110,12 +118,7 @@ public class HomeScreen implements Screen {
             table.add(level);
             table.row();
         }
-//        table.setFillParent(true);
-//        table.debug();
         ScrollPane scrollPane = new ScrollPane(table);
-//        scrollPane.setDebug(true, true);
-//        scrollPane.setFillParent(true);
-//        scrollPane.debug();
 
         scrollPane.setSize(stage.getWidth(), stage.getHeight() - 100);
 
@@ -137,6 +140,7 @@ public class HomeScreen implements Screen {
     @Override
     public void render(float delta) {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        Gdx.gl.glClearColor(0.4f,0.5f,0.4f,1);
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
         if (isdraw) stage.draw();
     }

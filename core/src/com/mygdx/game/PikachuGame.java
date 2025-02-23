@@ -2,6 +2,8 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -11,57 +13,73 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygdx.game.screen.HomeScreen;
-import com.mygdx.game.screen.SettingScreen;
+import com.mygdx.game.screen.LoadingScreen;
+import com.mygdx.game.screen.PlayScreen;
 
 public class PikachuGame extends Game {
-    Stage stage;
-    AssetManager assetManager;
-    OrthographicCamera camera;
-    Viewport viewport;
+  Stage stage;
+  AssetManager assetManager;
+  OrthographicCamera camera;
+  Viewport viewport;
+//  Preferences prefs = Gdx.app.getPreferences("Pika_vip");
 
-    @Override
-    public void create() {
-        assetManager = new AssetManager();
+  LoadingScreen loadingScreen;
+  HomeScreen homeScreen ;
+  PlayScreen playScreen;
+
+  @Override
+  public void create() {
+    assetManager = new AssetManager();
 //        fileAtlas();
-        float screenWidth = Gdx.graphics.getWidth();
-        float screenHeight = Gdx.graphics.getHeight();
+    float screenWidth = Gdx.graphics.getWidth();
+    float screenHeight = Gdx.graphics.getHeight();
 
-        float worldWidth = 720;
-        float worldHeight = worldWidth * screenHeight / screenWidth;
+    float worldWidth = 720;
+    float worldHeight = worldWidth * screenHeight / screenWidth;
 
-        camera = new OrthographicCamera(worldWidth, worldHeight);
-        camera.setToOrtho(false);
+    camera = new OrthographicCamera(worldWidth, worldHeight);
+    camera.setToOrtho(false);
 
-        viewport = new FitViewport(worldWidth, worldHeight, camera);
-        viewport.apply();
+    viewport = new FitViewport(worldWidth, worldHeight, camera);
+    viewport.apply();
 
-        stage = new Stage(viewport);
-        Gdx.input.setInputProcessor(stage);
-        loadAsset();
+    stage = new Stage(viewport);
+    Gdx.input.setInputProcessor(stage);
+    loadAsset();
 
-        setScreen(new HomeScreen(this, assetManager, stage));
+//        setScreen(new LoadingScreen(this,stage));
+        setScreen(new HomeScreen(this,assetManager,stage));
+    initScreen();
+//    setScreen(loadingScreen);
+  }
+public LoadingScreen getLoadingScreen(){
+    return loadingScreen;
+}
+  private void initScreen() {
+    loadingScreen = new LoadingScreen(this,stage);
+//    homeScreen= new HomeScreen(this, stage.getViewport());
+//    playScreen = new PlayScreen(this,stage.getViewport());
+  }
 
+  private void fileAtlas() {
+    for (int i = 0; i < 36; i++) {
+      System.out.println(i);
+      System.out.println("  rotate: false");
+      System.out.println("  xy: " + ((int) (i / 6) * (390 + 30) + 30) + ", " + ((i % 6) * (390 + 30) + 60));
+      System.out.println("  size: 390, 390");
+      System.out.println("  orig: 45, 45");
+      System.out.println("  offset: 0, 0");
+      System.out.println("  index: -1");
     }
+  }
 
-    private void fileAtlas() {
-        for (int i = 0; i < 36; i++) {
-            System.out.println(i);
-            System.out.println("  rotate: false");
-            System.out.println("  xy: " + ((int) (i / 6) * (390 + 30) + 30) + ", " + ((i % 6) * (390 + 30) + 60));
-            System.out.println("  size: 390, 390");
-            System.out.println("  orig: 45, 45");
-            System.out.println("  offset: 0, 0");
-            System.out.println("  index: -1");
-        }
-    }
-
-    private void loadAsset() {
-        assetManager.load("textureAtlas/animals2.atlas", TextureAtlas.class);
-        assetManager.load("textureAtlas/ui.atlas", TextureAtlas.class);
-        assetManager.load("sound/bubble_fall.mp3", Sound.class);
-        assetManager.load("font/arial_uni_30.fnt", BitmapFont.class);
-        assetManager.finishLoading();
-    }
+  private void loadAsset() {
+    assetManager.load("textureAtlas/animals2.atlas", TextureAtlas.class);
+    assetManager.load("textureAtlas/ui.atlas", TextureAtlas.class);
+    assetManager.load("sound/bubble_fall.mp3", Sound.class);
+    assetManager.load("font/arial_uni_30.fnt", BitmapFont.class);
+    assetManager.finishLoading();
+  }
 
 
 }
