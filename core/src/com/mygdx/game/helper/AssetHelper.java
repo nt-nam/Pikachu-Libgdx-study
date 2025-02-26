@@ -7,7 +7,6 @@
   import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
   public class AssetHelper extends AssetManager {
-    private static AssetHelper instance;
     private AssetHelper() {
       super();
       loadAssetAll();
@@ -21,11 +20,8 @@
       finishLoading();
     }
 
-    public static AssetHelper getInstance() {
-      if (instance == null) {
-        instance = new AssetHelper(); // tạo thể hiện mới nếu chưa có
-      }
-      return instance;
+    public AssetHelper getInstance() {
+      return this;
     }
     public TextureRegion getTextureRegion(String name){
       return get(name);

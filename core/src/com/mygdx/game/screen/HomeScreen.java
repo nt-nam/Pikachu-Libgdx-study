@@ -1,6 +1,5 @@
 package com.mygdx.game.screen;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
@@ -18,8 +17,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygdx.game.PikachuGame;
-import com.mygdx.game.helper.AssetHelper;
 
 public class HomeScreen implements Screen {
     private PikachuGame game;
@@ -33,11 +32,10 @@ public class HomeScreen implements Screen {
     private Label labelLevel;
     private boolean isdraw;
 
-    public HomeScreen(PikachuGame game, AssetManager assetManager,Stage stage) {
+    public HomeScreen(PikachuGame game,  Viewport viewport) {
         this.game = game;
-        this.stage = stage;
-//        this.assetHelper = AssetHelper.getInstance();
-        this.assetHelper = assetManager;
+        stage = new Stage(viewport);
+        this.assetHelper = game.getAssetManager();
         centerX = stage.getWidth() / 2;
         centerY = stage.getHeight() / 2;
         createAssetHome();
@@ -55,12 +53,12 @@ public class HomeScreen implements Screen {
 
         btnProfile = new Image(new TextureRegion(ui.findRegion("btn_blue")));
         btnProfile.setBounds(0, centerY * 2 - 100, 100, 100);
+        btnProfile.setColor(1f ,1f,1f,1f);
         Label label = new Label("Profile", style);
         label.setBounds(10, centerY * 2 - 100, 100, 100);
         stage.addActor(btnProfile);
         stage.addActor(label);
         prefs.putInteger("level",numberLevel);
-//        Group levelGroup = new Group();
         Table table = new Table();
 
         for (int n = 1; n < maxLevel; n++) {
@@ -102,7 +100,6 @@ public class HomeScreen implements Screen {
             level.setSize(stage.getWidth(), 100);
             blockLevel = new Image(new TextureRegion(ui.findRegion("btn_green")));
             blockLevel.setX(x * 110 + centerX - 220);
-//            blockLevel.setWidth(100);
             labelLevel = new Label("" + n, style);
             labelLevel.setBounds(blockLevel.getX(),blockLevel.getY(),blockLevel.getWidth(),blockLevel.getHeight());
             labelLevel.setFontScale(2f);
@@ -112,7 +109,9 @@ public class HomeScreen implements Screen {
             level.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
-                    game.setScreen(new PlayScreen(game, HomeScreen.this, stage.getViewport(), nlevel));
+                    game.getPlayScreen().setLevel(nlevel);
+                    game.setScreen(game.getPlayScreen());
+//                    game.setScreen(new PlayScreen(game, HomeScreen.this, stage.getViewport(), nlevel));
                 }
             });
             table.add(level);

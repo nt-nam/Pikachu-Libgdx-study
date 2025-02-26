@@ -5,16 +5,12 @@ package com.mygdx.game.control;
 //import static com.mygdx.game.screen.PlayScreen.isStraightPath;
 //import static com.mygdx.game.screen.PlayScreen.isTwoCornerPath;
 
-import com.mygdx.game.model.Animal;
-
-import java.util.ArrayList;
 import java.util.List;
 
 public class PathResult {
-  private static final int COLUMNS = 0;
   private boolean isEdible;
   private String pathType; // "straight", "oneCorner", "twoCorners"
-  private List<int[]> pathCoordinates; // List of coordinates in the path
+  private List<int[]> pathCoordinates;
 
   public PathResult(boolean isEdible, String pathType, List<int[]> pathCoordinates) {
     this.isEdible = isEdible;

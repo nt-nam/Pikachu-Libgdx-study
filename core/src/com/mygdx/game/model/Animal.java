@@ -4,13 +4,13 @@ package com.mygdx.game.model;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.mygdx.game.control.PathResult;
 import com.mygdx.game.screen.PlayScreen;
-
 
 
 public class Animal extends Actor {
@@ -67,11 +67,13 @@ public class Animal extends Actor {
       return;
     }
     // delete
-    PathResult result = PlayScreen.checkEdible(PlayScreen.animalSelect, this);
-    if (PlayScreen.animalSelect.getId() == id && result.isEdible()) {
-      for (int[] coordinate : result.getPathCoordinates()) {
-        System.out.println("Tọa độ: (" + coordinate[0] + ", " + coordinate[1] + ")");
-      }
+//    PathResult result = PlayScreen.checkEdible(PlayScreen.animalSelect, this);
+//    if (PlayScreen.animalSelect.getId() == id && result.isEdible()) {
+//      for (int[] coordinate : result.getPathCoordinates()) {
+//        System.out.println("Tọa độ: (" + coordinate[0] + ", " + coordinate[1] + ")");
+//      }
+    if (PlayScreen.animalSelect.getId() == id && PlayScreen.checkEdible(PlayScreen.animalSelect, this)) {
+      PlayScreen.removeAnimalSelect(this);
       removeAni();
       PlayScreen.drawMatrix();
       return;
@@ -81,9 +83,13 @@ public class Animal extends Actor {
   }
 
   private void removeAni() {
-    PlayScreen.removeAnimalSelect();
-    PlayScreen.animalHashMap.remove(getKey());
-    this.remove();
+
+//    PlayScreen.animalHashMap.remove(getKey());
+//    PlayScreen.animalHashMap.remove(PlayScreen.animalSelect.getKey());
+//    PlayScreen.animalSelect.addAction(removeAnimal);
+//    this.addAction(removeAnimal);
+//    PlayScreen.removeAnimalSelect();
+//    this.remove();
   }
 
   public String getKey() {

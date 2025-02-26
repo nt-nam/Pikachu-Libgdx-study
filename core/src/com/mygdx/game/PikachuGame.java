@@ -2,8 +2,6 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Preferences;
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -24,13 +22,13 @@ public class PikachuGame extends Game {
 //  Preferences prefs = Gdx.app.getPreferences("Pika_vip");
 
   LoadingScreen loadingScreen;
-  HomeScreen homeScreen ;
+  HomeScreen homeScreen;
   PlayScreen playScreen;
 
   @Override
   public void create() {
     assetManager = new AssetManager();
-//        fileAtlas();
+
     float screenWidth = Gdx.graphics.getWidth();
     float screenHeight = Gdx.graphics.getHeight();
 
@@ -47,18 +45,41 @@ public class PikachuGame extends Game {
     Gdx.input.setInputProcessor(stage);
     loadAsset();
 
-//        setScreen(new LoadingScreen(this,stage));
-        setScreen(new HomeScreen(this,assetManager,stage));
     initScreen();
-//    setScreen(loadingScreen);
   }
-public LoadingScreen getLoadingScreen(){
+
+  public LoadingScreen getLoadingScreen() {
+
     return loadingScreen;
-}
+  }
+
+  public PlayScreen getPlayScreen() {
+
+    initPlayScreen();
+    playScreen.resetScreen();
+    return playScreen;
+  }
+  private void initPlayScreen(){
+    if(playScreen == null){
+      playScreen = new PlayScreen(this,viewport);
+    }
+  }
+  private void initHomeScreen(){
+    if(homeScreen == null){
+      homeScreen = new HomeScreen(this,viewport);
+    }
+  }
+  public HomeScreen getHomeScreen() {
+    initHomeScreen();
+    return homeScreen;
+  }
+
+  public AssetManager getAssetManager() {
+    return assetManager;
+  }
+
   private void initScreen() {
-    loadingScreen = new LoadingScreen(this,stage);
-//    homeScreen= new HomeScreen(this, stage.getViewport());
-//    playScreen = new PlayScreen(this,stage.getViewport());
+    loadingScreen = new LoadingScreen(this, viewport);
   }
 
   private void fileAtlas() {
