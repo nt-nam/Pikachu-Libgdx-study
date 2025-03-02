@@ -1,4 +1,4 @@
-package com.mygdx.game;
+package com.mygdx.game.defaults;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -15,7 +15,7 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.mygdx.game.screen.UiPopup;
+import com.mygdx.game.defaults.screen.UiPopup;
 
 public class Demo extends Game {
   AssetManager assetManager;

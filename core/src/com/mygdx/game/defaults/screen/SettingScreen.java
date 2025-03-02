@@ -1,22 +1,21 @@
-package com.mygdx.game.screen;
+package com.mygdx.game.defaults.screen;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.mygdx.game.PikachuGame;
+import com.mygdx.game.defaults.PikachuGameA;
 
 public class SettingScreen implements Screen {
-    PikachuGame game;
+    PikachuGameA game;
     private AssetManager assetManager;
     private Stage stage;
     private UiPopup winPopup;
     Image starEmpty0, starEmpty1, starEmpty2, board, boardCoinMainMenu, btnBack, btnReplay, btnResume, coin, heart, popup, ribbonBlue, ribbonFailed;
 
 
-    public SettingScreen(PikachuGame game, AssetManager assetManager, Stage stage) {
+    public SettingScreen(PikachuGameA game, AssetManager assetManager, Stage stage) {
         this.assetManager = assetManager;
         this.stage = stage;
 

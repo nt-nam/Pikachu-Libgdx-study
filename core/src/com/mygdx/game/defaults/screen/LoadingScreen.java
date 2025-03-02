@@ -1,4 +1,4 @@
-package com.mygdx.game.screen;
+package com.mygdx.game.defaults.screen;
 
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
@@ -7,13 +7,13 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.mygdx.game.PikachuGame;
+import com.mygdx.game.defaults.PikachuGameA;
 
 public class LoadingScreen implements Screen {
-  PikachuGame game;
+  PikachuGameA game;
   Stage stage;
   AssetManager assetManager;
-  public LoadingScreen(PikachuGame game, Viewport viewport){
+  public LoadingScreen(PikachuGameA game, Viewport viewport){
     this.game = game;
     stage = new Stage(viewport);
     assetManager = new AssetManager();

@@ -1,16 +1,14 @@
-package com.mygdx.game.model;
+package com.mygdx.game.defaults.model;
 
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.mygdx.game.control.PathResult;
-import com.mygdx.game.screen.PlayScreen;
+import com.mygdx.game.defaults.screen.PlayScreen;
 
 
 public class Animal extends Actor {

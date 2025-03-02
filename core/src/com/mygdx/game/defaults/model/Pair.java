@@ -1,4 +1,4 @@
-package com.mygdx.game.model;
+package com.mygdx.game.defaults.model;
 
 public class Pair {
   int x, y;

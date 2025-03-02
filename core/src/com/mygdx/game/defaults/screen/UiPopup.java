@@ -1,6 +1,5 @@
-package com.mygdx.game.screen;
+package com.mygdx.game.defaults.screen;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
@@ -14,11 +13,11 @@ import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.mygdx.game.PikachuGame;
+import com.mygdx.game.defaults.PikachuGameA;
 
 public class UiPopup extends Group {
   public static UiPopup me;
-  PikachuGame game;
+  PikachuGameA game;
   AssetManager assetManager;
   Image starEmpty0, starEmpty1, starEmpty2, board, boardCoinMainMenu, btnBack, btnReplay, btnResume, coin, heart, popup, ribbonBlue, ribbonFailed;
   ImageButton button;
@@ -28,7 +27,7 @@ public class UiPopup extends Group {
   float centerX, centerY;
   private boolean type;
 
-  public UiPopup(PikachuGame game, AssetManager assetManager, boolean type) {
+  public UiPopup(PikachuGameA game, AssetManager assetManager, boolean type) {
     me= this;
     this.game = game;
     this.assetManager = assetManager;

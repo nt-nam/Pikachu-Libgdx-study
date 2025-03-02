@@ -102,3 +102,10 @@ ribbon_failed
   orig: 437, 138
   offset: 0, 0
   index: -1
+line_red
+  rotate: false
+  xy: 1060, 270
+  size: 30, 20
+  orig: 30, 20
+  offset: 0, 0
+  index: 2

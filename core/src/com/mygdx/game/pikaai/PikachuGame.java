@@ -1,4 +1,4 @@
-package com.mygdx.game;
+package com.mygdx.game.pikaai;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -10,16 +10,13 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.mygdx.game.screen.HomeScreen;
-import com.mygdx.game.screen.LoadingScreen;
-import com.mygdx.game.screen.PlayScreen;
+
 
 public class PikachuGame extends Game {
   Stage stage;
   AssetManager assetManager;
   OrthographicCamera camera;
   Viewport viewport;
-//  Preferences prefs = Gdx.app.getPreferences("Pika_vip");
 
   LoadingScreen loadingScreen;
   HomeScreen homeScreen;
@@ -56,7 +53,6 @@ public class PikachuGame extends Game {
   public PlayScreen getPlayScreen() {
 
     initPlayScreen();
-    playScreen.resetScreen();
     return playScreen;
   }
   private void initPlayScreen(){
@@ -80,18 +76,6 @@ public class PikachuGame extends Game {
 
   private void initScreen() {
     loadingScreen = new LoadingScreen(this, viewport);
-  }
-
-  private void fileAtlas() {
-    for (int i = 0; i < 36; i++) {
-      System.out.println(i);
-      System.out.println("  rotate: false");
-      System.out.println("  xy: " + ((int) (i / 6) * (390 + 30) + 30) + ", " + ((i % 6) * (390 + 30) + 60));
-      System.out.println("  size: 390, 390");
-      System.out.println("  orig: 45, 45");
-      System.out.println("  offset: 0, 0");
-      System.out.println("  index: -1");
-    }
   }
 
   private void loadAsset() {

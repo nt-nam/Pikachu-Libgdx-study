@@ -1,4 +1,4 @@
-package com.mygdx.game.screen;
+package com.mygdx.game.defaults.screen;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
@@ -18,10 +18,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.mygdx.game.PikachuGame;
+import com.mygdx.game.defaults.PikachuGameA;
 
 public class HomeScreen implements Screen {
-    private PikachuGame game;
+    private PikachuGameA game;
     int maxLevel = 100;
     Preferences prefs = Gdx.app.getPreferences("Pika_vip");
     private Stage stage;
@@ -32,7 +32,7 @@ public class HomeScreen implements Screen {
     private Label labelLevel;
     private boolean isdraw;
 
-    public HomeScreen(PikachuGame game,  Viewport viewport) {
+    public HomeScreen(PikachuGameA game, Viewport viewport) {
         this.game = game;
         stage = new Stage(viewport);
         this.assetHelper = game.getAssetManager();
@@ -111,17 +111,14 @@ public class HomeScreen implements Screen {
                 public void clicked(InputEvent event, float x, float y) {
                     game.getPlayScreen().setLevel(nlevel);
                     game.setScreen(game.getPlayScreen());
-//                    game.setScreen(new PlayScreen(game, HomeScreen.this, stage.getViewport(), nlevel));
                 }
             });
             table.add(level);
             table.row();
         }
+        
         ScrollPane scrollPane = new ScrollPane(table);
-
         scrollPane.setSize(stage.getWidth(), stage.getHeight() - 100);
-
-
         scrollPane.setScrollingDisabled(true, false);
         stage.addActor(scrollPane);
 

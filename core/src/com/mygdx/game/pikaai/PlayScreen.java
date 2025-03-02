@@ -1,7 +1,7 @@
-package com.mygdx.game.screen;
+package com.mygdx.game.pikaai;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
@@ -17,10 +17,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.mygdx.game.PikachuGame;
-import com.mygdx.game.model.Animal;
-import com.mygdx.game.model.Pair;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,7 +29,7 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class PlayScreen implements Screen {
-  private static final int ROWS = 6;
+  private static final int ROWS = 5;
   private static final int COLUMNS = 6;
   private final float centerX;
   private final float centerY;
@@ -41,6 +40,7 @@ public class PlayScreen implements Screen {
 
   private static Group board;
   public static HashMap<String, Animal> animalHashMap;
+  Array<Animal> animalArray = new Array<>();
 
   private TextureAtlas animals;
   private static TextureAtlas ui;
@@ -48,6 +48,8 @@ public class PlayScreen implements Screen {
   private int level;
   public static Animal animalSelect;
   private static int distance;
+  Label.LabelStyle style;
+  BitmapFont bitmapFont;
 
   public PlayScreen(PikachuGame game, Viewport viewport) {
     this.game = game;
@@ -65,23 +67,33 @@ public class PlayScreen implements Screen {
     assetManager.load("textureAtlas/animals2.atlas", TextureAtlas.class);
     assetManager.load("textureAtlas/ui.atlas", TextureAtlas.class);
     assetManager.finishLoading();
+
+    bitmapFont = game.getAssetManager().get("font/arial_uni_30.fnt");
+    style = new Label.LabelStyle();
+    style.font = bitmapFont;
   }
 
   public void resetScreen() {
-//    stage.clear();
-    stage = new Stage(stage.getViewport());
+    // Xóa dữ liệu trong animalHashMap để không còn animal cũ
+    while (board.getChildren().notEmpty())
+      board.getChildren().first().remove();
+    board.clear();
+    board.remove();
+    while (animalArray.notEmpty()) {
+      animalArray.pop().remove();
+    }
+    animalHashMap.clear();
+
+//    System.out.println("size Stage: "+stage.getActors().size);
     animals = assetManager.get("textureAtlas/animals2.atlas");
     ui = assetManager.get("textureAtlas/ui.atlas");
-    createBoard();
+    createBoard(); // Tạo lại các animal mới
 
     levelTitle = new Image(new TextureRegionDrawable(ui.findRegion("btn_blue")));
     levelTitle.setSize(200, 100);
     levelTitle.setPosition(centerX - 0.5f * levelTitle.getWidth(), centerY * 2 - levelTitle.getHeight());
 
-//    BitmapFont bitmapFont = assetHelper.get("font/arial_uni_30.fnt");
-    BitmapFont bitmapFont = game.getAssetManager().get("font/arial_uni_30.fnt");
-    Label.LabelStyle style = new Label.LabelStyle();
-    style.font = bitmapFont;
+
     Label labelTitleLevel = new Label("Level: " + level, style);
     labelTitleLevel.setBounds(levelTitle.getX(), levelTitle.getY(), levelTitle.getWidth(), levelTitle.getHeight());
     labelTitleLevel.setAlignment(Align.center);
@@ -91,6 +103,12 @@ public class PlayScreen implements Screen {
     closeScreen.addListener(new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
+//        for (Actor a: stage.getActors()) {
+//          if(a instanceof Animal){
+//            a.remove();  // Xóa tất cả animal khi đóng màn hình
+//          }
+//        }
+
         game.setScreen(game.getHomeScreen());
       }
     });
@@ -101,18 +119,16 @@ public class PlayScreen implements Screen {
     Gdx.input.setInputProcessor(stage);
   }
 
+
   @Override
   public void show() {
     resetScreen();
-
   }
 
   private void createBoard() {
     List<Integer> numbers = new ArrayList<>();
-    @SuppressWarnings("NewApi") int randomId = ThreadLocalRandom.current().nextInt(1, 35);
     for (int i = 1; i <= COLUMNS * ROWS / 2; i++) {
-//      numbers.add(i % 35);
-//      numbers.add(i % 35);
+      @SuppressWarnings("NewApi") int randomId = ThreadLocalRandom.current().nextInt(1, 35);
       numbers.add(randomId);
       numbers.add(randomId);
     }
@@ -129,9 +145,11 @@ public class PlayScreen implements Screen {
     stage.addActor(board);
   }
 
+
   private void createAnimal(Animal animal) {
     String key = animal.getKey();
     animalHashMap.put(key, animal);
+    animalArray.add(animal);
     board.addActor(animal);
   }
 
@@ -149,6 +167,7 @@ public class PlayScreen implements Screen {
     System.out.println("----------------------------------");
   }
 
+
   public static boolean checkEdible(Animal a1, Animal a2) {
     if (a1 == null || a2 == null) return false;
 
@@ -158,6 +177,7 @@ public class PlayScreen implements Screen {
     int y2 = a2.getGridY();
     List<Pair> pairList = new ArrayList<>();
     if (isStraightPath(x1, y1, x2, y2, pairList)) {
+
       drawLine(pairList);
       return true;
     }
@@ -174,20 +194,122 @@ public class PlayScreen implements Screen {
     return false;
   }
 
-  private static void drawLine(List<Pair> pairList) {
+  private static void drawLine3(List<Pair> pairList) {
     if (pairList != null) {
+      StringBuilder pathFull = new StringBuilder("path full: ");
+      Pair pairBefore = null;
+
       for (Pair pair : pairList) {
-        if (animalHashMap.get(getKey(pair.getX(), pair.getY())) == null) {
-          Image coin = new Image(new TextureRegionDrawable(ui.findRegion("coin")));
-          coin.setBounds(pair.getX() * distance + board.getX(), pair.getY() * distance + board.getY(), distance - 5, distance - 5);
+        pathFull.append("- [").append(pair.getX()).append(",").append(pair.getY()).append("] ");
+        if (pairBefore == null || pairBefore == pair) {
+          pairBefore = pair;
+          continue;
+        }
+
+        boolean isVertical = pair.getX() == pairBefore.getX() &&
+            (pair.getY() == pairBefore.getY() + 1 || pair.getY() == pairBefore.getY() - 1);
+        boolean isHorizontal = pair.getY() == pairBefore.getY() &&
+            (pair.getX() == pairBefore.getX() + 1 || pair.getX() == pairBefore.getX() - 1);
+
+        if (isVertical || isHorizontal) {
+          float width = isVertical ? (float) distance / 10 : distance;
+          float height = isVertical ? distance : (float) distance / 10;
+
+          Image line = new Image(new TextureRegionDrawable(ui.findRegion("btn_red")));
+          float x = (Math.min(pair.getX(), pairBefore.getX()) + 0.5f) * distance + board.getX();
+          float y = (Math.min(pair.getY(), pairBefore.getY()) + 0.5f) * distance + board.getY();
+          line.setBounds(x, y, width, height);
+          stage.addActor(line);
+          line.addAction(Actions.sequence(
+              Actions.delay(1f),
+              Actions.removeActor()
+          ));
+        }
+
+        pairBefore = pair;
+
+      }
+      System.out.println(pathFull);
+    }
+  }
+  private static void drawLine(List<Pair> pairList) {
+    if (pairList != null && !pairList.isEmpty()) {
+      StringBuilder pathFull = new StringBuilder("path full: ");
+
+      // Ghi lại toàn bộ danh sách để debug
+      for (Pair pair : pairList) {
+        pathFull.append("- [").append(pair.getX()).append(",").append(pair.getY()).append("] ");
+      }
+      System.out.println(pathFull);
+
+      // Duyệt qua tất cả các cặp Pair trong danh sách
+      for (int i = 0; i < pairList.size(); i++) {
+        Pair pair1 = pairList.get(i);
+        for (int j = i + 1; j < pairList.size(); j++) { // Bắt đầu từ i+1 để tránh lặp lại cặp
+          Pair pair2 = pairList.get(j);
+
+          // Kiểm tra nếu hai Pair cách nhau 1 đơn vị x hoặc y
+          boolean isVertical = pair1.getX() == pair2.getX() &&
+              (Math.abs(pair1.getY() - pair2.getY()) == 1);
+          boolean isHorizontal = pair1.getY() == pair2.getY() &&
+              (Math.abs(pair1.getX() - pair2.getX()) == 1);
+
+          if (isVertical || isHorizontal) {
+            // Tính toán chiều rộng và cao của đường kẻ
+            float width = isVertical ? (float) distance / 10 : distance;
+            float height = isVertical ? distance : (float) distance / 10;
+
+            // Tính toán vị trí của đường kẻ
+            float x = (Math.min(pair1.getX(), pair2.getX()) + 0.5f) * distance + board.getX();
+            float y = (Math.min(pair1.getY(), pair2.getY()) + 0.5f) * distance + board.getY();
+
+            // Tạo và thêm đường kẻ vào stage
+            Image line = new Image(new TextureRegionDrawable(ui.findRegion("btn_red")));
+            line.setBounds(x, y, width, height);
+            stage.addActor(line);
+            line.addAction(Actions.sequence(
+                Actions.delay(1f),
+                Actions.removeActor()
+            ));
+          }
+        }
+      }
+    }
+  }
+  private static void drawLine2(List<Pair> pairList) {
+    if (pairList != null) {
+      String pathFull = "path full: ";
+      Pair pairBefore = null;
+      for (Pair pair : pairList) {
+        pathFull += "- [" + pair.getX() + "," + pair.getY() + "] ";
+        if (pairBefore == null || pairBefore == pair) {
+          pairBefore = pair;
+          continue;
+        } else if (
+            pair.getX() == pairBefore.getX() &&
+                ((pair.getY() == pairBefore.getY() + 1) || (pair.getY() == pairBefore.getY() - 1))
+        ) {
+          Image coin = new Image(new TextureRegionDrawable(ui.findRegion("btn_red")));
+          coin.setBounds((pair.getX() + 0.5f) * distance + board.getX(), (pair.getY() + 0.5f) * distance + board.getY(), (float) distance / 10, distance);
           stage.addActor(coin);
           coin.addAction(Actions.sequence(
               Actions.delay(1f),    // Đợi 1 giây
               Actions.removeActor() // Xóa khỏi stage
           ));
-
+        } else if (pair.getY() == pairBefore.getY() &&
+            ((pair.getX() == pairBefore.getX() + 1) || (pair.getX() == pairBefore.getX() - 1))) {
+          Image coin = new Image(new TextureRegionDrawable(ui.findRegion("btn_red")));
+          coin.setBounds((pair.getX() + 0.5f) * distance + board.getX(), (pair.getY() + 0.5f) * (distance) + board.getY(), distance, (float) distance / 10);
+          stage.addActor(coin);
+          coin.addAction(Actions.sequence(
+              Actions.delay(1f),    // Đợi 1 giây
+              Actions.removeActor() // Xóa khỏi stage
+          ));
         }
+        pairBefore = pair;
+
       }
+      System.out.println(pathFull);
     }
   }
 
@@ -260,19 +382,33 @@ public class PlayScreen implements Screen {
     Gdx.gl.glClearColor(0.4f, 0.6f, 0.4f, 1);
     stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
     stage.draw();
+    if (animalHashMap.isEmpty()) {
+      Preferences pref = Gdx.app.getPreferences("Pika vip");
+      if (pref.getInteger("levelCompleted") <= level)
+        pref.putInteger("levelCompleted", level + 1);
+      pref.flush();
+      Timer.schedule(new Timer.Task() {
+        @Override
+        public void run() {
+          game.setScreen(game.getHomeScreen());
+        }
+      }, 2f);
+    }
   }
 
   public static void removeAnimalSelect(Animal animal) {
     PlayScreen.animalHashMap.remove(animal.getKey());
     PlayScreen.animalHashMap.remove(animalSelect.getKey());
-    animal.addAction(Actions.sequence(
-        Actions.delay(1f),    // Đợi 1 giây
-        Actions.removeActor() // Xóa khỏi stage
-    ));
-    animalSelect.addAction(Actions.sequence(
-        Actions.delay(1f),    // Đợi 1 giây
-        Actions.removeActor() // Xóa khỏi stage
-    ));
+    animal.remove();
+    animalSelect.remove();
+//    animal.addAction(Actions.sequence(
+//        Actions.delay(0.3f),    // Đợi 0.3 giây
+//        Actions.removeActor() // Xóa khỏi stage
+//    ));
+//    animalSelect.addAction(Actions.sequence(
+//        Actions.delay(0.3f),    // Đợi 0.3 giây
+//        Actions.removeActor() // Xóa khỏi stage
+//    ));
   }
 
   @Override
@@ -282,18 +418,15 @@ public class PlayScreen implements Screen {
 
   @Override
   public void pause() {
-    resetScreen();
 
   }
 
   @Override
   public void resume() {
-    stage = new Stage(stage.getViewport());
   }
 
   @Override
   public void hide() {
-    resetScreen();
 
   }
 
@@ -301,6 +434,7 @@ public class PlayScreen implements Screen {
   public void dispose() {
     stage.dispose();
     assetManager.dispose();
+    animalHashMap.clear();
   }
 
   public void setLevel(int level) {
