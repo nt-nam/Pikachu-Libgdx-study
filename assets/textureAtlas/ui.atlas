@@ -109,3 +109,10 @@ line_red
   orig: 30, 20
   offset: 0, 0
   index: 2
+line_green
+  rotate: false
+  xy: 1457, 446
+  size: 30, 20
+  orig: 30, 20
+  offset: 0, 0
+  index: 2
