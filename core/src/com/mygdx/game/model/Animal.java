@@ -43,47 +43,6 @@ public class Animal extends Actor {
   public void toggleSelection() {
     setSelected(!isSelected);
 
-    // null thi return
-    if (PlayScreen.animalSelect == null) {
-      PlayScreen.setAnimalSelect(this);
-      return;
-    }
-
-    if (PlayScreen.animalSelect.getStage() == null) {
-      PlayScreen.animalSelect.isSelected = false;
-      PlayScreen.setAnimalSelect(this);
-      return;
-    }
-
-    //equal
-    if (PlayScreen.animalSelect == this) {
-      PlayScreen.setAnimalSelect(null);
-      return;
-    }
-
-    if (PlayScreen.animalSelect.getId() == id && PlayScreen.checkEdible(PlayScreen.animalSelect, this)) {
-      PlayScreen.removeAnimalSelect(this);
-      PlayScreen.setAnimalSelect(null);
-//      PlayScreen.drawMatrix();
-      return;
-    }
-    PlayScreen.animalSelect.setSelected(false);
-    PlayScreen.setAnimalSelect(this);
-  }
-  public static void removeAnimalSelect(Animal animal) {
-    // Loại bỏ Animal khỏi animalHashMap
-    PlayScreen.animalHashMap.remove(animal.getKey());
-    PlayScreen.animalHashMap.remove(PlayScreen.animalSelect.getKey());
-
-    // Xóa khỏi stage
-    animal.addAction(Actions.sequence(
-        Actions.delay(1f),    // Đợi 1 giây
-        Actions.removeActor() // Xóa khỏi stage
-    ));
-    PlayScreen.animalSelect.addAction(Actions.sequence(
-        Actions.delay(1f),    // Đợi 1 giây
-        Actions.removeActor() // Xóa khỏi stage
-    ));
   }
   public String getKey() {
     return gridX + "," + gridY;
@@ -110,8 +69,6 @@ public class Animal extends Actor {
 
   public void setSelected(boolean selected) {
     this.isSelected = selected;
-//    setDebug(isSelected);
-//    addAction(selected ? Actions.scaleTo(1.2f, 1.2f, 0.2f) : Actions.scaleTo(1, 1, 0.2f));
   }
 
   public int getId() {

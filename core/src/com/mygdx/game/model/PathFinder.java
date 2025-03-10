@@ -19,10 +19,10 @@ public class PathFinder {
 
   // Class to store position, turns, direction, and path
   private static class Node {
-    int row, col;           // Current position
-    int turns;              // Number of turns
-    int direction;          // Current direction (-1 if starting)
-    List<int[]> path;       // List of coordinates in the path
+    int row, col;
+    int turns;
+    int direction;
+    List<int[]> path;
 
     Node(int row, int col, int turns, int direction, List<int[]> path) {
       this.row = row;
@@ -41,24 +41,24 @@ public class PathFinder {
   }
 
 
-  public List<int[]> findPath1(Animal animalStart, Animal animalEnd) {
+  public List<int[]> findPath(Animal animalStart, Animal animalEnd) {
+
     if (animalStart == null || animalEnd == null || animalStart.getId() != animalEnd.getId()) {
+      System.out.println("finish top");
       return null;
     }
 
     int startRow = animalStart.getGridX();
-    int startCol = animalStart.getGridX();
+    int startCol = animalStart.getGridY();
     int endRow = animalEnd.getGridX();
     int endCol = animalEnd.getGridY();
 
     Queue<Node> queue = new ArrayDeque<>();
-    boolean[][] visited = new boolean[rows][cols];
+    boolean[][] visited = new boolean[rows + 2][cols + 2];
 
     List<int[]> initialPath = new ArrayList<>();
     initialPath.add(new int[]{startRow, startCol});
     queue.add(new Node(startRow, startCol, 0, -1, initialPath));
-
-    visited[startRow][startCol] = true;
 
     while (!queue.isEmpty()) {
       Node current = queue.poll();
@@ -68,37 +68,47 @@ public class PathFinder {
       int prevDir = current.direction;
       List<int[]> currentPath = current.path;
 
-      // Reached the target
+      visited[row + 1][col + 1] = true;
+
+      // Đến đích
       if (row == endRow && col == endCol) {
-        currentPath.add(new int[]{endRow, endCol});
-        return currentPath; // Return the full path
+        return currentPath;
       }
 
-      if (isValid(row, col)) {
-        continue;
-      }
-      visited[row][col] = true;
-      if (isEmpty(row, col)) {
-        for (int i = 0; i < 4; i++) {
-          int newRow = row + DIRECTIONS[i][0]; // wtf AI làm rối đoạn này thật chứ
-          int newCol = col + DIRECTIONS[i][1]; // nếu quên cố ghi tọa độ Oxy
-          int newTurns = turns;
 
-          if (visited[row][col]) {
-            continue;
-          }
-          if (prevDir != -1 && prevDir != i) {
-            newTurns++;
-          }
-          List<int[]> newPath = new ArrayList<>(currentPath);
-          newPath.add(new int[]{newRow, newCol});
 
-          // Add new node to queue
-          queue.add(new Node(newRow, newCol, newTurns, i, newPath));
+      for (int i = 0; i < 4; i++) {
+        int newRow = row + DIRECTIONS[i][0];
+        int newCol = col + DIRECTIONS[i][1];
+        int newTurns = turns;
+
+        // Kiểm tra điều kiện
+        if (!isValid(newRow, newCol)) {
+          continue;
         }
+        if (visited[newRow + 1][newCol + 1]) {
+          continue;
+        }
+        if (prevDir != -1 && prevDir != i) {
+          newTurns++;
+        }
+        if (newTurns > 2) { // Giới hạn 2 lần rẽ
+          continue;
+        }
+        if (!isEmpty(newRow, newCol) && !(newRow == endRow && newCol == endCol)) {
+          continue;
+        }
+
+        List<int[]> newPath = new ArrayList<>(currentPath);
+        newPath.add(new int[]{newRow, newCol});
+
+        visited[newRow + 1][newCol + 1] = true;
+        // Add new node to queue
+        queue.add(new Node(newRow, newCol, newTurns, i, newPath));
       }
 
     }
+    System.out.println("the end");
     return null;
   }
 

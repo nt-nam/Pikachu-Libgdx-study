@@ -36,9 +36,12 @@ public class AssetHelper extends AssetManager {
   }
 
   public static TextureAtlas getAnimals() {
-    if(animals == null){
-      animals = am.get(animalsPath);
-    }
+    am.load(animalsPath, TextureAtlas.class);
+    am.finishLoading();
+    animals = new TextureAtlas();
+    animals = am.get(animalsPath);
+//    if(animals == null){
+//    }
     return animals;
   }
 

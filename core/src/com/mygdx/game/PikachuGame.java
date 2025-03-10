@@ -14,6 +14,7 @@ import com.mygdx.game.data.AssetHelper;
 import com.mygdx.game.screen.HomeScreen;
 import com.mygdx.game.screen.LoadingScreen;
 import com.mygdx.game.screen.PlayScreen;
+import com.mygdx.game.screen.TestScreen;
 
 
 public class PikachuGame extends Game {
@@ -25,6 +26,7 @@ public class PikachuGame extends Game {
   LoadingScreen loadingScreen;
   HomeScreen homeScreen;
   PlayScreen playScreen;
+  TestScreen testScreen;
 
   @Override
   public void create() {
@@ -83,7 +85,9 @@ public class PikachuGame extends Game {
   }
 
   private void initScreen() {
-    loadingScreen = new LoadingScreen(this, viewport);
+    testScreen = new TestScreen(this);
+    setScreen(testScreen);
+//    loadingScreen = new LoadingScreen(this, viewport);
   }
 
   private void loadAsset() {
