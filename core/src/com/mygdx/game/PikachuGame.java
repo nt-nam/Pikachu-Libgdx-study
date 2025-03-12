@@ -2,7 +2,6 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -11,10 +10,14 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygdx.game.data.AssetHelper;
+import com.mygdx.game.model.Player;
 import com.mygdx.game.screen.HomeScreen;
 import com.mygdx.game.screen.LoadingScreen;
+import com.mygdx.game.screen.MenuScreen;
 import com.mygdx.game.screen.PlayScreen;
 import com.mygdx.game.screen.TestScreen;
+import com.mygdx.game.utils.SkinManager;
+import com.mygdx.game.utils.SoundManager;
 
 
 public class PikachuGame extends Game {
@@ -22,11 +25,16 @@ public class PikachuGame extends Game {
   AssetHelper assetManager;
   OrthographicCamera camera;
   Viewport viewport;
+  Player player;
+  SkinManager skinManager;
+  SoundManager soundManager;
 
   LoadingScreen loadingScreen;
   HomeScreen homeScreen;
   PlayScreen playScreen;
   TestScreen testScreen;
+  MenuScreen menuScreen;
+  
 
   @Override
   public void create() {
@@ -63,7 +71,7 @@ public class PikachuGame extends Game {
   }
   private void initPlayScreen(){
     if(playScreen == null){
-      playScreen = new PlayScreen(this,viewport);
+      playScreen = new PlayScreen(this);
     }
   }
   private void initHomeScreen(){
@@ -84,10 +92,28 @@ public class PikachuGame extends Game {
     return stage;
   }
 
+  public MenuScreen getMenuScreen() {
+    if(menuScreen == null){
+      menuScreen = new MenuScreen(this);
+    }
+    return menuScreen;
+  }
+
+  public void setMenuScreen(MenuScreen menuScreen) {
+    this.menuScreen = menuScreen;
+  }
+
+  public TestScreen getTestScreen() {
+    return testScreen;
+  }
+
+  public void setTestScreen(TestScreen testScreen) {
+    this.testScreen = testScreen;
+  }
+
   private void initScreen() {
-    testScreen = new TestScreen(this);
-    setScreen(testScreen);
-//    loadingScreen = new LoadingScreen(this, viewport);
+    loadingScreen = new LoadingScreen(this,viewport);
+    setScreen(loadingScreen);
   }
 
   private void loadAsset() {
@@ -99,4 +125,25 @@ public class PikachuGame extends Game {
   }
 
 
+  public Player getPlayer() {
+    if(player == null){
+      player = new Player();
+    }
+    return player;
+  }
+
+  public SkinManager getSkinManager() {
+    if(skinManager == null){
+      getPlayer();
+      skinManager = new SkinManager(player);
+    }
+    return skinManager;
+  }
+
+  public SoundManager getSoundManager() {
+    if(soundManager == null){
+      soundManager = new SoundManager();
+    }
+    return soundManager;
+  }
 }

@@ -21,10 +21,10 @@ The game needs to complete the following elements:
 │   └── PathFinder.java      # Logic to find valid paths between tiles          v
 ├── utils/
 │   ├── GameConstants.java   # Constants (tile size, screen dimensions)         v
-│   ├── SoundManager.java    # Manages music and sound effects
+│   ├── SoundManager.java    # Manages music and sound effects                  v
 │   └── SkinManager.java     # Handles skin loading and switching               v
 └── ui/
-    ├── ButtonFactory.java   # Creates UI buttons (hint, shuffle, undo)
-    └── HUD.java            # Heads-up display (score, buffers, progress)
+    ├── ButtonFactory.java   # Creates UI buttons (hint, shuffle, undo)         v
+    └── HUD.java             # Heads-up display (score, buffers, progress)      v
 
 

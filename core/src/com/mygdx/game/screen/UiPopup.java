@@ -37,7 +37,6 @@ public class UiPopup extends Group {
   }
   public UiPopup( AssetManager assetManager, boolean type) {
     me= this;
-    this.game = game;
     this.assetManager = assetManager;
     createAsset();
     this.type = type;

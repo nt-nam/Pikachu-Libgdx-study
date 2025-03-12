@@ -11,10 +11,12 @@ public class AssetHelper extends AssetManager {
   static String uiPath = "textureAtlas/ui.atlas";
   static String animalsPath = "textureAtlas/animals2.atlas";
   static String buttonsPath = "textureAtlas/btn.atlas";
+
   public AssetHelper(){
     super();
-    if(am == null)
+    if(am == null){
       am = new AssetManager();
+    }
     UI = new TextureAtlas();
     animals = new TextureAtlas();
     buttons = new TextureAtlas();
@@ -40,8 +42,6 @@ public class AssetHelper extends AssetManager {
     am.finishLoading();
     animals = new TextureAtlas();
     animals = am.get(animalsPath);
-//    if(animals == null){
-//    }
     return animals;
   }
 

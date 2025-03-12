@@ -5,6 +5,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.mygdx.game.PikachuGame;
+import com.mygdx.game.utils.GameConstants;
 import com.mygdx.game.view.Board;
 
 public class TestScreen implements Screen {
@@ -14,7 +15,7 @@ public class TestScreen implements Screen {
   public TestScreen(PikachuGame game){
     this.game = game;
     stage = game.getStage();
-    board = new Board(6,5);
+    board = new Board(GameConstants.DEFAULT_ROWS,GameConstants.DEFAULT_COLS);
   }
   @Override
   public void show() {

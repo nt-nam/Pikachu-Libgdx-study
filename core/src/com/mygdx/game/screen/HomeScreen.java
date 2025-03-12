@@ -20,15 +20,16 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygdx.game.PikachuGame;
+import com.mygdx.game.data.AssetHelper;
 
 
 public class HomeScreen implements Screen {
   private PikachuGame game;
   int maxLevel;
   int levelCompleted;
-  Preferences prefs = Gdx.app.getPreferences("Pika vip");
-  private Stage stage;
-  private AssetManager assetHelper;
+  Preferences prefs = Gdx.app.getPreferences("Pika");
+  private final Stage stage;
+  private AssetHelper assetHelper;
   private Image btnProfile, blockLevel;
   private float centerX, centerY;
   private BitmapFont bitmapFont;
