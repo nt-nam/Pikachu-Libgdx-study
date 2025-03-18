@@ -1,5 +1,7 @@
 package com.mygdx.game.utils;
 
+import static com.mygdx.game.utils.GameConstants.*;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
@@ -18,8 +20,8 @@ public class SoundManager {
   // Constructor
   public SoundManager() {
     this.soundEffects = new HashMap<>();
-    this.musicVolume = GameConstants.MUSIC_VOLUME_DEFAULT;
-    this.soundVolume = GameConstants.SOUND_VOLUME_DEFAULT;
+    this.musicVolume = MUSIC_VOLUME_DEFAULT;
+    this.soundVolume = SOUND_VOLUME_DEFAULT;
     this.musicMuted = false;
     this.soundMuted = false;
     loadSounds(); // Tải âm thanh khi khởi tạo
@@ -28,14 +30,14 @@ public class SoundManager {
   // Tải tất cả âm thanh
   private void loadSounds() {
     // Tải nhạc nền
-    backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal(GameConstants.MUSIC_PATH));
+    backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal(MUSIC_PATH));
     backgroundMusic.setLooping(true); // Lặp lại nhạc nền
     backgroundMusic.setVolume(musicMuted ? 0 : musicVolume);
 
     // Tải hiệu ứng âm thanh
-    soundEffects.put("match", Gdx.audio.newSound(Gdx.files.internal(GameConstants.MATCH_SOUND_PATH)));
-    soundEffects.put("shuffle", Gdx.audio.newSound(Gdx.files.internal(GameConstants.SHUFFLE_SOUND_PATH)));
-    soundEffects.put("click", Gdx.audio.newSound(Gdx.files.internal(GameConstants.CLICK_SOUND_PATH)));
+    soundEffects.put("match", Gdx.audio.newSound(Gdx.files.internal(MATCH_SOUND_PATH)));
+    soundEffects.put("shuffle", Gdx.audio.newSound(Gdx.files.internal(SHUFFLE_SOUND_PATH)));
+    soundEffects.put("click", Gdx.audio.newSound(Gdx.files.internal(CLICK_SOUND_PATH)));
   }
 
   // Phát nhạc nền

@@ -1,37 +1,48 @@
 package com.mygdx.game.screen;
 
+import static com.mygdx.game.utils.GameConstants.*;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.mygdx.game.PikachuGame;
+import com.mygdx.game.data.AssetHelper;
+import com.mygdx.game.data.LevelManager;
+import com.mygdx.game.model.Level;
+import com.mygdx.game.model.Player;
 import com.mygdx.game.utils.GameConstants;
+import com.mygdx.game.view.Board;
+import com.mygdx.game.view.ButtonFactory;
+import com.mygdx.game.view.HUD;
 
 public class PlayScreen implements Screen {
+  private final PikachuGame game;
+  private static Stage stage;
+
+  private final AssetHelper assetManager;
+  private Player player;
+  private HUD hud;
+  private Board board;
+  private final ButtonFactory buttonFactory;
+  private LevelManager levelManager;
+
   private static int ROWS;
   private static int COLUMNS;
   private final float centerX;
   private final float centerY;
 
-  private final PikachuGame game;
-  private final AssetManager assetManager;
-  private static Stage stage;
-
-  private static Group board, lineSelect;
-
   private static TextureAtlas ui;
-  private Image closeScreen, levelTitle;
+  private Image levelTitle;
   private int level;
   private static int distance;
   Label.LabelStyle style;
@@ -39,50 +50,77 @@ public class PlayScreen implements Screen {
 
   public PlayScreen(PikachuGame game) {
     this.game = game;
-    stage = new Stage();
-    stage.setViewport(game.getStage().getViewport());
-    this.level = 0;
-    board = new Group();
-    lineSelect = new Group();
+    stage = new Stage(game.getStage().getViewport());
+    this.level = 1;
+    assetManager = game.getAssetHelper();
+    buttonFactory = new ButtonFactory(game.getSkinManager(),game.getSoundManager());
+    levelManager = new LevelManager();
+    ui = assetManager.get(DEFAULT_UI+LIST_SKIN_UI[0]);
+    player = game.getPlayer();
     ROWS = GameConstants.DEFAULT_ROWS;
     COLUMNS = GameConstants.DEFAULT_COLS;
+    board = new Board(ROWS,COLUMNS);
+    hud = new HUD(player,game.getSkinManager());
     centerX = stage.getWidth() / 2;
     centerY = stage.getHeight() / 2;
     distance = (int) stage.getWidth() / (COLUMNS + 1);
-    assetManager = new AssetManager();
-    assetManager.load("textureAtlas/ani.atlas", TextureAtlas.class);
-    assetManager.load("textureAtlas/ui.atlas", TextureAtlas.class);
-    assetManager.load("textureAtlas/btn.atlas", TextureAtlas.class);
-    assetManager.finishLoading();
+
 
     bitmapFont = game.getAssetHelper().get("font/arial_uni_30.fnt");
     style = new Label.LabelStyle();
     style.font = bitmapFont;
+    createBtn();
+    showHUD();
   }
 
-  public void resetScreen() {
+  private void showHUD() {
+    ImageButton hintButton = buttonFactory.createHintButton(player, board);
+    hintButton.setBounds(centerX*0.4f, centerY*0.08f,centerX*0.3f, centerX*0.3f);
+    stage.addActor(hintButton);
+
+    ImageButton shuffleButton = buttonFactory.createShuffleButton(player, board);
+    shuffleButton.addListener(new ClickListener(){
+      @Override
+      public void clicked(InputEvent event, float x, float y) {
+        board.shuffle();
+        super.clicked(event, x, y);
+      }
+    });
+    shuffleButton.setBounds(centerX*0.85f, centerY*0.08f, centerX*0.3f,centerX*0.3f);
+    stage.addActor(shuffleButton);
+
+    ImageButton undoButton = buttonFactory.createUndoButton(player, board);
+    undoButton.setBounds(centerX*1.3f, centerY*0.08f, centerX*0.3f, centerX*0.3f);
+    stage.addActor(undoButton);
+
+    ImageButton closeButton = buttonFactory.createCloseButton(player,game);
+    closeButton.setBounds(centerX * 2 - 100, centerY * 2 - 100, 100, 100);
+
+    stage.addActor(closeButton);
+    System.out.println("new 1");
+  }
+
+  public void showBoard() {
     while (board.getChildren().notEmpty())
       board.getChildren().first().remove();
     board.clear();
     board.remove();
 
-    while (lineSelect.getChildren().notEmpty())
-      lineSelect.getChildren().first().remove();
-    lineSelect.clear();
-    lineSelect.remove();
-
-
-    ui = assetManager.get("textureAtlas/ui.atlas");
-
-
-    createLineSelect();
     createBtn();
+    Level levelData = levelManager.getLevel(level);
+    board = new Board(levelData.getRows(),levelData.getCols());
+    board.setPosition(centerX -board.getWidth()/2,centerY-board.getHeight()/2);
+    board.setOrigin(board.getWidth()/2,board.getHeight()/2);
+    board.setScale(centerX/board.getWidth()*1.2f);
+
+    stage.addActor(board);
+
     stage.addActor(levelTitle);
     Gdx.input.setInputProcessor(stage);
   }
 
   private void createBtn() {
-    //TODO create title level
+
     levelTitle = new Image(new TextureRegionDrawable(ui.findRegion("btn_blue")));
     levelTitle.setSize(200, 100);
     levelTitle.setPosition(centerX - 0.5f * levelTitle.getWidth(), centerY * 2 - levelTitle.getHeight());
@@ -92,88 +130,15 @@ public class PlayScreen implements Screen {
     labelTitleLevel.setAlignment(Align.center);
 
     stage.addActor(labelTitleLevel);
-
-
-    closeScreen = new Image(new TextureRegionDrawable(ui.findRegion("line_red")));
-    closeScreen.setBounds(centerX * 2 - 100, centerY * 2 - 100, 100, 100);
-    closeScreen.addListener(new ClickListener() {
-      @Override
-      public void clicked(InputEvent event, float x, float y) {
-        game.setScreen(game.getHomeScreen());
-      }
-    });
-    stage.addActor(closeScreen);
-
-    Image hind = new Image(new TextureRegionDrawable(ui.findRegion("btn_blue")));
-    hind.setBounds(distance + 20, distance, distance, distance);
-    hind.addListener(new ClickListener() {
-      @Override
-      public void clicked(InputEvent event, float x, float y) {
-        super.clicked(event, x, y);
-      }
-
-    });
-    stage.addActor(hind);
-
-    final Image shuffle = new Image(new TextureRegionDrawable(ui.findRegion("btn_blue")));
-    shuffle.setBounds((distance + 20) * 2, distance, distance, distance);
-    shuffle.addListener(new ClickListener() {
-      @Override
-      public void clicked(InputEvent event, float x, float y) {
-      }
-    });
-    stage.addActor(shuffle);
-
-    Image Undo = new Image(new TextureRegionDrawable(ui.findRegion("btn_blue")));
-    Undo.setBounds((distance + 20) * 3, distance, distance, distance);
-    Undo.addListener(new ClickListener() {
-      @Override
-      public void clicked(InputEvent event, float x, float y) {
-      }
-    });
-    stage.addActor(Undo);
-
   }
 
-  private void createLineSelect() {
-    TextureRegion ani = new TextureRegion(ui.findRegion("line_red"));
-    Image line1 = new Image(ani);
-    Image line2 = new Image(ani);
-    Image line3 = new Image(ani);
-    Image line4 = new Image(ani);
-    int size = 10;
-    line1.setBounds(0, 0, size, distance);
-    line2.setBounds(distance - size, 0, size, distance);
-    line3.setBounds(0, 0, distance, size);
-    line4.setBounds(0, distance - size, distance, size);
 
-    lineSelect.addActor(line1);
-    lineSelect.addActor(line2);
-    lineSelect.addActor(line3);
-    lineSelect.addActor(line4);
-//    board.addActor(lineSelect);
-  }
 
 
   @Override
   public void show() {
-    resetScreen();
+    showBoard();
   }
-
-
-//  public static void drawMatrix() {
-//    for (int j = ROWS; j >= -1; j--) {
-//      for (int i = -1; i <= COLUMNS; i++) {
-//        if (animalHashMap.get(getKey(i, j)) == null) {
-//          System.out.print(" -");
-//        } else {
-//          System.out.print(" " + animalHashMap.get(getKey(i, j)).getId());
-//        }
-//      }
-//      System.out.println(" ");
-//    }
-//    System.out.println("----------------------------------");
-//  }
 
 
   @Override
@@ -182,6 +147,7 @@ public class PlayScreen implements Screen {
     Gdx.gl.glClearColor(0.4f, 0.6f, 0.4f, 1);
     stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
     stage.draw();
+    hud.render();
   }
 
 

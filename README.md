@@ -13,7 +13,7 @@ The game needs to complete the following elements:
 │   ├── GameScreen.java      # Main gameplay screen
 │   ├── MenuScreen.java      # Main menu screen
 │   ├── SettingsScreen.java  # Settings screen (music, sound)
-│   └── ShopScreen.java      # Shop screen for buying buffers/skins
+│   └── ShopScreen.java      # Shop screen for buying buffers/skins             
 ├── model/
 │   ├── Animal.java          # Represents a single tile (animal, position)      v
 │   ├── Board.java           # Game board logic (tile grid, matching)           v

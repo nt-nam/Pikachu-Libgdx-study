@@ -8,13 +8,14 @@ import java.util.List;
 import java.util.Queue;
 
 public class PathFinder {
-  private final Board board;
+  private Board board;
   private final int rows;
   private final int cols;
 
   // Directions: up, right, down, left
   private static final int[][] DIRECTIONS = {
       {-1, 0}, {0, 1}, {1, 0}, {0, -1}
+      
   };
 
   // Class to store position, turns, direction, and path
@@ -44,7 +45,7 @@ public class PathFinder {
   public List<int[]> findPath(Animal animalStart, Animal animalEnd) {
 
     if (animalStart == null || animalEnd == null || animalStart.getId() != animalEnd.getId()) {
-      System.out.println("finish top");
+//      System.out.println("finish top");
       return null;
     }
 
@@ -108,7 +109,7 @@ public class PathFinder {
       }
 
     }
-    System.out.println("the end");
+//    System.out.println("the end");
     return null;
   }
 
@@ -189,5 +190,8 @@ public class PathFinder {
       return true;
     }
     return animal == null || !animal.isVisible();
+  }
+  public void setBoard(Board board){
+    this.board = board;
   }
 }

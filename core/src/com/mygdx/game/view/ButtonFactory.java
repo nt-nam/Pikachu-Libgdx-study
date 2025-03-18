@@ -1,10 +1,12 @@
 package com.mygdx.game.view;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.mygdx.game.PikachuGame;
 import com.mygdx.game.model.Player;
 import com.mygdx.game.utils.SkinManager;
 import com.mygdx.game.utils.SoundManager;
@@ -39,11 +41,50 @@ public class ButtonFactory {
     return button;
   }
 
+  public ImageButton createButton2(String buttonName, final Runnable action) {
+    // Tạo Texture từ đường dẫn (ví dụ: "buttons/hint_button.png")
+    Texture texture = new Texture(Gdx.files.internal("images/btn/" + buttonName + ".png"));
+    TextureRegionDrawable drawable = new TextureRegionDrawable(texture);
+
+    ImageButton button = new ImageButton(drawable);
+
+    if (action != null) {
+      button.addListener(new ClickListener() {
+        @Override
+        public void clicked(InputEvent event, float x, float y) {
+          soundManager.playSound("click");
+          action.run();
+        }
+      });
+    }
+
+    return button;
+  }
+
+  public ImageButton createButton3(String buttonName, final ClickListener clickListener) {
+    // Tạo Texture từ đường dẫn (ví dụ: "buttons/hint_button.png")
+    Texture texture = new Texture(Gdx.files.internal("images/btn/" + buttonName + ".png"));
+    TextureRegionDrawable drawable = new TextureRegionDrawable(texture);
+
+    ImageButton button = new ImageButton(drawable);
+
+    button.addListener(new ClickListener() {
+      @Override
+      public void clicked(InputEvent event, float x, float y) {
+        soundManager.playSound("click");
+        clickListener.clicked(event, x, y);
+      }
+    });
+
+
+    return button;
+  }
+
   // Tạo nút Hint
   public ImageButton createHintButton(final Player player, final Board board) {
-    return createButton("hint_button", new Runnable() {
+    return createButton3("hint", new ClickListener() {
       @Override
-      public void run() {
+      public void clicked(InputEvent event, float x, float y) {
         if (player.useHint()) {
           int[] hint = board.findHint();
           if (hint != null) {
@@ -57,12 +98,11 @@ public class ButtonFactory {
 
   // Tạo nút Shuffle
   public ImageButton createShuffleButton(final Player player, final Board board) {
-    return createButton("shuffle_button", new Runnable() {
+    return createButton3("shuffle", new ClickListener() {
       @Override
-      public void run() {
+      public void clicked(InputEvent event, float x, float y) {
         if (player.useShuffle()) {
-          board.shuffle();
-          // TODO: Cập nhật giao diện sau khi xáo trộn
+          board.shuffle(); // Gọi hàm shuffle() để xáo trộn bảng
           Gdx.app.log("ButtonFactory", "Board shuffled");
         }
       }
@@ -71,13 +111,31 @@ public class ButtonFactory {
 
   // Tạo nút Undo
   public ImageButton createUndoButton(final Player player, Board board) {
-    return createButton("undo_button", new Runnable() {
+    return createButton2("next", new Runnable() {
       @Override
       public void run() {
         if (player.useUndo()) {
           // TODO: Thực hiện hoàn tác (cần lưu trạng thái trước đó trong Board hoặc GameScreen)
           Gdx.app.log("ButtonFactory", "Undo action performed");
         }
+      }
+    });
+  }
+
+  public ImageButton createCloseButton(final Player player, final PikachuGame game) {
+    return createButton2("close", new Runnable() {
+      @Override
+      public void run() {
+        game.setScreen(game.getHomeScreen());
+      }
+    });
+  }
+
+  public ImageButton createProfileButton(final Player player) {
+    return createButton2("circle", new Runnable() {
+      @Override
+      public void run() {
+
       }
     });
   }

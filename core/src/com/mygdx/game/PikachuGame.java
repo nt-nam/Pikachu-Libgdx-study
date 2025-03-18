@@ -1,5 +1,7 @@
 package com.mygdx.game;
 
+import static com.mygdx.game.utils.GameConstants.*;
+
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
@@ -13,7 +15,7 @@ import com.mygdx.game.data.AssetHelper;
 import com.mygdx.game.model.Player;
 import com.mygdx.game.screen.HomeScreen;
 import com.mygdx.game.screen.LoadingScreen;
-import com.mygdx.game.screen.MenuScreen;
+//import com.mygdx.game.screen.MenuScreen;
 import com.mygdx.game.screen.PlayScreen;
 import com.mygdx.game.screen.TestScreen;
 import com.mygdx.game.utils.SkinManager;
@@ -33,8 +35,8 @@ public class PikachuGame extends Game {
   HomeScreen homeScreen;
   PlayScreen playScreen;
   TestScreen testScreen;
-  MenuScreen menuScreen;
-  
+//  MenuScreen menuScreen;
+
 
   @Override
   public void create() {
@@ -54,18 +56,25 @@ public class PikachuGame extends Game {
 
     stage = new Stage(viewport);
     Gdx.input.setInputProcessor(stage);
+    getPlayer();
+    playMusic();
     loadAsset();
 
     initScreen();
   }
 
-  public LoadingScreen getLoadingScreen() {
+  private void playMusic() {
+    if(soundManager == null){
+      soundManager = new SoundManager();
+    }
+    soundManager.playBackgroundMusic();
+  }
 
+  public LoadingScreen getLoadingScreen() {
     return loadingScreen;
   }
 
   public PlayScreen getPlayScreen() {
-
     initPlayScreen();
     return playScreen;
   }
@@ -92,16 +101,16 @@ public class PikachuGame extends Game {
     return stage;
   }
 
-  public MenuScreen getMenuScreen() {
-    if(menuScreen == null){
-      menuScreen = new MenuScreen(this);
-    }
-    return menuScreen;
-  }
-
-  public void setMenuScreen(MenuScreen menuScreen) {
-    this.menuScreen = menuScreen;
-  }
+//  public MenuScreen getMenuScreen() {
+//    if(menuScreen == null){
+//      menuScreen = new MenuScreen(this);
+//    }
+//    return menuScreen;
+//  }
+//
+//  public void setMenuScreen(MenuScreen menuScreen) {
+//    this.menuScreen = menuScreen;
+//  }
 
   public TestScreen getTestScreen() {
     return testScreen;
@@ -117,8 +126,8 @@ public class PikachuGame extends Game {
   }
 
   private void loadAsset() {
-    assetManager.load("textureAtlas/animals2.atlas", TextureAtlas.class);
-    assetManager.load("textureAtlas/ui.atlas", TextureAtlas.class);
+    assetManager.load(DEFAULT_ANIMAL+LIST_SKIN_ANIMAL[player.getCurrentSkinAniId()], TextureAtlas.class);
+    assetManager.load(DEFAULT_UI+LIST_SKIN_UI[player.getCurrentSkinUiId()], TextureAtlas.class);
     assetManager.load("sound/bubble_fall.mp3", Sound.class);
     assetManager.load("font/arial_uni_30.fnt", BitmapFont.class);
     assetManager.finishLoading();
@@ -128,6 +137,7 @@ public class PikachuGame extends Game {
   public Player getPlayer() {
     if(player == null){
       player = new Player();
+      player.load();
     }
     return player;
   }

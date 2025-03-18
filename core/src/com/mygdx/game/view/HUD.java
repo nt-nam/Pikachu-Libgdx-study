@@ -1,11 +1,15 @@
 package com.mygdx.game.view;
 
+import static com.mygdx.game.utils.GameConstants.SCREEN_HEIGHT;
+import static com.mygdx.game.utils.GameConstants.SCREEN_WIDTH;
+
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.badlogic.gdx.utils.Align;
 import com.mygdx.game.model.Player;
 import com.mygdx.game.utils.GameConstants;
@@ -25,6 +29,7 @@ public class HUD {
   private Label undosLabel;           // Nhãn số hoàn tác
   private Label timeLabel;            // Nhãn thời gian
   private float timeLeft;             // Thời gian còn lại (giây)
+  private ProgressBar timeLine;
 
   // Constructor
   public HUD(Player player, SkinManager skinManager) {
@@ -32,33 +37,32 @@ public class HUD {
     this.skinManager = skinManager;
     this.batch = new SpriteBatch();
     this.stage = new Stage();
-    this.font = new BitmapFont(); // Font mặc định, có thể thay bằng font tùy chỉnh
+    this.font = new BitmapFont(Gdx.files.internal("font/arial_uni_30.fnt"));
     this.timeLeft = GameConstants.LEVEL_TIME_SECONDS;
-
     // Thiết lập style cho Label
     Label.LabelStyle labelStyle = new Label.LabelStyle(font, Color.WHITE);
 
     // Tạo các nhãn
     scoreLabel = new Label("Score: " + player.getScore(), labelStyle);
-    scoreLabel.setPosition(10, GameConstants.SCREEN_HEIGHT - 30);
+    scoreLabel.setPosition(10, SCREEN_HEIGHT - 30);
 
     coinsLabel = new Label("Coins: " + player.getCoins(), labelStyle);
-    coinsLabel.setPosition(10, GameConstants.SCREEN_HEIGHT - 60);
+    coinsLabel.setPosition(10, SCREEN_HEIGHT - 60);
 
     levelLabel = new Label("Level: " + player.getLevel(), labelStyle);
-    levelLabel.setPosition(10, GameConstants.SCREEN_HEIGHT - 90);
+    levelLabel.setPosition(SCREEN_WIDTH * 0.5f - 40, SCREEN_HEIGHT - 50);
 
     hintsLabel = new Label("Hints: " + player.getHints(), labelStyle);
-    hintsLabel.setPosition(GameConstants.SCREEN_WIDTH - 150, GameConstants.SCREEN_HEIGHT - 30);
+    hintsLabel.setPosition(SCREEN_WIDTH - 150, SCREEN_HEIGHT - 30);
 
     shufflesLabel = new Label("Shuffles: " + player.getShuffles(), labelStyle);
-    shufflesLabel.setPosition(GameConstants.SCREEN_WIDTH - 150, GameConstants.SCREEN_HEIGHT - 60);
+    shufflesLabel.setPosition(SCREEN_WIDTH - 150, SCREEN_HEIGHT - 60);
 
     undosLabel = new Label("Undos: " + player.getUndos(), labelStyle);
-    undosLabel.setPosition(GameConstants.SCREEN_WIDTH - 150, GameConstants.SCREEN_HEIGHT - 90);
+    undosLabel.setPosition(SCREEN_WIDTH - 150, SCREEN_HEIGHT - 90);
 
     timeLabel = new Label("Time: " + (int) timeLeft, labelStyle);
-    timeLabel.setPosition(GameConstants.SCREEN_WIDTH / 2 - 50, GameConstants.SCREEN_HEIGHT - 30);
+    timeLabel.setPosition(50, SCREEN_HEIGHT - 90);
     timeLabel.setAlignment(Align.center);
 
     // Thêm vào stage
@@ -95,8 +99,8 @@ public class HUD {
     batch.begin();
     stage.draw();
     // Vẽ thêm biểu tượng nếu cần (ví dụ: icon cạnh số hints)
-    TextureAtlas.AtlasRegion hintIcon = skinManager.getButtonTexture("hint_button");
-    batch.draw(hintIcon, GameConstants.SCREEN_WIDTH - 180, GameConstants.SCREEN_HEIGHT - 30, 24, 24);
+//    TextureAtlas.AtlasRegion hintIcon = skinManager.getButtonTexture("hint_button");
+//    batch.draw(hintIcon, GameConstants.SCREEN_WIDTH - 180, GameConstants.SCREEN_HEIGHT - 30, 24, 24);
     batch.end();
   }
 
@@ -117,8 +121,16 @@ public class HUD {
     font.dispose();
   }
 
+  public void setTime(float time) {
+    this.timeLeft = time;
+  }
+
   // Getter cho Stage (nếu cần thêm nút vào HUD)
   public Stage getStage() {
     return stage;
+  }
+
+  public void setLevelLabel(int n) {
+    levelLabel.setText("Level: " + n);
   }
 }

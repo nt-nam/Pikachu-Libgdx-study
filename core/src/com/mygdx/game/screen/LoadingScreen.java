@@ -11,25 +11,15 @@ import com.mygdx.game.PikachuGame;
 
 public class LoadingScreen implements Screen {
   PikachuGame game;
-  AssetManager assetManager;
 
   public LoadingScreen(PikachuGame game, Viewport v){
     this.game = game;
-    assetManager = new AssetManager();
   }
 
-  private void loadAsset() {
-    assetManager.load("textureAtlas/animals2.atlas", TextureAtlas.class);
-    assetManager.load("textureAtlas/ui.atlas", TextureAtlas.class);
-    assetManager.load("sound/bubble_fall.mp3", Sound.class);
-    assetManager.load("font/arial_uni_30.fnt", BitmapFont.class);
-    assetManager.finishLoading();
-    game.setScreen(game.getMenuScreen());
-  }
 
   @Override
   public void show() {
-    loadAsset();
+    game.setScreen(game.getHomeScreen());
   }
 
   @Override

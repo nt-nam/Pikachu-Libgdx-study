@@ -1,8 +1,9 @@
 package com.mygdx.game.model;
 
+import static com.mygdx.game.utils.GameConstants.*;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
-import com.mygdx.game.utils.GameConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,19 +15,22 @@ public class Player {
   private int shuffles;
   private int undos;
   private int level;
-  private int currentSkinId;
+  private int currentSkinAniId;
+  private int currentSkinUiId;
   private List<Integer> unlockedSkins;
+  private String pathAni,pathUi;
 
   public Player() {
     this.score = 0;
     this.coins = 0;
-    this.hints = GameConstants.DEFAULT_HINTS;
-    this.shuffles = GameConstants.DEFAULT_SHUFFLES;
-    this.undos = GameConstants.DEFAULT_UNDOS;
+    this.hints = DEFAULT_HINTS;
+    this.shuffles = DEFAULT_SHUFFLES;
+    this.undos = DEFAULT_UNDOS;
     this.level = 1;
-    this.currentSkinId = GameConstants.DEFAULT_SKIN;
+    this.currentSkinAniId = DEFAULT_SKIN;
+    this.currentSkinUiId = DEFAULT_SKIN;
     this.unlockedSkins = new ArrayList<>();
-    this.unlockedSkins.add(GameConstants.DEFAULT_SKIN);
+    this.unlockedSkins.add(DEFAULT_SKIN);
   }
 
   // Lưu dữ liệu vào Preferences
@@ -38,7 +42,8 @@ public class Player {
     prefs.putInteger("shuffles", shuffles);
     prefs.putInteger("undos", undos);
     prefs.putInteger("level", level);
-    prefs.putInteger("currentSkinId", currentSkinId);
+    prefs.putInteger("currentSkinAniId", currentSkinAniId);
+    prefs.putInteger("currentSkinUiId", currentSkinUiId);
 
     // Lưu danh sách unlockedSkins dưới dạng chuỗi (dùng dấu phân cách)
     StringBuilder skins = new StringBuilder();
@@ -50,7 +55,7 @@ public class Player {
     }
     prefs.putString("unlockedSkins", skins.toString());
 
-    prefs.flush(); // Ghi dữ liệu xuống file
+    prefs.flush();
   }
 
   // Tải dữ liệu từ Preferences
@@ -58,15 +63,16 @@ public class Player {
     Preferences prefs = Gdx.app.getPreferences("PikachuPlayerData");
     this.score = prefs.getInteger("score", 0);
     this.coins = prefs.getInteger("coins", 0);
-    this.hints = prefs.getInteger("hints", GameConstants.DEFAULT_HINTS);
-    this.shuffles = prefs.getInteger("shuffles", GameConstants.DEFAULT_SHUFFLES);
-    this.undos = prefs.getInteger("undos", GameConstants.DEFAULT_UNDOS);
+    this.hints = prefs.getInteger("hints", DEFAULT_HINTS);
+    this.shuffles = prefs.getInteger("shuffles", DEFAULT_SHUFFLES);
+    this.undos = prefs.getInteger("undos", DEFAULT_UNDOS);
     this.level = prefs.getInteger("level", 1);
-    this.currentSkinId = prefs.getInteger("currentSkinId", GameConstants.DEFAULT_SKIN);
+    this.currentSkinAniId = prefs.getInteger("currentSkinId", DEFAULT_SKIN);
+    this.currentSkinUiId = prefs.getInteger("currentUiId", DEFAULT_SKIN);
 
     // Tải danh sách unlockedSkins
     this.unlockedSkins = new ArrayList<>();
-    String skinsString = prefs.getString("unlockedSkins", String.valueOf(GameConstants.DEFAULT_SKIN));
+    String skinsString = prefs.getString("unlockedSkins", String.valueOf(DEFAULT_SKIN));
     if (!skinsString.isEmpty()) {
       String[] skinIds = skinsString.split(",");
       for (String skinId : skinIds) {
@@ -78,8 +84,10 @@ public class Player {
       }
     }
     if (unlockedSkins.isEmpty()) {
-      unlockedSkins.add(GameConstants.DEFAULT_SKIN);
+      unlockedSkins.add(DEFAULT_SKIN);
     }
+    pathAni = DEFAULT_ANIMAL + LIST_SKIN_ANIMAL[currentSkinAniId];
+    pathUi = DEFAULT_UI + LIST_SKIN_UI[currentSkinUiId];
   }
 
   // Thêm điểm khi nối thành công
@@ -103,7 +111,7 @@ public class Player {
 
   // Mua buffer
   public boolean buyHint() {
-    if (spendCoins(GameConstants.HINT_COST)) {
+    if (spendCoins(HINT_COST)) {
       this.hints++;
       return true;
     }
@@ -111,7 +119,7 @@ public class Player {
   }
 
   public boolean buyShuffle() {
-    if (spendCoins(GameConstants.SHUFFLE_COST)) {
+    if (spendCoins(SHUFFLE_COST)) {
       this.shuffles++;
       return true;
     }
@@ -119,7 +127,7 @@ public class Player {
   }
 
   public boolean buyUndo() {
-    if (spendCoins(GameConstants.UNDO_COST)) {
+    if (spendCoins(UNDO_COST)) {
       this.undos++;
       return true;
     }
@@ -154,7 +162,7 @@ public class Player {
   // Chuyển sang cấp tiếp theo
   public void nextLevel() {
     this.level++;
-    this.coins += GameConstants.COIN_PER_LEVEL; // Thưởng xu khi hoàn thành cấp
+    this.coins += COIN_PER_LEVEL; // Thưởng xu khi hoàn thành cấp
   }
 
   // Mở khóa skin mới
@@ -169,7 +177,7 @@ public class Player {
   // Đổi skin
   public boolean setSkin(int skinId) {
     if (unlockedSkins.contains(skinId)) {
-      this.currentSkinId = skinId;
+      this.currentSkinAniId = skinId;
       return true;
     }
     return false;
@@ -200,12 +208,24 @@ public class Player {
     return level;
   }
 
-  public int getCurrentSkinId() {
-    return currentSkinId;
+  public int getCurrentSkinAniId() {
+    return currentSkinAniId;
+  }
+
+  public int getCurrentSkinUiId() {
+    return currentSkinUiId;
+  }
+
+  public String getPathAni() {
+    return pathAni;
+  }
+
+  public String getPathUi() {
+    return pathUi;
   }
 
   public List<Integer> getUnlockedSkins() {
-    return new ArrayList<>(unlockedSkins); // Trả về bản sao để bảo vệ dữ liệu
+    return new ArrayList<>(unlockedSkins);
   }
 
   // Setter methods (nếu cần thiết)

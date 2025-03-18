@@ -1,6 +1,11 @@
 package com.mygdx.game.data;
 
+import static com.mygdx.game.utils.GameConstants.DEFAULT_UI;
+import static com.mygdx.game.utils.GameConstants.LIST_SKIN_UI;
+
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 
 public class AssetHelper extends AssetManager {
@@ -8,9 +13,11 @@ public class AssetHelper extends AssetManager {
   static TextureAtlas UI;
   static TextureAtlas animals;
   static TextureAtlas buttons;
-  static String uiPath = "textureAtlas/ui.atlas";
-  static String animalsPath = "textureAtlas/animals2.atlas";
-  static String buttonsPath = "textureAtlas/btn.atlas";
+  static BitmapFont bmf;
+
+  static String uiPath = DEFAULT_UI + LIST_SKIN_UI[0];
+  static String animalsPath = "textureAtlas/ani/ani0.atlas";
+  static String buttonsPath = "textureAtlas/ui/btn0.atlas";
 
   public AssetHelper(){
     super();
@@ -20,10 +27,11 @@ public class AssetHelper extends AssetManager {
     UI = new TextureAtlas();
     animals = new TextureAtlas();
     buttons = new TextureAtlas();
+    bmf = new BitmapFont(Gdx.files.internal("font/arial_uni_30.fnt"));
     loadAS();
   }
 
-  private void loadAS() {
+  private static void loadAS() {
     am.load(uiPath, TextureAtlas.class);
     am.load(animalsPath, TextureAtlas.class);
     am.load(buttonsPath, TextureAtlas.class);
@@ -31,9 +39,10 @@ public class AssetHelper extends AssetManager {
   }
 
   public static TextureAtlas getUI() {
-    if(UI == null){
-      UI = am.get(uiPath);
-    }
+    am.load(uiPath, TextureAtlas.class);
+    am.finishLoading();
+    UI = new TextureAtlas();
+    UI = am.get(uiPath);
     return UI;
   }
 
@@ -43,6 +52,10 @@ public class AssetHelper extends AssetManager {
     animals = new TextureAtlas();
     animals = am.get(animalsPath);
     return animals;
+  }
+
+  public static BitmapFont getBmf() {
+    return bmf;
   }
 
   public static TextureAtlas getButtons() {
