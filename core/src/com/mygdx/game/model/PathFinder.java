@@ -9,13 +9,13 @@ import java.util.Queue;
 
 public class PathFinder {
   private Board board;
-  private final int rows;
-  private final int cols;
+  private int rows;
+  private int cols;
 
   // Directions: up, right, down, left
   private static final int[][] DIRECTIONS = {
       {-1, 0}, {0, 1}, {1, 0}, {0, -1}
-      
+
   };
 
   // Class to store position, turns, direction, and path
@@ -77,7 +77,6 @@ public class PathFinder {
       }
 
 
-
       for (int i = 0; i < 4; i++) {
         int newRow = row + DIRECTIONS[i][0];
         int newCol = col + DIRECTIONS[i][1];
@@ -123,7 +122,7 @@ public class PathFinder {
 
     // Initialize BFS
     Queue<Node> queue = new ArrayDeque<>();
-    boolean[][][] visited = new boolean[rows][cols][4];
+    boolean[][][] visited = new boolean[rows+2][cols+2][4];
 
     // Start node with initial path
     List<int[]> initialPath = new ArrayList<>();
@@ -154,10 +153,16 @@ public class PathFinder {
         if (prevDir != -1 && prevDir != i) {
           newTurns++;
         }
+        try {
+          // Skip if invalid, visited, or too many turns
+          if (!isValid(newRow, newCol) || newTurns > 2) {
+            continue;
+          }
+          if(visited[newRow+1][newCol+1][i]) continue;
 
-        // Skip if invalid, visited, or too many turns
-        if (!isValid(newRow, newCol) || visited[newRow][newCol][i] || newTurns > 2) {
-          continue;
+        } catch (RuntimeException e) {
+          System.out.println("aa");
+          System.out.println("ct: "+ e.getMessage());
         }
 
         // Skip if blocked (not empty and not the end tile)
@@ -166,7 +171,7 @@ public class PathFinder {
         }
 
         // Mark as visited
-        visited[newRow][newCol][i] = true;
+        visited[newRow+1][newCol+1][i] = true;
 
         // Create new path by copying current path and adding new position
         List<int[]> newPath = new ArrayList<>(currentPath);
@@ -191,7 +196,10 @@ public class PathFinder {
     }
     return animal == null || !animal.isVisible();
   }
-  public void setBoard(Board board){
+
+  public void setBoard(Board board) {
     this.board = board;
+    rows = board.getROWS();
+    cols = board.getCOLS();
   }
 }

@@ -6,6 +6,7 @@ import static com.mygdx.game.utils.GameConstants.*;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.mygdx.game.model.Player;
 
 import java.util.HashMap;
@@ -91,6 +92,10 @@ public class SkinManager {
       return resources.uiAtlas.findRegion(buttonName);
     }
     return null;
+  }
+  public TextureRegionDrawable getDrawable(String name) {
+    Texture texture = new Texture(Gdx.files.internal("images/" + name + ".png"));
+    return new TextureRegionDrawable(texture);
   }
 
   // Giải phóng tài nguyên

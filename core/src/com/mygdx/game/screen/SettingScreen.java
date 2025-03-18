@@ -25,7 +25,7 @@ public class SettingScreen implements Screen {
 
     @Override
     public void show() {
-        winPopup = new UiPopup(game, assetManager, false);
+        winPopup = new UiPopup(game, false);
 
 
         stage.addActor(winPopup);

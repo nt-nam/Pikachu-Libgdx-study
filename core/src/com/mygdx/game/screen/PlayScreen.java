@@ -22,7 +22,7 @@ import com.mygdx.game.model.Level;
 import com.mygdx.game.model.Player;
 import com.mygdx.game.utils.GameConstants;
 import com.mygdx.game.view.Board;
-import com.mygdx.game.view.ButtonFactory;
+import com.mygdx.game.utils.ButtonFactory;
 import com.mygdx.game.view.HUD;
 
 public class PlayScreen implements Screen {
@@ -69,6 +69,7 @@ public class PlayScreen implements Screen {
     bitmapFont = game.getAssetHelper().get("font/arial_uni_30.fnt");
     style = new Label.LabelStyle();
     style.font = bitmapFont;
+    showBoard();
     createBtn();
     showHUD();
   }
@@ -97,22 +98,17 @@ public class PlayScreen implements Screen {
     closeButton.setBounds(centerX * 2 - 100, centerY * 2 - 100, 100, 100);
 
     stage.addActor(closeButton);
-    System.out.println("new 1");
   }
 
   public void showBoard() {
-    while (board.getChildren().notEmpty())
-      board.getChildren().first().remove();
-    board.clear();
-    board.remove();
-
     createBtn();
     Level levelData = levelManager.getLevel(level);
-    board = new Board(levelData.getRows(),levelData.getCols());
+    board.setNew(levelData);
+    hud.setTime(levelData.getTime());
     board.setPosition(centerX -board.getWidth()/2,centerY-board.getHeight()/2);
     board.setOrigin(board.getWidth()/2,board.getHeight()/2);
     board.setScale(centerX/board.getWidth()*1.2f);
-
+    board.getPathFinder().setBoard(board);
     stage.addActor(board);
 
     stage.addActor(levelTitle);
@@ -137,6 +133,7 @@ public class PlayScreen implements Screen {
 
   @Override
   public void show() {
+    hud.resetTime();
     showBoard();
   }
 
@@ -145,6 +142,7 @@ public class PlayScreen implements Screen {
   public void render(float delta) {
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
     Gdx.gl.glClearColor(0.4f, 0.6f, 0.4f, 1);
+    hud.update(delta);
     stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
     stage.draw();
     hud.render();

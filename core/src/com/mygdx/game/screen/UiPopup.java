@@ -14,23 +14,26 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.mygdx.game.PikachuGame;
+import com.mygdx.game.utils.SkinManager;
 
 public class UiPopup extends Group {
   public static UiPopup me;
   PikachuGame game;
   AssetManager assetManager;
+  SkinManager skinManager;
   Image starEmpty0, starEmpty1, starEmpty2, board, boardCoinMainMenu, btnBack, btnReplay, btnResume, coin, heart, popup, ribbonBlue, ribbonFailed;
-  ImageButton button;
+  ImageButton button, btnHome, btnNextLevel, btn;
   Sound soundClick;
   BitmapFont font;
   Label label;
   float centerX, centerY;
   private boolean type;
 
-  public UiPopup(PikachuGame game, AssetManager assetManager, boolean type) {
+  public UiPopup(PikachuGame game, boolean type) {
     me= this;
     this.game = game;
-    this.assetManager = assetManager;
+    this.assetManager = game.getAssetHelper();
+    this.skinManager = new SkinManager(game.getPlayer());
     createAsset();
     this.type = type;
     showAssetByType();

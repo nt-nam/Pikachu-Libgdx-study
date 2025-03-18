@@ -21,7 +21,7 @@ public class GameConstants {
   public static final int ANIMAL_TYPES = 6;
 
   // Buffer mặc định
-  public static final int DEFAULT_HINTS = 3;     // Số lần gợi ý ban đầu
+  public static final int DEFAULT_HINTS = 30;     // Số lần gợi ý ban đầu
   public static final int DEFAULT_SHUFFLES = 4;  // Số lần xáo trộn ban đầu
   public static final int DEFAULT_UNDOS = 2;     // Số lần hoàn tác ban đầu
 
@@ -37,7 +37,7 @@ public class GameConstants {
   public static final float SOUND_VOLUME_DEFAULT = 0.8f; // Âm lượng hiệu ứng âm thanh mặc định
 
   // Thời gian
-  public static final int LEVEL_TIME_SECONDS = 120; // Thời gian mỗi cấp (giây)
+  public static final int LEVEL_TIME_SECONDS = 200; // Thời gian mỗi cấp (giây)
 
   // Đường dẫn tài nguyên (assets)
   public static final String DEFAULT_BACKGROUND_PATH = "images/bg.png";

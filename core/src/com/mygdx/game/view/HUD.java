@@ -5,11 +5,16 @@ import static com.mygdx.game.utils.GameConstants.SCREEN_WIDTH;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.mygdx.game.model.Player;
 import com.mygdx.game.utils.GameConstants;
@@ -28,8 +33,11 @@ public class HUD {
   private Label shufflesLabel;        // Nhãn số xáo trộn
   private Label undosLabel;           // Nhãn số hoàn tác
   private Label timeLabel;            // Nhãn thời gian
+  private ProgressBar timeline;
   private float timeLeft;             // Thời gian còn lại (giây)
-  private ProgressBar timeLine;
+  private float maxTime; // Thời gian tối đa của cấp độ
+  private int totalPairs;
+  private int matchedPairs;
 
   // Constructor
   public HUD(Player player, SkinManager skinManager) {
@@ -39,6 +47,8 @@ public class HUD {
     this.stage = new Stage();
     this.font = new BitmapFont(Gdx.files.internal("font/arial_uni_30.fnt"));
     this.timeLeft = GameConstants.LEVEL_TIME_SECONDS;
+    this.maxTime = GameConstants.LEVEL_TIME_SECONDS;
+    this.matchedPairs = 0;
     // Thiết lập style cho Label
     Label.LabelStyle labelStyle = new Label.LabelStyle(font, Color.WHITE);
 
@@ -65,6 +75,14 @@ public class HUD {
     timeLabel.setPosition(50, SCREEN_HEIGHT - 90);
     timeLabel.setAlignment(Align.center);
 
+    // Tạo Timeline (thanh thời gian)
+    ProgressBar.ProgressBarStyle style = newStyle();
+
+    // Tạo ProgressBar với chiều cao mới
+    timeline = new ProgressBar(0, 100, 1, false, style);
+    timeline.setSize(stage.getWidth() * 0.8f, 30); // Đặt kích thước mới cho toàn bộ thanh
+    timeline.setPosition(stage.getWidth() * 0.1f, GameConstants.SCREEN_HEIGHT - 150);
+
     // Thêm vào stage
     stage.addActor(scoreLabel);
     stage.addActor(coinsLabel);
@@ -73,7 +91,48 @@ public class HUD {
     stage.addActor(shufflesLabel);
     stage.addActor(undosLabel);
     stage.addActor(timeLabel);
+    stage.addActor(timeline);
   }
+
+  private ProgressBar.ProgressBarStyle newStyle() {
+    ProgressBar.ProgressBarStyle style = new ProgressBar.ProgressBarStyle();
+
+    final float barHeight = 30;
+
+    TextureRegion backgroundRegion = skinManager.getDrawable("bar_timeline_stroke").getRegion();
+    TextureRegion knobBeforeRegion = skinManager.getDrawable("bar_timeline").getRegion();
+
+    Drawable customBackground = new TextureRegionDrawable(backgroundRegion) {
+      @Override
+      public void draw(Batch batch, float x, float y, float width, float height) {
+        // Vẽ background với chiều cao cố định, lặp texture nếu cần
+        batch.draw(getRegion(), x-3, y-3, width+6, barHeight+6);
+      }
+
+      @Override
+      public float getMinHeight() {
+        return barHeight;
+      }
+    };
+
+
+    Drawable customKnobBefore = new TextureRegionDrawable(knobBeforeRegion) {
+      @Override
+      public void draw(Batch batch, float x, float y, float width, float height) {
+        // Vẽ knobBefore với chiều cao cố định, chỉ vẽ phần tiến độ
+        batch.draw(getRegion(), x, y, width, barHeight);
+      }
+
+      @Override
+      public float getMinHeight() {
+        return barHeight;
+      }
+    };
+    style.knobBefore = customKnobBefore;
+    style.background = customBackground;
+    return style;
+  }
+
 
   // Cập nhật HUD
   public void update(float deltaTime) {
@@ -89,6 +148,12 @@ public class HUD {
     shufflesLabel.setText("Shuffles: " + player.getShuffles());
     undosLabel.setText("Undos: " + player.getUndos());
     timeLabel.setText("Time: " + (int) timeLeft);
+
+    // Cập nhật thanh thời gian
+    if (maxTime > 0) {
+      float timeProgress = (timeLeft / maxTime) * 100; // Phần trăm thời gian còn lại
+      timeline.setValue(timeProgress);
+    }
 
     // Cập nhật stage
     stage.act(deltaTime);
@@ -122,6 +187,7 @@ public class HUD {
   }
 
   public void setTime(float time) {
+    timeline.
     this.timeLeft = time;
   }
 

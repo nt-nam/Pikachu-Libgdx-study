@@ -1,4 +1,4 @@
-package com.mygdx.game.view;
+package com.mygdx.game.utils;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
@@ -8,8 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.mygdx.game.PikachuGame;
 import com.mygdx.game.model.Player;
-import com.mygdx.game.utils.SkinManager;
-import com.mygdx.game.utils.SoundManager;
+import com.mygdx.game.view.Board;
 
 public class ButtonFactory {
   private SkinManager skinManager;    // Quản lý texture của skin
@@ -61,7 +60,7 @@ public class ButtonFactory {
     return button;
   }
 
-  public ImageButton createButton3(String buttonName, final ClickListener clickListener) {
+  public ImageButton createButtonBtn(String buttonName, final ClickListener clickListener) {
     // Tạo Texture từ đường dẫn (ví dụ: "buttons/hint_button.png")
     Texture texture = new Texture(Gdx.files.internal("images/btn/" + buttonName + ".png"));
     TextureRegionDrawable drawable = new TextureRegionDrawable(texture);
@@ -75,14 +74,28 @@ public class ButtonFactory {
         clickListener.clicked(event, x, y);
       }
     });
+    return button;
+  }
+  public ImageButton createButtonUI(String buttonName, final ClickListener clickListener) {
+    // Tạo Texture từ đường dẫn (ví dụ: "buttons/hint_button.png")
+    Texture texture = new Texture(Gdx.files.internal("images/ui/" + buttonName + ".png"));
+    TextureRegionDrawable drawable = new TextureRegionDrawable(texture);
 
-
+    ImageButton button = new ImageButton(drawable);
+    button.setSize(texture.getWidth(),texture.getHeight());
+    button.addListener(new ClickListener() {
+      @Override
+      public void clicked(InputEvent event, float x, float y) {
+        soundManager.playSound("click");
+        clickListener.clicked(event, x, y);
+      }
+    });
     return button;
   }
 
   // Tạo nút Hint
   public ImageButton createHintButton(final Player player, final Board board) {
-    return createButton3("hint", new ClickListener() {
+    return createButtonBtn("hint", new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
         if (player.useHint()) {
@@ -90,6 +103,10 @@ public class ButtonFactory {
           if (hint != null) {
             // TODO: Hiển thị gợi ý trên giao diện (ví dụ: làm sáng ô)
             Gdx.app.log("ButtonFactory", "Hint used: (" + hint[0] + "," + hint[1] + ") - (" + hint[2] + "," + hint[3] + ")");
+            Gdx.app.log("ButtonFactory", "Board used: (" +board.getROWS() + "," + board.getCOLS() + ")");
+            board.getAnimal(hint[0],hint[1]).debug();
+            board.getAnimal(hint[2],hint[3]).debug();
+
           }
         }
       }
@@ -98,7 +115,7 @@ public class ButtonFactory {
 
   // Tạo nút Shuffle
   public ImageButton createShuffleButton(final Player player, final Board board) {
-    return createButton3("shuffle", new ClickListener() {
+    return createButtonBtn("shuffle", new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
         if (player.useShuffle()) {

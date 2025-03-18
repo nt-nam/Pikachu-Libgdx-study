@@ -20,9 +20,9 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygdx.game.PikachuGame;
 import com.mygdx.game.data.AssetHelper;
-import com.mygdx.game.data.LevelManager;
 import com.mygdx.game.model.Player;
-import com.mygdx.game.view.ButtonFactory;
+import com.mygdx.game.utils.GameConstants;
+import com.mygdx.game.utils.ButtonFactory;
 
 
 public class HomeScreen implements Screen {
@@ -32,7 +32,8 @@ public class HomeScreen implements Screen {
   private Player player;
   private ButtonFactory buttonFactory;
 
-  private ImageButton btnProfile;
+  private ImageButton btnProfile,btnPlay,btnSetting, levelCenter;
+
   private Image blockLevel;
   private BitmapFont bitmapFont;
   private Label labelLevel;
@@ -63,15 +64,48 @@ public class HomeScreen implements Screen {
     bitmapFont = assetHelper.get("font/arial_uni_30.fnt");
     style = new Label.LabelStyle();
     style.font = bitmapFont;
+    createScollPane();
     createProfile();
+    createBtnPlay();
+    createBtnSetting();
+  }
 
+  private void createBtnSetting() {
+    btnSetting = buttonFactory.createButtonUI("btn_setting",new ClickListener(){
+      @Override
+      public void clicked(InputEvent event, float x, float y) {
+        super.clicked(event, x, y);
+      }
+    });
+    btnSetting.setSize(GameConstants.TILE_SIZE*2,GameConstants.TILE_SIZE*2);
+    btnSetting.setPosition(centerX*2f - btnSetting.getWidth(),centerY*2f - btnSetting.getHeight());
+    stage.addActor(btnSetting);
+  }
+
+  private void createBtnPlay() {
+    btnPlay = buttonFactory.createButtonUI("btn_play",new ClickListener(){
+      @Override
+      public void clicked(InputEvent event, float x, float y) {
+        super.clicked(event, x, y);
+      }
+    });
+    btnPlay.setSize(centerX,centerX*0.5f);
+    btnPlay.setPosition(centerX*0.5f,0);
+    stage.addActor(btnPlay);
   }
 
   private void createProfile() {
-    btnProfile = buttonFactory.createProfileButton(player);
+//    btnProfile = buttonFactory.createProfileButton(player);
+    btnProfile = buttonFactory.createButtonUI("btn_home",new ClickListener(){
+      @Override
+      public void clicked(InputEvent event, float x, float y) {
+        System.out.println("click btn profile, img: btn_home");
+      }
+    });
+
 //    btnProfile = new Image(new TextureRegion(ui.findRegion("btn_blue")));
-    btnProfile.setBounds(0, centerY * 2 - 100, 100, 100);
-    btnProfile.setColor(1f, 1f, 1f, 1f);
+    btnProfile.setSize(GameConstants.TILE_SIZE*2,GameConstants.TILE_SIZE*2);
+    btnProfile.setPosition(0,centerY*2f - btnProfile.getHeight());
     Label label = new Label("Profile", style);
     label.setBounds(10, centerY * 2 - 100, 100, 100);
     stage.addActor(btnProfile);
@@ -79,7 +113,7 @@ public class HomeScreen implements Screen {
   }
 
   private void createScollPane() {
-    clearStage();
+    clearScrollPane();
     Table table = new Table();
 
     for (int n = 1; n < maxLevel; n++) {
@@ -120,12 +154,21 @@ public class HomeScreen implements Screen {
       Group level = new Group();
       level.setSize(stage.getWidth(), 100);
       blockLevel = new Image(new TextureRegion(ui.findRegion("btn_green")));
+      levelCenter = buttonFactory.createButtonUI("btn_level", new ClickListener(){
+        @Override
+        public void clicked(InputEvent event, float x, float y) {
+          super.clicked(event, x, y);
+
+        }
+      });
+      levelCenter.setSize(blockLevel.getWidth(),blockLevel.getHeight());
       blockLevel.setX(x * 110 + centerX - 220);
       labelLevel = new Label("" + n, style);
       labelLevel.setBounds(blockLevel.getX(), blockLevel.getY() + 5, blockLevel.getWidth(), blockLevel.getHeight());
       labelLevel.setFontScale(2f);
       labelLevel.setAlignment(Align.center);
       level.addActor(blockLevel);
+//      level.addActor(levelCenter);
       level.addActor(labelLevel);
       if (n > levelCompleted) {
         blockLevel.setColor(0.4f, 0.4f, 0.4f, 0.8f);
@@ -144,12 +187,12 @@ public class HomeScreen implements Screen {
     }
 
     ScrollPane scrollPane = new ScrollPane(table);
-    scrollPane.setSize(stage.getWidth(), stage.getHeight() - 100);
+    scrollPane.setSize(stage.getWidth(), stage.getHeight() -0);
     scrollPane.setScrollingDisabled(true, false);
     stage.addActor(scrollPane);
   }
 
-  private void clearStage() {
+  private void clearScrollPane() {
     for (Actor a : stage.getActors()) {
       if (a instanceof ScrollPane) {
         a.remove();
@@ -162,7 +205,7 @@ public class HomeScreen implements Screen {
 
   @Override
   public void show() {
-    createScollPane();
+
     Gdx.input.setInputProcessor(stage);
   }
 

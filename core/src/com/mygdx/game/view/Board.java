@@ -17,6 +17,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.mygdx.game.data.AssetHelper;
 import com.mygdx.game.model.Animal;
+import com.mygdx.game.model.Level;
 import com.mygdx.game.model.Pair;
 import com.mygdx.game.model.PathFinder;
 import com.mygdx.game.utils.GameConstants;
@@ -26,24 +27,30 @@ import java.util.Collections;
 import java.util.List;
 
 public class Board extends Group {
-  private final int ROWS, COLS;
+  private int ROWS, COLS;
   private Animal[][] animals;
   private TextureAtlas animalAtlas, uiAtlas;
   private PathFinder pathFinder;
   private Animal animalSelect;
   private Image background;
   private static Group lineSelect;
+  private int pairAni;
 
   public Board(int rows, int cols) {
     ROWS = rows;
     COLS = cols;
-    setSize(ROWS * TILE_SIZE, COLS * TILE_SIZE);
-    debug();
-    animals = new Animal[ROWS][COLS];
-    pathFinder = new PathFinder(this);
     animalAtlas = AssetHelper.getAnimals();
     uiAtlas = AssetHelper.getUI();
     lineSelect = new Group();
+    pairAni = GameConstants.ANIMAL_TYPES;
+    init();
+  }
+
+  private void init() {
+    setSize(ROWS * TILE_SIZE, COLS * TILE_SIZE);
+    animals = new Animal[ROWS][COLS];
+    pathFinder = new PathFinder(this);
+
     createBackground();
     initAnimals();
     createLineSelect();
@@ -66,7 +73,7 @@ public class Board extends Group {
 
     List<Integer> tileTypes = new ArrayList<>();
     for (int i = 0; i < totalTiles / 2; i++) {
-      int type = i % GameConstants.ANIMAL_TYPES + 1;
+      int type = i % pairAni + 1;
       tileTypes.add(type);
       tileTypes.add(type);
     }
@@ -125,12 +132,12 @@ public class Board extends Group {
   }
 
   private void addAnimalListener(Animal animal) {
-     final int finalRow = animal.getGridX();
-     final int finalCol = animal.getGridY();
+    final int finalRow = animal.getGridX();
+    final int finalCol = animal.getGridY();
     animals[finalRow][finalCol].addListener(new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
-        System.out.println(finalRow +"  " +finalCol);
+        System.out.println(finalRow + "  " + finalCol);
         if (animalSelect == animals[finalRow][finalCol]) {
           setBorder(null);
           return;
@@ -142,19 +149,43 @@ public class Board extends Group {
         List<int[]> path = pathFinder.findPath(animalSelect, animals[finalRow][finalCol]);
         if (path != null) {
           createLineMatch(path);
-          animalSelect.setVisible(false);
-          animals[finalRow][finalCol].setVisible(false);
+          setVisibleAnimal(animalSelect, 0.5f);
+          setVisibleAnimal(animals[finalRow][finalCol], 0.5f);
           setBorder(null);
         } else {
           setBorder(animals[finalRow][finalCol]);
         }
       }
+
+      private void setVisibleAnimal(Animal animalA, float v) {
+        final Animal a = animalA;
+        a.addAction(
+            Actions.sequence(
+                Actions.fadeOut(v), // Mờ dần từ alpha = 1 xuống 0
+                Actions.run(new Runnable() {
+                  @Override
+                  public void run() {
+                    a.setVisible(false);
+                  }
+                }) // Ẩn actor khi hoàn tất
+            )
+        );
+      }
     });
   }
 
+//  private void setVisibleAnima2l(Animal animalA, float v) {
+//    animalA.addAction(
+//        Actions.sequence(
+//            Actions.fadeOut(v), // Mờ dần từ alpha = 1 xuống 0
+//            Actions.run(() -> animalA.setVisible(false)) // Ẩn actor khi hoàn tất
+//        )
+//    );
+//  }
+
   private void createLineMatch(List<int[]> path) {
 
-    StringBuilder pathFull = new StringBuilder("path full: ");
+    StringBuilder pathFull = new StringBuilder("[PathFinder] Path connect: ");
 
     // Ghi lại toàn bộ danh sách để debug
     for (int[] pair : path) {
@@ -260,6 +291,7 @@ public class Board extends Group {
         }
       }
     }
+    pathFinder.setBoard(this);
   }
 
   public int getROWS() {
@@ -274,19 +306,23 @@ public class Board extends Group {
   public int[] findHint() {
     for (int row1 = 0; row1 < ROWS; row1++) {
       for (int col1 = 0; col1 < COLS; col1++) {
+
         Animal tile1 = animals[row1][col1];
         if (tile1 != null && tile1.isVisible()) {
           for (int row2 = 0; row2 < ROWS; row2++) {
             for (int col2 = 0; col2 < COLS; col2++) {
+
               Animal tile2 = animals[row2][col2];
-              if (tile2 != null && tile2.isVisible() && !(row1 == row2 && col1 == col2)) {
+              if (tile2 != null && tile2.isVisible() && !(row1 == row2 && col1 == col2) && tile1.getId() == tile2.getId()) {
                 if (canMatch(row1, col1, row2, col2)) {
                   return new int[]{row1, col1, row2, col2};
                 }
               }
+
             }
           }
         }
+
       }
     }
     return null; // Không tìm thấy cặp nào
@@ -296,5 +332,20 @@ public class Board extends Group {
   public boolean canMatch(int row1, int col1, int row2, int col2) {
     List<int[]> path = pathFinder.findPath(row1, col1, row2, col2);
     return path != null;
+  }
+
+  public PathFinder getPathFinder() {
+    return pathFinder;
+  }
+
+  public void setNew(Level lv) {
+//        while (getChildren().notEmpty())
+//      getChildren().first().remove();
+    clear();
+    remove();
+    ROWS = lv.getRows();
+    COLS = lv.getCols();
+    pairAni = lv.getPairs();
+    init();
   }
 }
