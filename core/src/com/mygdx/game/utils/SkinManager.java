@@ -6,6 +6,7 @@ import static com.mygdx.game.utils.GameConstants.*;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.mygdx.game.model.Player;
 
@@ -17,12 +18,17 @@ public class SkinManager {
   private int currentSkinUiId;
   private Map<Integer, SkinResources> skinMap;   // Lưu tài nguyên theo skinId
   private Player player;                         // Tham chiếu đến người chơi
+  private String idUI = "";
+
+  public Image createImageUI(String name) {
+    return new Image(new Texture(Gdx.files.internal("images/ui/" + name + ".png")));
+  }
 
   // Class nội bộ để lưu tài nguyên của một skin
   private static class SkinResources {
-    TextureAtlas animalAtlas;   // Atlas cho hình thú
-    TextureAtlas uiAtlas;       // Atlas cho giao diện (nút)
-    Texture background;         // Hình nền
+    TextureAtlas animalAtlas;
+    TextureAtlas uiAtlas;
+    Texture background;
 
     SkinResources(int skinId) {
       if (skinId >= 0 && skinId < LIST_SKIN_ANIMAL.length) {
@@ -86,13 +92,14 @@ public class SkinManager {
   }
 
   // Lấy texture cho nút
-  public TextureAtlas.AtlasRegion getButtonTexture(String buttonName) {
+  public TextureAtlas.AtlasRegion getButtonTextureUIAtlas(String buttonName) {
     SkinResources resources = skinMap.get(currentSkinUiId);
     if (resources != null) {
       return resources.uiAtlas.findRegion(buttonName);
     }
     return null;
   }
+
   public TextureRegionDrawable getDrawable(String name) {
     Texture texture = new Texture(Gdx.files.internal("images/" + name + ".png"));
     return new TextureRegionDrawable(texture);

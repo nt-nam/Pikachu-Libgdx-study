@@ -15,11 +15,11 @@ public class TestScreen implements Screen {
   public TestScreen(PikachuGame game){
     this.game = game;
     stage = game.getStage();
-    board = new Board(GameConstants.DEFAULT_ROWS,GameConstants.DEFAULT_COLS);
+//    board = new Board();
   }
   @Override
   public void show() {
-    stage.addActor(board);
+//    stage.addActor(board);
     System.out.println("mo Test Screen");
   }
 

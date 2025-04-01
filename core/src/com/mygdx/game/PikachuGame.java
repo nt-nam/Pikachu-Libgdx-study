@@ -17,7 +17,9 @@ import com.mygdx.game.screen.HomeScreen;
 import com.mygdx.game.screen.LoadingScreen;
 //import com.mygdx.game.screen.MenuScreen;
 import com.mygdx.game.screen.PlayScreen;
+import com.mygdx.game.screen.SettingScreen;
 import com.mygdx.game.screen.TestScreen;
+import com.mygdx.game.screen.UiPopup;
 import com.mygdx.game.utils.SkinManager;
 import com.mygdx.game.utils.SoundManager;
 
@@ -35,7 +37,7 @@ public class PikachuGame extends Game {
   HomeScreen homeScreen;
   PlayScreen playScreen;
   TestScreen testScreen;
-//  MenuScreen menuScreen;
+  SettingScreen settingScreen;
 
 
   @Override
@@ -56,7 +58,9 @@ public class PikachuGame extends Game {
 
     stage = new Stage(viewport);
     Gdx.input.setInputProcessor(stage);
+
     getPlayer();
+    getSoundManager();
     playMusic();
     loadAsset();
 
@@ -88,11 +92,15 @@ public class PikachuGame extends Game {
       homeScreen = new HomeScreen(this,viewport);
     }
   }
+
+
   public HomeScreen getHomeScreen() {
     initHomeScreen();
     return homeScreen;
   }
-
+  public SettingScreen getSettingScreen() {
+    return settingScreen;
+  }
   public AssetHelper getAssetHelper() {
     return assetManager;
   }
@@ -100,17 +108,6 @@ public class PikachuGame extends Game {
   public Stage getStage() {
     return stage;
   }
-
-//  public MenuScreen getMenuScreen() {
-//    if(menuScreen == null){
-//      menuScreen = new MenuScreen(this);
-//    }
-//    return menuScreen;
-//  }
-//
-//  public void setMenuScreen(MenuScreen menuScreen) {
-//    this.menuScreen = menuScreen;
-//  }
 
   public TestScreen getTestScreen() {
     return testScreen;
@@ -122,6 +119,7 @@ public class PikachuGame extends Game {
 
   private void initScreen() {
     loadingScreen = new LoadingScreen(this,viewport);
+    settingScreen = new SettingScreen(this);
     setScreen(loadingScreen);
   }
 
@@ -153,6 +151,7 @@ public class PikachuGame extends Game {
   public SoundManager getSoundManager() {
     if(soundManager == null){
       soundManager = new SoundManager();
+      soundManager.initFromPlayer(player);
     }
     return soundManager;
   }

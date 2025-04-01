@@ -2,73 +2,152 @@ package com.mygdx.game.screen;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygdx.game.PikachuGame;
 
 public class SettingScreen implements Screen {
-    PikachuGame game;
-    private AssetManager assetManager;
+    private PikachuGame game;
     private Stage stage;
-    private UiPopup winPopup;
-    Image starEmpty0, starEmpty1, starEmpty2, board, boardCoinMainMenu, btnBack, btnReplay, btnResume, coin, heart, popup, ribbonBlue, ribbonFailed;
+    private Viewport viewport;
 
-
-    public SettingScreen(PikachuGame game, AssetManager assetManager, Stage stage) {
-        this.assetManager = assetManager;
-        this.stage = stage;
-
+    public SettingScreen(PikachuGame game) {
+        this.game = game;
+        this.viewport = game.getStage().getViewport(); // Lấy viewport từ game
+        this.stage = new Stage(viewport);
+        Gdx.input.setInputProcessor(stage); // Đặt stage xử lý input
+        createUI();
     }
 
-    float startX, startY;
+    private void createUI() {
+        // Tạo nền đơn giản bằng Pixmap
+        Image background = createOverlay(stage.getWidth(), stage.getHeight(), 0.8f, Color.GRAY);
+        stage.addActor(background);
+
+        // Tạo tiêu đề "Settings"
+        Label.LabelStyle labelStyle = new Label.LabelStyle(game.getAssetHelper().get("font/arial_uni_30.fnt", BitmapFont.class), Color.WHITE);
+        Label titleLabel = new Label("Settings", labelStyle);
+        titleLabel.setFontScale(2f);
+        titleLabel.setPosition(stage.getWidth() / 2 - titleLabel.getWidth() / 2, stage.getHeight() - 100);
+        stage.addActor(titleLabel);
+
+        // Tạo nút Music
+        TextButton.TextButtonStyle buttonStyle = createSimpleButtonStyle();
+        TextButton musicButton = new TextButton("Music: ON", buttonStyle);
+        musicButton.setPosition(stage.getWidth() / 2 - 150, stage.getHeight() / 2 + 50);
+        musicButton.setSize(300, 60);
+        musicButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                boolean isMuted = game.getSoundManager().isMusicMuted();
+                game.getSoundManager().setMusicMuted(!isMuted);
+                musicButton.setText("Music: " + (isMuted ? "ON" : "OFF"));
+            }
+        });
+        stage.addActor(musicButton);
+
+        // Tạo nút Sound
+        TextButton soundButton = new TextButton("Sound: ON", buttonStyle);
+        soundButton.setPosition(stage.getWidth() / 2 - 150, stage.getHeight() / 2 - 50);
+        soundButton.setSize(300, 60);
+        soundButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                boolean isMuted = game.getSoundManager().isSoundMuted();
+                game.getSoundManager().setSoundMuted(!isMuted);
+                soundButton.setText("Sound: " + (isMuted ? "ON" : "OFF"));
+            }
+        });
+        stage.addActor(soundButton);
+
+        // Tạo nút Back
+        TextButton backButton = new TextButton("Back", buttonStyle);
+        backButton.setPosition(stage.getWidth() / 2 - 150, stage.getHeight() / 2 - 150);
+        backButton.setSize(300, 60);
+        backButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                game.setScreen(game.getHomeScreen()); // Quay về HomeScreen
+            }
+        });
+        stage.addActor(backButton);
+    }
+
+    // Tạo style đơn giản cho TextButton bằng Pixmap
+    private TextButton.TextButtonStyle createSimpleButtonStyle() {
+        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixmap.setColor(Color.DARK_GRAY);
+        pixmap.fill();
+        Texture upTexture = new Texture(pixmap);
+
+        pixmap.setColor(Color.LIGHT_GRAY);
+        pixmap.fill();
+        Texture downTexture = new Texture(pixmap);
+        pixmap.dispose();
+
+        TextButton.TextButtonStyle style = new TextButton.TextButtonStyle();
+        style.up = new TextureRegionDrawable(upTexture);
+        style.down = new TextureRegionDrawable(downTexture);
+        style.font = game.getAssetHelper().get("font/arial_uni_30.fnt", BitmapFont.class);
+        style.fontColor = Color.WHITE;
+        return style;
+    }
+
+    // Tạo overlay (nền) giống trong UiPopup
+    private Image createOverlay(float w, float h, float alpha, Color color) {
+        color.a = alpha;
+        Texture texture = createSolid(1, 1, color);
+        Image image = new Image(texture);
+        image.setSize(w, h);
+        return image;
+    }
+
+    private Texture createSolid(int w, int h, Color color) {
+        Pixmap pixmap = new Pixmap(w, h, Pixmap.Format.RGBA8888);
+        pixmap.setColor(color);
+        pixmap.fillRectangle(0, 0, w, h);
+        Texture texture = new Texture(pixmap);
+        pixmap.dispose();
+        return texture;
+    }
 
     @Override
     public void show() {
-        winPopup = new UiPopup(game, false);
-
-
-        stage.addActor(winPopup);
-
+        Gdx.input.setInputProcessor(stage); // Đảm bảo stage nhận input
     }
 
     @Override
     public void render(float delta) {
-        stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));  // Cập nhật hành động của stage
+        stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
         stage.draw();
-
     }
 
     @Override
     public void resize(int width, int height) {
-
+        viewport.update(width, height);
     }
 
     @Override
-    public void pause() {
-
-    }
+    public void pause() {}
 
     @Override
-    public void resume() {
-
-    }
+    public void resume() {}
 
     @Override
-    public void hide() {
-
-    }
+    public void hide() {}
 
     @Override
     public void dispose() {
         stage.dispose();
-    }
-
-    public UiPopup getWinPopup() {
-        return winPopup;
-    }
-
-    public void setWinPopup(UiPopup winPopup) {
-        this.winPopup = winPopup;
     }
 }

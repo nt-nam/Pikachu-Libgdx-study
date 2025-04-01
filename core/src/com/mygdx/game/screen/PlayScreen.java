@@ -9,134 +9,121 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.badlogic.gdx.utils.Align;
 import com.mygdx.game.PikachuGame;
 import com.mygdx.game.data.AssetHelper;
 import com.mygdx.game.data.LevelManager;
 import com.mygdx.game.model.Level;
 import com.mygdx.game.model.Player;
+import com.mygdx.game.utils.ButtonFactory;
 import com.mygdx.game.utils.GameConstants;
 import com.mygdx.game.view.Board;
-import com.mygdx.game.utils.ButtonFactory;
 import com.mygdx.game.view.HUD;
 
 public class PlayScreen implements Screen {
+  // Game core components
   private final PikachuGame game;
-  private static Stage stage;
-
   private final AssetHelper assetManager;
+  private static Stage stage;
   private Player player;
-  private HUD hud;
   private Board board;
-  private final ButtonFactory buttonFactory;
+  private HUD hud;
   private LevelManager levelManager;
+  private int level;
 
+  // UI-related components
+  private final ButtonFactory buttonFactory;
+  private static TextureAtlas ui;
+  private UiPopup currentPopup;
+  private UiPopup pausePopup;
+  private Label.LabelStyle style;
+  private BitmapFont bitmapFont;
+
+  // Game board dimensions
   private static int ROWS;
   private static int COLUMNS;
+  private static int distance;
+
+  // Screen positioning
   private final float centerX;
   private final float centerY;
 
-  private static TextureAtlas ui;
-  private Image levelTitle;
-  private int level;
-  private static int distance;
-  Label.LabelStyle style;
-  BitmapFont bitmapFont;
+  // Scoring constants
+  private static final int POINTS_PER_PAIR = 100;
+  private static final int TIME_BONUS_MULTIPLIER = 10;
 
   public PlayScreen(PikachuGame game) {
+    // Game core components initialization
     this.game = game;
-    stage = new Stage(game.getStage().getViewport());
-    this.level = 1;
     assetManager = game.getAssetHelper();
-    buttonFactory = new ButtonFactory(game.getSkinManager(),game.getSoundManager());
-    levelManager = new LevelManager();
-    ui = assetManager.get(DEFAULT_UI+LIST_SKIN_UI[0]);
+    stage = new Stage(game.getStage().getViewport());
     player = game.getPlayer();
-    ROWS = GameConstants.DEFAULT_ROWS;
-    COLUMNS = GameConstants.DEFAULT_COLS;
-    board = new Board(ROWS,COLUMNS);
-    hud = new HUD(player,game.getSkinManager());
-    centerX = stage.getWidth() / 2;
-    centerY = stage.getHeight() / 2;
-    distance = (int) stage.getWidth() / (COLUMNS + 1);
+    this.level = 2;
+    levelManager = new LevelManager();
+    board = new Board();
+    board.setPlayScreen(this);
 
-
+// UI-related components initialization
+    buttonFactory = new ButtonFactory(game.getSkinManager(), game.getSoundManager());
+    ui = assetManager.get(DEFAULT_UI + LIST_SKIN_UI[0]);
+    pausePopup = new UiPopup(game);
+    hud = new HUD(game, stage, board);
     bitmapFont = game.getAssetHelper().get("font/arial_uni_30.fnt");
     style = new Label.LabelStyle();
     style.font = bitmapFont;
-    showBoard();
-    createBtn();
-    showHUD();
-  }
 
-  private void showHUD() {
-    ImageButton hintButton = buttonFactory.createHintButton(player, board);
-    hintButton.setBounds(centerX*0.4f, centerY*0.08f,centerX*0.3f, centerX*0.3f);
-    stage.addActor(hintButton);
 
-    ImageButton shuffleButton = buttonFactory.createShuffleButton(player, board);
-    shuffleButton.addListener(new ClickListener(){
-      @Override
-      public void clicked(InputEvent event, float x, float y) {
-        board.shuffle();
-        super.clicked(event, x, y);
-      }
-    });
-    shuffleButton.setBounds(centerX*0.85f, centerY*0.08f, centerX*0.3f,centerX*0.3f);
-    stage.addActor(shuffleButton);
+// Screen positioning initialization
+    centerX = stage.getWidth() / 2;
+    centerY = stage.getHeight() / 2;
 
-    ImageButton undoButton = buttonFactory.createUndoButton(player, board);
-    undoButton.setBounds(centerX*1.3f, centerY*0.08f, centerX*0.3f, centerX*0.3f);
-    stage.addActor(undoButton);
+// Final setup
 
-    ImageButton closeButton = buttonFactory.createCloseButton(player,game);
-    closeButton.setBounds(centerX * 2 - 100, centerY * 2 - 100, 100, 100);
-
-    stage.addActor(closeButton);
   }
 
   public void showBoard() {
-    createBtn();
+    System.out.println("[PlayScreen]: Show board");
     Level levelData = levelManager.getLevel(level);
     board.setNew(levelData);
     hud.setTime(levelData.getTime());
-    board.setPosition(centerX -board.getWidth()/2,centerY-board.getHeight()/2);
-    board.setOrigin(board.getWidth()/2,board.getHeight()/2);
-    board.setScale(centerX/board.getWidth()*1.2f);
+    board.setPosition(centerX - board.getWidth() / 2, centerY - board.getHeight() / 2);
+    board.setOrigin(board.getWidth() / 2, board.getHeight() / 2);
+    board.setScale(centerX / board.getWidth() * 1.2f);
     board.getPathFinder().setBoard(board);
     stage.addActor(board);
 
-    stage.addActor(levelTitle);
     Gdx.input.setInputProcessor(stage);
   }
 
   private void createBtn() {
+    System.out.println("[PlayScreen]: create btn");
+    ImageButton btnSetting = buttonFactory.createButtonWood("btn_setting", new ClickListener() {
+      @Override
+      public void clicked(InputEvent event, float x, float y) {
+        if(!pausePopup.isPause()){
 
-    levelTitle = new Image(new TextureRegionDrawable(ui.findRegion("btn_blue")));
-    levelTitle.setSize(200, 100);
-    levelTitle.setPosition(centerX - 0.5f * levelTitle.getWidth(), centerY * 2 - levelTitle.getHeight());
-
-    Label labelTitleLevel = new Label("Level: " + level, style);
-    labelTitleLevel.setBounds(levelTitle.getX(), levelTitle.getY(), levelTitle.getWidth(), levelTitle.getHeight());
-    labelTitleLevel.setAlignment(Align.center);
-
-    stage.addActor(labelTitleLevel);
+          pausePopup.setUiPause();
+          pausePopup.setVisible(true);
+          pausePopup.setPosition((stage.getWidth() * 0.1f), (stage.getHeight() *0.1f) );
+        }
+        stage.addActor(pausePopup);
+        System.out.println("[PlayScreen]: click btnSetting");
+      }
+    });
+    btnSetting.setSize(GameConstants.TILE_SIZE * 2, GameConstants.TILE_SIZE * 2);
+    btnSetting.setPosition(centerX * 2f - btnSetting.getWidth(), centerY * 2f - btnSetting.getHeight());
+    stage.addActor(btnSetting);
   }
-
-
-
 
   @Override
   public void show() {
+    createBtn();
     hud.resetTime();
+//    stage.clear();
     showBoard();
   }
-
 
   @Override
   public void render(float delta) {
@@ -145,10 +132,12 @@ public class PlayScreen implements Screen {
     hud.update(delta);
     stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
     stage.draw();
-    hud.render();
+    board.updateLineSelect();
+    if (hud.isTimeUp()) {
+      System.out.println("[PlayScreen]: Time end.");
+      handleTimeUp();
+    }
   }
-
-
 
   @Override
   public void resize(int width, int height) {
@@ -156,21 +145,19 @@ public class PlayScreen implements Screen {
   }
 
   @Override
-  public void pause() {
-
-  }
+  public void pause() {}
 
   @Override
-  public void resume() {
-  }
+  public void resume() {}
 
   @Override
   public void hide() {
-
+//    clearPopup();
   }
 
   @Override
   public void dispose() {
+    clearPopup();
     stage.dispose();
     assetManager.dispose();
   }
@@ -178,5 +165,78 @@ public class PlayScreen implements Screen {
   public void setLevel(int level) {
     this.level = level;
   }
-}
 
+  public void onPairMatched() {
+    int currentScore = player.getScore();
+    player.setScore(currentScore + POINTS_PER_PAIR);
+    hud.update(Gdx.graphics.getDeltaTime());
+  }
+
+  public void onLevelCompleted() {
+    float timeLeft = hud.isTimeUp() ? 0 : hud.getTimeLeft();
+    int timeBonus = (int) (timeLeft * TIME_BONUS_MULTIPLIER);
+    int currentScore = player.getScore();
+    player.setScore(currentScore + timeBonus);
+
+    if(currentPopup == null){
+      currentPopup = new UiPopup(game);
+      currentPopup.setPosition((stage.getWidth() - currentPopup.getWidth() * 0.8f) * 0.5f, (stage.getHeight() - currentPopup.getHeight() * 0.8f) * 0.5f);
+    }
+    currentPopup.setUiWin(level, calculateStars(timeLeft));
+    currentPopup.setLabelWin(player.getScore(), (int) timeLeft);
+    stage.addActor(currentPopup);
+
+//    currentPopup.addAction(Actions.sequence(
+//        Actions.delay(3f),
+//        Actions.run(() -> {
+//          game.setScreen(game.getHomeScreen());
+//          clearPopup();
+//        })
+//    ));
+
+    level++;
+    hud.setLevelLabel(level);
+    Level nextLevel = levelManager.getLevel(level);
+    board.setNew(nextLevel);
+    hud.setTime(nextLevel.getTime());
+  }
+
+  private void handleTimeUp() {
+    if (currentPopup == null) {
+      currentPopup = new UiPopup(game);
+      stage.addActor(currentPopup);
+//      currentPopup.addAction(Actions.sequence(
+//          Actions.delay(3f),
+//          Actions.run(() -> {
+//            game.setScreen(game.getHomeScreen());
+////            clearPopup();
+//          })
+//      ));
+    }
+    currentPopup.setUiLose(board);
+    currentPopup.setPosition(stage.getWidth()*0.1f,stage.getHeight()*0.1f);
+    currentPopup.setVisible(true);
+  }
+
+  private int calculateStars(float timeLeft) {
+    float maxTime = GameConstants.LEVEL_TIME_SECONDS;
+    if (timeLeft > maxTime * 0.75f) return 3;
+    else if (timeLeft > maxTime * 0.25f) return 2;
+    else return 1;
+  }
+
+  private void clearPopup() {
+    if (currentPopup != null) {
+      currentPopup.remove();
+      currentPopup = null;
+    }
+    if (pausePopup != null) {
+      pausePopup.remove();
+      pausePopup = null;
+    }
+  }
+
+  public float getTimeLeft() {
+    return hud != null ? hud.getTimeLeft() : 0;
+  }
+}

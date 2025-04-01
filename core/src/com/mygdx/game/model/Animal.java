@@ -49,7 +49,7 @@ public class Animal extends Actor {
   }
 
   public void moveTo() {
-    addAction(Actions.moveTo(gridX * distance, gridY * distance, 0.5f));
+    addAction(Actions.moveTo(gridX * distance, gridY * distance, 0.2f));
   }
 
   Color color = getColor();

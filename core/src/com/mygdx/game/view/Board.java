@@ -4,22 +4,21 @@ import static com.badlogic.gdx.math.MathUtils.random;
 import static com.mygdx.game.utils.GameConstants.TILE_SIZE;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Timer;
 import com.mygdx.game.data.AssetHelper;
 import com.mygdx.game.model.Animal;
 import com.mygdx.game.model.Level;
-import com.mygdx.game.model.Pair;
 import com.mygdx.game.model.PathFinder;
+import com.mygdx.game.screen.PlayScreen;
 import com.mygdx.game.utils.GameConstants;
 
 import java.util.ArrayList;
@@ -27,39 +26,48 @@ import java.util.Collections;
 import java.util.List;
 
 public class Board extends Group {
-  private int ROWS, COLS;
+  private PlayScreen playScreen;
   private Animal[][] animals;
+  private Animal animalSelect;
   private TextureAtlas animalAtlas, uiAtlas;
   private PathFinder pathFinder;
-  private Animal animalSelect;
   private Image background;
   private static Group lineSelect;
-  private int pairAni;
 
-  public Board(int rows, int cols) {
-    ROWS = rows;
-    COLS = cols;
+  private int ROWS, COLS;
+  private int pairAni;
+  private int matchedPairs;
+  private int totalPairs;
+  private int type;
+
+  public Board() {
     animalAtlas = AssetHelper.getAnimals();
     uiAtlas = AssetHelper.getUI();
     lineSelect = new Group();
     pairAni = GameConstants.ANIMAL_TYPES;
-    init();
   }
 
-  private void init() {
+  public void setNew(Level lv) {
+    System.out.println("[Board]: set new board");
+    clear();
+    ROWS = lv.getRows();
+    COLS = lv.getCols();
+    pairAni = lv.getPairs();
+    matchedPairs = 0;
+    totalPairs = (ROWS * COLS) / 2;
+    type = lv.getType();
     setSize(ROWS * TILE_SIZE, COLS * TILE_SIZE);
     animals = new Animal[ROWS][COLS];
     pathFinder = new PathFinder(this);
-
     createBackground();
     initAnimals();
     createLineSelect();
   }
 
   private void createBackground() {
-    background = new Image(new TextureRegion(new Texture("images/board/board3.png")));
-    float scaleBG = 2f;
-    background.setPosition((float) -(ROWS * TILE_SIZE) / 2, (float) -(COLS * TILE_SIZE) / 2);
+    background = new Image(new TextureRegion(new Texture("images/board/board.png")));
+    float scaleBG = 1.5f;
+    background.setPosition((float) -(ROWS * TILE_SIZE) / 3.7f, (float) -(COLS * TILE_SIZE) / 3.7f);
     background.setSize((ROWS * TILE_SIZE) * scaleBG, (COLS * TILE_SIZE) * scaleBG);
     this.addActor(background);
   }
@@ -132,114 +140,135 @@ public class Board extends Group {
   }
 
   private void addAnimalListener(Animal animal) {
-    final int finalRow = animal.getGridX();
-    final int finalCol = animal.getGridY();
-    animals[finalRow][finalCol].addListener(new ClickListener() {
+
+    animal.addListener(new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
-        System.out.println(finalRow + "  " + finalCol);
-        if (animalSelect == animals[finalRow][finalCol]) {
+        System.out.println(animal.getGridX() + "  " + animal.getGridY());
+        if (animalSelect == animals[animal.getGridX()][animal.getGridY()]) {
           setBorder(null);
           return;
         }
+
         if (animalSelect == null) {
-          setBorder(animals[finalRow][finalCol]);
+          setBorder(animals[animal.getGridX()][animal.getGridY()]);
           return;
         }
-        List<int[]> path = pathFinder.findPath(animalSelect, animals[finalRow][finalCol]);
+
+        List<int[]> path = pathFinder.findPath(animalSelect, animals[animal.getGridX()][animal.getGridY()]);
         if (path != null) {
           createLineMatch(path);
-          setVisibleAnimal(animalSelect, 0.5f);
-          setVisibleAnimal(animals[finalRow][finalCol], 0.5f);
+          setVisibleAnimal(animalSelect, 0.2f);
+          setVisibleAnimal(animals[animal.getGridX()][animal.getGridY()], 0.2f);
+          matchPair(); // Gọi khi ghép đôi thành công
           setBorder(null);
+          checkCanMatch();
         } else {
-          setBorder(animals[finalRow][finalCol]);
+          setBorder(animals[animal.getGridX()][animal.getGridY()]);
         }
+
+        checkCanMatch();
       }
 
       private void setVisibleAnimal(Animal animalA, float v) {
         final Animal a = animalA;
         a.addAction(
             Actions.sequence(
-                Actions.fadeOut(v), // Mờ dần từ alpha = 1 xuống 0
-                Actions.run(new Runnable() {
-                  @Override
-                  public void run() {
-                    a.setVisible(false);
-                  }
-                }) // Ẩn actor khi hoàn tất
+                Actions.fadeOut(v),
+                Actions.run(() -> {
+                  a.setVisible(false);
+                  checkLevelComplete(); // Kiểm tra hoàn thành sau khi ẩn
+                })
             )
         );
       }
+
+
     });
+
+
   }
+  public void checkCanMatch(){
+    System.out.println("check can match");
+    Timer.schedule(new Timer.Task() {
+      @Override
+      public void run() {
+        while (findHint() == null) {
+          System.out.println("loop shuffle");
+          shuffle();
+        }
+      }
+    }, 0.53f);
 
-//  private void setVisibleAnima2l(Animal animalA, float v) {
-//    animalA.addAction(
-//        Actions.sequence(
-//            Actions.fadeOut(v), // Mờ dần từ alpha = 1 xuống 0
-//            Actions.run(() -> animalA.setVisible(false)) // Ẩn actor khi hoàn tất
-//        )
-//    );
-//  }
-
+  }
   private void createLineMatch(List<int[]> path) {
 
     StringBuilder pathFull = new StringBuilder("[PathFinder] Path connect: ");
 
-    // Ghi lại toàn bộ danh sách để debug
     for (int[] pair : path) {
       pathFull.append("- [").append(pair[0]).append(",").append(pair[1]).append("] ");
     }
     System.out.println(pathFull);
 
-    // Duyệt qua tất cả các cặp Pair trong danh sách
     for (int i = 0; i < path.size(); i++) {
       int[] pair1 = path.get(i);
-      for (int j = i + 1; j < path.size(); j++) { // Bắt đầu từ i+1 để tránh lặp lại cặp
+      for (int j = i + 1; j < path.size(); j++) {
         int[] pair2 = path.get(j);
 
-        // Kiểm tra nếu hai Pair cách nhau 1 đơn vị x hoặc y
         boolean isVertical = pair1[0] == pair2[0] &&
             (Math.abs(pair1[1] - pair2[1]) == 1);
         boolean isHorizontal = pair1[1] == pair2[1] &&
             (Math.abs(pair1[0] - pair2[0]) == 1);
 
         if (isVertical || isHorizontal) {
-          // Tính toán chiều rộng và cao của đường kẻ
           float width = isVertical ? (float) TILE_SIZE / 10 : TILE_SIZE;
           float height = isVertical ? TILE_SIZE : (float) TILE_SIZE / 10;
 
-          // Tính toán vị trí của đường kẻ
-          float x = (Math.min(pair1[0], pair2[0]) + 0.5f) * TILE_SIZE + 0;
-          float y = (Math.min(pair1[1], pair2[1]) + 0.5f) * TILE_SIZE + 0;
+          float x = (Math.min(pair1[0], pair2[0]) + 0.5f) * TILE_SIZE;
+          float y = (Math.min(pair1[1], pair2[1]) + 0.5f) * TILE_SIZE;
 
-          // Tạo và thêm đường kẻ vào stage
-//            Image line = new Image(new TextureRegionDrawable(ui.findRegion("line_red")));
           Image lineMath = new Image(new TextureRegion(uiAtlas.findRegion("line_red")));
           lineMath.setBounds(x, y, width, height);
           addActor(lineMath);
-          lineMath.addAction(Actions.sequence(
-              Actions.delay(1f),
-              Actions.removeActor()
-          ));
+
+          lineMath.addAction(
+              Actions.sequence(
+                  Actions.fadeOut(0.2f),
+                  Actions.run(() -> {
+                    lineMath.remove();
+                    removeActor(lineMath);
+                  })
+              )
+          );
         }
       }
     }
+    Timer.schedule(new Timer.Task() {
+      @Override
+      public void run() {
+        moveWithLevel();
+      }
+    }, 0.53f);
 
   }
 
-  private void createLineMatch1(List<int[]> path) {
-    int[] after = null;
-    for (int[] array : path) {
-      if (after == null) {
-        after = array;
-        continue;
-      }
-      if (after[0] == array[0]) {
-//        miniLine();
+  private void matchPair() {
+    matchedPairs++;
+    if (playScreen != null) {
+      playScreen.onPairMatched();
+    }
+  }
+
+  private void checkLevelComplete() {
+    if (matchedPairs >= totalPairs) {
+      if (playScreen != null) {
+        playScreen.onLevelCompleted();
       }
     }
+  }
+
+  public void setPlayScreen(PlayScreen playScreen) {
+    this.playScreen = playScreen;
   }
 
   private void miniLine(int gridX, int gridY, int type) {
@@ -255,14 +284,15 @@ public class Board extends Group {
   }
 
   public Animal getAnimal(int row, int col) {
-    if (row == -1 || col == -1 || row == ROWS || col == COLS)
-      return null;
+    if (row < 0 || col < 0 || row >= ROWS || col >= COLS) return null;
     return animals[row][col];
   }
 
-  // Xáo trộn toàn bộ bàn chơi
+  public void undo() {
+
+  }
+
   public void shuffle() {
-    // Lấy tất cả ô còn lại (visible) vào danh sách
     List<Animal> remainingTiles = new ArrayList<>();
     for (int row = 0; row < ROWS; row++) {
       for (int col = 0; col < COLS; col++) {
@@ -272,18 +302,16 @@ public class Board extends Group {
       }
     }
 
-    // Xáo trộn danh sách
     Collections.shuffle(remainingTiles);
 
-    // Đặt lại vào lưới và cập nhật vị trí
     int index = 0;
     for (int row = 0; row < ROWS && index < remainingTiles.size(); row++) {
       for (int col = 0; col < COLS && index < remainingTiles.size(); col++) {
-        if (animals[row][col].isVisible()) { // Chỉ điền vào ô trống
+        if (animals[row][col].isVisible()) {
           Animal tile = remainingTiles.get(index);
-          tile.setPosition(row * TILE_SIZE, col * TILE_SIZE); // Cập nhật vị trí hiển thị
-          tile.setGridX(row); // Cập nhật row logic (giả định Tile có setter)
-          tile.setGridY(col); // Cập nhật col logic (giả định Tile có setter)
+          tile.setPosition(row * TILE_SIZE, col * TILE_SIZE);
+          tile.setGridX(row);
+          tile.setGridY(col);
           animals[row][col] = tile;
           animals[row][col].clearListeners();
           addAnimalListener(animals[row][col]);
@@ -294,41 +322,42 @@ public class Board extends Group {
     pathFinder.setBoard(this);
   }
 
-  public int getROWS() {
-    return ROWS;
+  public void showAnimationHint(){
+    int[] grid = findHint();
+
+    animals[grid[0]][grid[1]].addAction(Actions.sequence(
+        Actions.color(Color.YELLOW, 0.5f),
+        Actions.color(Color.WHITE, 0.5f)
+    ));
+    animals[grid[2]][grid[3]].addAction(Actions.sequence(
+        Actions.color(Color.YELLOW, 0.5f),
+        Actions.color(Color.WHITE, 0.5f)
+    ));
+
+    Gdx.app.log("ButtonFactory", "Hint used: (" + grid[0] + "," + grid[1] + ") - (" + grid[2] + "," + grid[3] + ")");
   }
 
-  public int getCOLS() {
-    return COLS;
-  }
-
-  // Tìm một cặp ô có thể nối được (dùng cho hint)
   public int[] findHint() {
     for (int row1 = 0; row1 < ROWS; row1++) {
       for (int col1 = 0; col1 < COLS; col1++) {
-
         Animal tile1 = animals[row1][col1];
         if (tile1 != null && tile1.isVisible()) {
           for (int row2 = 0; row2 < ROWS; row2++) {
             for (int col2 = 0; col2 < COLS; col2++) {
-
               Animal tile2 = animals[row2][col2];
               if (tile2 != null && tile2.isVisible() && !(row1 == row2 && col1 == col2) && tile1.getId() == tile2.getId()) {
                 if (canMatch(row1, col1, row2, col2)) {
                   return new int[]{row1, col1, row2, col2};
                 }
               }
-
             }
           }
         }
-
       }
     }
-    return null; // Không tìm thấy cặp nào
+    return null;
   }
 
-  // Kiểm tra xem hai ô có thể nối được không
   public boolean canMatch(int row1, int col1, int row2, int col2) {
     List<int[]> path = pathFinder.findPath(row1, col1, row2, col2);
     return path != null;
@@ -338,14 +367,141 @@ public class Board extends Group {
     return pathFinder;
   }
 
-  public void setNew(Level lv) {
-//        while (getChildren().notEmpty())
-//      getChildren().first().remove();
-    clear();
-    remove();
-    ROWS = lv.getRows();
-    COLS = lv.getCols();
-    pairAni = lv.getPairs();
-    init();
+
+  public int getROWS() {
+    return ROWS;
+  }
+
+  public int getCOLS() {
+    return COLS;
+  }
+
+  public void moveWithLevel(){
+    switch (type){
+      case 1:
+        moveLeft();
+        break;
+      case 2:
+        moveRight();
+        break;
+      case 3:
+        moveTop();
+        break;
+      case 4:
+        moveBottom();
+        break;
+      default:
+
+    }
+
+  }
+
+  public void moveTop() {
+    for (int m = COLS -1; m >= 0; m--) {
+      for (int n = 0; n < ROWS; n++) {
+        if (!animals[n][m].isVisible()) {
+          boolean flag = true;
+          for (int k = m - 1; k >= 0 && flag; k--) {
+            if (animals[n][k].isVisible()) {
+              moveAniUpdate(n, m, n, k);
+              flag = false;
+            }
+          }
+        }
+      }
+    }
+    showIdAnimal();
+  }
+
+  public void moveBottom() {
+    for (int m = 0; m < COLS; m++) {
+      for (int n = 0; n < ROWS; n++) {
+        if (!animals[n][m].isVisible()) {
+          boolean flag = true;
+          for (int k = m + 1; k <COLS && flag; k++) {
+            if (animals[n][k].isVisible()) {
+              moveAniUpdate(n, m, n, k);
+              flag = false;
+            }
+          }
+        }
+      }
+    }
+    showIdAnimal();
+  }
+
+  public void moveLeft() {
+    for (int i = 0; i < ROWS; i++) {
+      for (int j = 0; j < COLS; j++) {
+        if (!animals[i][j].isVisible()) {
+          boolean flag = true;
+          for (int k = i + 1; k < ROWS && flag; k++) {
+            if (animals[k][j].isVisible()) {
+              moveAniUpdate(i, j, k, j);
+              flag = false;
+            }
+          }
+        }
+      }
+    }
+    showIdAnimal();
+  }
+
+  public void moveRight() {
+    for (int i = ROWS - 1; i >= 0; i--) {
+      for (int j = 0; j < COLS; j++) {
+        if (!animals[i][j].isVisible()) {
+          boolean flag = true;
+          for (int k = i - 1; k >= 0 && flag; k--) {
+            if (animals[k][j].isVisible()) {
+              moveAniUpdate(i, j, k, j);
+              flag = false;
+            }
+          }
+        }
+      }
+    }
+    showIdAnimal();
+  }
+
+  private void moveAniUpdate(int x1, int y1, int x2, int y2) {
+
+    if (x1 < 0 || x1 >= animals.length || y1 < 0 || y1 >= animals[0].length ||
+        x2 < 0 || x2 >= animals.length || y2 < 0 || y2 >= animals[0].length) {
+      return;
+    }
+
+    Animal animal1 = animals[x1][y1];
+    Animal animal2 = animals[x2][y2];
+
+    animal1.setGridX(x2);
+    animal1.setGridY(y2);
+
+    animal2.setGridX(x1);
+    animal2.setGridY(y1);
+
+    animals[x1][y1] = animal2;
+    animals[x2][y2] = animal1;
+
+    animals[x1][y1].moveTo();
+    animals[x2][y2].moveTo();
+  }
+
+  void showIdAnimal() {
+    for (int i = 0; i < ROWS; i++) {
+      System.out.println(" ");
+      for (int j = 0; j < COLS; j++) {
+        System.out.print((animals[i][j].getId()) + "-");
+      }
+    }
+  }
+  public void reset() {
+
+  }
+
+  public void updateLineSelect() {
+    if(animalSelect != null){
+      lineSelect.setPosition(animalSelect.getX(),animalSelect.getY());
+    }
   }
 }

@@ -93,6 +93,7 @@ public class PathFinder {
           newTurns++;
         }
         if (newTurns > 2) { // Giới hạn 2 lần rẽ
+          visited[newRow + 1][newCol + 1] = false;
           continue;
         }
         if (!isEmpty(newRow, newCol) && !(newRow == endRow && newCol == endCol)) {

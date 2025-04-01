@@ -22,10 +22,14 @@ public class GameConstants {
 
   // Buffer mặc định
   public static final int DEFAULT_HINTS = 30;     // Số lần gợi ý ban đầu
-  public static final int DEFAULT_SHUFFLES = 4;  // Số lần xáo trộn ban đầu
+  public static final int DEFAULT_SHUFFLES = 40;  // Số lần xáo trộn ban đầu
   public static final int DEFAULT_UNDOS = 2;     // Số lần hoàn tác ban đầu
 
   // Giá trị phần thưởng và chi phí
+  // Thông số chung của level
+  public static final int LEVEL_TIME_SECONDS = 200; // Thời gian mỗi cấp (giây)
+  public static final int POINTS_PER_PAIR = 100; // Điểm cho mỗi cặp
+  public static final int TIME_BONUS_MULTIPLIER = 10; // Điểm thưởng dựa trên thời gian còn lại
   public static final int POINTS_PER_MATCH = 5; // Điểm cho mỗi lần nối thành công
   public static final int COIN_PER_LEVEL = 50;    // Số xu nhận được sau mỗi cấp
   public static final int HINT_COST = 20;         // Giá mua gợi ý (xu)
@@ -36,8 +40,6 @@ public class GameConstants {
   public static final float MUSIC_VOLUME_DEFAULT = 0.5f; // Âm lượng nhạc mặc định (0.0f - 1.0f)
   public static final float SOUND_VOLUME_DEFAULT = 0.8f; // Âm lượng hiệu ứng âm thanh mặc định
 
-  // Thời gian
-  public static final int LEVEL_TIME_SECONDS = 200; // Thời gian mỗi cấp (giây)
 
   // Đường dẫn tài nguyên (assets)
   public static final String DEFAULT_BACKGROUND_PATH = "images/bg.png";

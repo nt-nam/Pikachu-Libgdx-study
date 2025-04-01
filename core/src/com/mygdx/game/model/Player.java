@@ -18,7 +18,9 @@ public class Player {
   private int currentSkinAniId;
   private int currentSkinUiId;
   private List<Integer> unlockedSkins;
-  private String pathAni,pathUi;
+  private String pathAni, pathUi;
+  private boolean musicMuted;
+  private boolean soundMuted;
 
   public Player() {
     this.score = 0;
@@ -31,6 +33,8 @@ public class Player {
     this.currentSkinUiId = DEFAULT_SKIN;
     this.unlockedSkins = new ArrayList<>();
     this.unlockedSkins.add(DEFAULT_SKIN);
+    this.musicMuted = false;
+    this.soundMuted = false;
   }
 
   // Lưu dữ liệu vào Preferences
@@ -44,8 +48,9 @@ public class Player {
     prefs.putInteger("level", level);
     prefs.putInteger("currentSkinAniId", currentSkinAniId);
     prefs.putInteger("currentSkinUiId", currentSkinUiId);
+    prefs.putBoolean("musicMuted", musicMuted);
+    prefs.putBoolean("soundMuted", soundMuted);
 
-    // Lưu danh sách unlockedSkins dưới dạng chuỗi (dùng dấu phân cách)
     StringBuilder skins = new StringBuilder();
     for (int skinId : unlockedSkins) {
       skins.append(skinId).append(",");
@@ -64,11 +69,13 @@ public class Player {
     this.score = prefs.getInteger("score", 0);
     this.coins = prefs.getInteger("coins", 0);
     this.hints = prefs.getInteger("hints", DEFAULT_HINTS);
-    this.shuffles = prefs.getInteger("shuffles", DEFAULT_SHUFFLES);
+    this.shuffles = 20+prefs.getInteger("shuffles", DEFAULT_SHUFFLES);
     this.undos = prefs.getInteger("undos", DEFAULT_UNDOS);
     this.level = prefs.getInteger("level", 1);
     this.currentSkinAniId = prefs.getInteger("currentSkinId", DEFAULT_SKIN);
     this.currentSkinUiId = prefs.getInteger("currentUiId", DEFAULT_SKIN);
+    this.musicMuted = prefs.getBoolean("musicMuted", false); // Tải trạng thái Music
+    this.soundMuted = prefs.getBoolean("soundMuted", false);
 
     // Tải danh sách unlockedSkins
     this.unlockedSkins = new ArrayList<>();
@@ -109,7 +116,6 @@ public class Player {
     return false;
   }
 
-  // Mua buffer
   public boolean buyHint() {
     if (spendCoins(HINT_COST)) {
       this.hints++;
@@ -134,7 +140,6 @@ public class Player {
     return false;
   }
 
-  // Sử dụng buffer
   public boolean useHint() {
     if (this.hints > 0) {
       this.hints--;
@@ -159,13 +164,11 @@ public class Player {
     return false;
   }
 
-  // Chuyển sang cấp tiếp theo
   public void nextLevel() {
     this.level++;
     this.coins += COIN_PER_LEVEL; // Thưởng xu khi hoàn thành cấp
   }
 
-  // Mở khóa skin mới
   public boolean unlockSkin(int skinId, int cost) {
     if (!unlockedSkins.contains(skinId) && spendCoins(cost)) {
       unlockedSkins.add(skinId);
@@ -174,7 +177,6 @@ public class Player {
     return false;
   }
 
-  // Đổi skin
   public boolean setSkin(int skinId) {
     if (unlockedSkins.contains(skinId)) {
       this.currentSkinAniId = skinId;
@@ -228,6 +230,16 @@ public class Player {
     return new ArrayList<>(unlockedSkins);
   }
 
+  public boolean isMusicMuted() {
+    return musicMuted;
+  }
+
+  public boolean isSoundMuted() {
+    return soundMuted;
+  }
+
+
+
   // Setter methods (nếu cần thiết)
   public void setScore(int score) {
     this.score = score;
@@ -251,5 +263,15 @@ public class Player {
 
   public void setLevel(int level) {
     this.level = level;
+  }
+
+  public void setMusicMuted(boolean muted) {
+    this.musicMuted = muted;
+    save();
+  }
+
+  public void setSoundMuted(boolean muted) {
+    this.soundMuted = muted;
+    save();
   }
 }

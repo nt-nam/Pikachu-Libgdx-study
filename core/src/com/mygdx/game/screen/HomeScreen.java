@@ -30,9 +30,14 @@ public class HomeScreen implements Screen {
   private final Stage stage;
   private AssetHelper assetHelper;
   private Player player;
+
+  public ButtonFactory getButtonFactory() {
+    return buttonFactory;
+  }
+
   private ButtonFactory buttonFactory;
 
-  private ImageButton btnProfile,btnPlay,btnSetting, levelCenter;
+  private ImageButton btnProfile, btnPlay, btnSetting, levelCenter;
 
   private Image blockLevel;
   private BitmapFont bitmapFont;
@@ -50,13 +55,14 @@ public class HomeScreen implements Screen {
     this.player = game.getPlayer();
     stage = new Stage(viewport);
     this.assetHelper = game.getAssetHelper();
-    buttonFactory = new ButtonFactory(game.getSkinManager(),game.getSoundManager());
+    buttonFactory = new ButtonFactory(game.getSkinManager(), game.getSoundManager());
     maxLevel = 100;
     levelCompleted = 4;
     centerX = stage.getWidth() / 2;
     centerY = stage.getHeight() / 2;
     createAssetHome();
     isdraw = true;
+    player.setLevel(levelCompleted);
   }
 
   private void createAssetHome() {
@@ -65,38 +71,47 @@ public class HomeScreen implements Screen {
     style = new Label.LabelStyle();
     style.font = bitmapFont;
     createScollPane();
-    createProfile();
+//    createProfile();
     createBtnPlay();
     createBtnSetting();
   }
 
   private void createBtnSetting() {
-    btnSetting = buttonFactory.createButtonUI("btn_setting",new ClickListener(){
+    btnSetting = buttonFactory.createButtonWood("btn_setting", new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
-        super.clicked(event, x, y);
+        create();
       }
     });
-    btnSetting.setSize(GameConstants.TILE_SIZE*2,GameConstants.TILE_SIZE*2);
-    btnSetting.setPosition(centerX*2f - btnSetting.getWidth(),centerY*2f - btnSetting.getHeight());
+    btnSetting.setSize(GameConstants.TILE_SIZE * 2, GameConstants.TILE_SIZE * 2);
+    btnSetting.setPosition(centerX * 2f - btnSetting.getWidth(), centerY * 2f - btnSetting.getHeight());
     stage.addActor(btnSetting);
   }
 
+  private void create() {
+    UiPopup uiSetting = new UiPopup(game);
+    uiSetting.setUiSetting();
+    uiSetting.setPosition((stage.getWidth() - uiSetting.getWidth() * 0.8f) * 0.5f, (stage.getHeight() - uiSetting.getHeight() * 0.8f) * 0.5f);
+    stage.addActor(uiSetting);
+
+  }
+
   private void createBtnPlay() {
-    btnPlay = buttonFactory.createButtonUI("btn_play",new ClickListener(){
+    btnPlay = buttonFactory.createButtonWood("btn_play", new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
-        super.clicked(event, x, y);
+        game.getPlayScreen().setLevel(player.getLevel());
+        game.setScreen(game.getPlayScreen());
       }
     });
-    btnPlay.setSize(centerX,centerX*0.5f);
-    btnPlay.setPosition(centerX*0.5f,0);
+    btnPlay.setSize(centerX, centerX * 0.5f);
+    btnPlay.setPosition(centerX * 0.5f, 0);
     stage.addActor(btnPlay);
   }
 
   private void createProfile() {
 //    btnProfile = buttonFactory.createProfileButton(player);
-    btnProfile = buttonFactory.createButtonUI("btn_home",new ClickListener(){
+    btnProfile = buttonFactory.createButtonWood("btn_home", new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
         System.out.println("click btn profile, img: btn_home");
@@ -104,8 +119,8 @@ public class HomeScreen implements Screen {
     });
 
 //    btnProfile = new Image(new TextureRegion(ui.findRegion("btn_blue")));
-    btnProfile.setSize(GameConstants.TILE_SIZE*2,GameConstants.TILE_SIZE*2);
-    btnProfile.setPosition(0,centerY*2f - btnProfile.getHeight());
+    btnProfile.setSize(GameConstants.TILE_SIZE * 2, GameConstants.TILE_SIZE * 2);
+    btnProfile.setPosition(0, centerY * 2f - btnProfile.getHeight());
     Label label = new Label("Profile", style);
     label.setBounds(10, centerY * 2 - 100, 100, 100);
     stage.addActor(btnProfile);
@@ -154,14 +169,14 @@ public class HomeScreen implements Screen {
       Group level = new Group();
       level.setSize(stage.getWidth(), 100);
       blockLevel = new Image(new TextureRegion(ui.findRegion("btn_green")));
-      levelCenter = buttonFactory.createButtonUI("btn_level", new ClickListener(){
+      levelCenter = buttonFactory.createButtonWood("btn_level", new ClickListener() {
         @Override
         public void clicked(InputEvent event, float x, float y) {
           super.clicked(event, x, y);
 
         }
       });
-      levelCenter.setSize(blockLevel.getWidth(),blockLevel.getHeight());
+      levelCenter.setSize(blockLevel.getWidth(), blockLevel.getHeight());
       blockLevel.setX(x * 110 + centerX - 220);
       labelLevel = new Label("" + n, style);
       labelLevel.setBounds(blockLevel.getX(), blockLevel.getY() + 5, blockLevel.getWidth(), blockLevel.getHeight());
@@ -187,7 +202,7 @@ public class HomeScreen implements Screen {
     }
 
     ScrollPane scrollPane = new ScrollPane(table);
-    scrollPane.setSize(stage.getWidth(), stage.getHeight() -0);
+    scrollPane.setSize(stage.getWidth(), stage.getHeight() - 100);
     scrollPane.setScrollingDisabled(true, false);
     stage.addActor(scrollPane);
   }
@@ -199,8 +214,6 @@ public class HomeScreen implements Screen {
       }
     }
   }
-
-
 
 
   @Override

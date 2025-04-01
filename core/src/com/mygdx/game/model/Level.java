@@ -6,6 +6,7 @@ public class Level {
   private int cols;
   private int pairs;
   private float time;
+  private int type;
 
   public Level() {}
 
@@ -14,4 +15,5 @@ public class Level {
   public int getCols() { return cols; }
   public int getPairs() { return pairs; }
   public float getTime() { return time; }
+  public int getType(){return type;}
 }

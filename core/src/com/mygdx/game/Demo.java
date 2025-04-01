@@ -44,14 +44,14 @@ public class Demo extends Game {
     stage = new Stage(viewport);
     Gdx.input.setInputProcessor(stage);
 
-    assetManager.load("textureAtlas/animals.atlas", TextureAtlas.class);
-    assetManager.load("textureAtlas/ui.atlas", TextureAtlas.class);
+    assetManager.load("textureAtlas/ani/ani0.atlas", TextureAtlas.class);
+    assetManager.load("textureAtlas/ui/ui0.atlas", TextureAtlas.class);
     assetManager.load("sound/bubble_fall.mp3", Sound.class);
     assetManager.load("font/arial_uni_30.fnt", BitmapFont.class);
     assetManager.finishLoading();
-    winPopup = new UiPopup(assetManager,true);
+    winPopup = new UiPopup(assetManager,0);
 
-    TextureAtlas animals = assetManager.get("textureAtlas/animals.atlas");
+    TextureAtlas animals = assetManager.get("textureAtlas/ani/ani0.atlas");
     img = new Image(new TextureRegion(animals.findRegion("cucxilau1"))) {
       @Override
       public void act(float delta) {
@@ -62,7 +62,7 @@ public class Demo extends Game {
     };
     img.setOrigin(Align.center);
     winPopup.scaleBy(0.5f,0.5f);
-    winPopup.setPosition(worldWidth/2 - winPopup.getCenterX(),worldHeight/2 - winPopup.getCenterY());
+//    winPopup.setPosition(worldWidth/2 - winPopup.getCenterX(),worldHeight/2 - winPopup.getCenterY());
     stage.addActor(winPopup);
 
   }

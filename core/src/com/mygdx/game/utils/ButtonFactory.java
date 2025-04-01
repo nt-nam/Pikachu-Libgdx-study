@@ -3,6 +3,7 @@ package com.mygdx.game.utils;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
@@ -22,7 +23,7 @@ public class ButtonFactory {
 
   public ImageButton createButton(String buttonName, final Runnable action) {
     TextureRegionDrawable drawable = new TextureRegionDrawable(
-        skinManager.getButtonTexture(buttonName)
+        skinManager.getButtonTextureUIAtlas(buttonName)
     );
 
     ImageButton button = new ImageButton(drawable);
@@ -76,13 +77,41 @@ public class ButtonFactory {
     });
     return button;
   }
-  public ImageButton createButtonUI(String buttonName, final ClickListener clickListener) {
+
+  public ImageButton createButtonWood(String buttonName, ClickListener clickListener) {
     // Tạo Texture từ đường dẫn (ví dụ: "buttons/hint_button.png")
     Texture texture = new Texture(Gdx.files.internal("images/ui/" + buttonName + ".png"));
     TextureRegionDrawable drawable = new TextureRegionDrawable(texture);
 
     ImageButton button = new ImageButton(drawable);
-    button.setSize(texture.getWidth(),texture.getHeight());
+    button.setSize(texture.getWidth(), texture.getHeight());
+    button.addListener(new ClickListener() {
+      @Override
+      public void clicked(InputEvent event, float x, float y) {
+        soundManager.playSound("click");
+        clickListener.clicked(event, x, y);
+      }
+    });
+    return button;
+  }
+
+  public Button createButtonTick(ClickListener clickListener) {
+    String nameNon = "check_square_grey";
+    String nameCheck = "check_square_grey_checkmark";
+
+    Texture textureUp = new Texture(Gdx.files.internal("images/ui/" + nameNon + ".png"));
+    Texture textureCheck = new Texture(Gdx.files.internal("images/ui/" + nameCheck + ".png"));
+
+    TextureRegionDrawable drawable = new TextureRegionDrawable(textureUp);
+    TextureRegionDrawable drawable2 = new TextureRegionDrawable(textureCheck);
+
+    Button.ButtonStyle style = new Button.ButtonStyle();
+    style.checked = drawable2;
+    style.up = drawable;
+
+    Button button = new Button(style);
+    button.setSize(textureUp.getWidth(), textureUp.getHeight());
+
     button.addListener(new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
@@ -99,15 +128,7 @@ public class ButtonFactory {
       @Override
       public void clicked(InputEvent event, float x, float y) {
         if (player.useHint()) {
-          int[] hint = board.findHint();
-          if (hint != null) {
-            // TODO: Hiển thị gợi ý trên giao diện (ví dụ: làm sáng ô)
-            Gdx.app.log("ButtonFactory", "Hint used: (" + hint[0] + "," + hint[1] + ") - (" + hint[2] + "," + hint[3] + ")");
-            Gdx.app.log("ButtonFactory", "Board used: (" +board.getROWS() + "," + board.getCOLS() + ")");
-            board.getAnimal(hint[0],hint[1]).debug();
-            board.getAnimal(hint[2],hint[3]).debug();
-
-          }
+          board.showAnimationHint();
         }
       }
     });

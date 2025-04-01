@@ -5,39 +5,44 @@ import static com.mygdx.game.utils.GameConstants.*;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
+import com.mygdx.game.model.Player;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class SoundManager {
-  private Music backgroundMusic;                  // Nhạc nền
-  private Map<String, Sound> soundEffects;        // Các hiệu ứng âm thanh
-  private float musicVolume;                      // Âm lượng nhạc nền
-  private float soundVolume;                      // Âm lượng hiệu ứng âm thanh
-  private boolean musicMuted;                     // Trạng thái tắt nhạc
-  private boolean soundMuted;                     // Trạng thái tắt âm thanh
+  private Music backgroundMusic;
+  private Map<String, Sound> soundEffects;
+  private float musicVolume;
+  private float soundVolume;
+  private boolean musicMuted;
+  private boolean soundMuted;
 
-  // Constructor
   public SoundManager() {
     this.soundEffects = new HashMap<>();
     this.musicVolume = MUSIC_VOLUME_DEFAULT;
     this.soundVolume = SOUND_VOLUME_DEFAULT;
     this.musicMuted = false;
     this.soundMuted = false;
-    loadSounds(); // Tải âm thanh khi khởi tạo
+    loadSounds();
   }
 
-  // Tải tất cả âm thanh
+  // Tải âm thanh
   private void loadSounds() {
-    // Tải nhạc nền
     backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal(MUSIC_PATH));
-    backgroundMusic.setLooping(true); // Lặp lại nhạc nền
+    backgroundMusic.setLooping(true);
     backgroundMusic.setVolume(musicMuted ? 0 : musicVolume);
 
-    // Tải hiệu ứng âm thanh
     soundEffects.put("match", Gdx.audio.newSound(Gdx.files.internal(MATCH_SOUND_PATH)));
     soundEffects.put("shuffle", Gdx.audio.newSound(Gdx.files.internal(SHUFFLE_SOUND_PATH)));
     soundEffects.put("click", Gdx.audio.newSound(Gdx.files.internal(CLICK_SOUND_PATH)));
+  }
+
+  // Khởi tạo trạng thái từ Player
+  public void initFromPlayer(Player player) {
+    this.musicMuted = player.isMusicMuted();
+    this.soundMuted = player.isSoundMuted();
+    updateMusicState();
   }
 
   // Phát nhạc nền
@@ -86,8 +91,13 @@ public class SoundManager {
   // Bật/tắt nhạc nền
   public void setMusicMuted(boolean muted) {
     this.musicMuted = muted;
-    backgroundMusic.setVolume(muted ? 0 : musicVolume);
-    if (muted) {
+    updateMusicState();
+  }
+
+  // Cập nhật trạng thái nhạc
+  private void updateMusicState() {
+    backgroundMusic.setVolume(musicMuted ? 0 : musicVolume);
+    if (musicMuted) {
       stopBackgroundMusic();
     } else {
       playBackgroundMusic();
