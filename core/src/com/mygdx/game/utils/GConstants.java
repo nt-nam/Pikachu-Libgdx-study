@@ -1,7 +1,7 @@
 package com.mygdx.game.utils;
 
 
-public class GameConstants {
+public class GConstants {
   // Kích thước màn hình
   public static final int SCREEN_WIDTH = 480;
   public static final int SCREEN_HEIGHT = 840;
@@ -48,14 +48,19 @@ public class GameConstants {
   public static final String MATCH_SOUND_PATH = "sound/bubble_switch.mp3";
   public static final String SHUFFLE_SOUND_PATH = "sound/bubble_switch.mp3";
   public static final String CLICK_SOUND_PATH = "sound/bubble_switch.mp3";
-  
-  public static final int DEFAULT_SKIN = 0;
+  public static final String DEFAULT_ATLAS_ANIMAL = "textureAtlas/ani/ani0.atlas";
+  public static final String DEFAULT_ATLAS_UI = "textureAtlas/ui/ui0.atlas";
+  public static final String DEFAULT_ATLAS_UI_WOOD = "textureAtlas/ui/UiWood.atlas";
+  public static final String DEFAULT_ATLAS_BTN = "textureAtlas/ui/btn_pikachu.atlas";
+  public static final String BMF = "font/arial_uni_30";
+
   public static final String DEFAULT_ANIMAL = "textureAtlas/ani/";
   public static final String DEFAULT_UI = "textureAtlas/ui/";
+  public static final int DEFAULT_SKIN = 0;
   public static final String[] LIST_SKIN_ANIMAL = {"ani0.atlas","ani1.atlas","ani2.atlas","ani3.atlas","ani4.atlas"};
   public static final String[] LIST_SKIN_UI = {"ui0.atlas","ui1.atlas","ui2.atlas","ui3.atlas","ui4.atlas"};
 
-  private GameConstants() {
+  private GConstants() {
   }
 
 }

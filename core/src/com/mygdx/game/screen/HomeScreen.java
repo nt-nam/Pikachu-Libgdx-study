@@ -3,14 +3,9 @@ package com.mygdx.game.screen;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
@@ -18,17 +13,23 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.mygdx.game.PikachuGame;
-import com.mygdx.game.data.AssetHelper;
+import com.mygdx.game.GMain;
+import com.mygdx.game.data.GAssetsManager;
 import com.mygdx.game.model.Player;
-import com.mygdx.game.utils.GameConstants;
+import com.mygdx.game.utils.GConstants;
 import com.mygdx.game.utils.ButtonFactory;
+import com.mygdx.game.utils.hud.AL;
+import com.mygdx.game.utils.hud.Button;
+import com.mygdx.game.utils.hud.MapGroup;
+import com.mygdx.game.utils.hud.builders.BB;
+import com.mygdx.game.utils.hud.builders.LB;
+import com.mygdx.game.utils.hud.builders.MGB;
 
 
 public class HomeScreen implements Screen {
-  private PikachuGame game;
+  private GMain game;
   private final Stage stage;
-  private AssetHelper assetHelper;
+  private GAssetsManager gAssetsManager;
   private Player player;
 
   public ButtonFactory getButtonFactory() {
@@ -39,22 +40,19 @@ public class HomeScreen implements Screen {
 
   private ImageButton btnProfile, btnPlay, btnSetting, levelCenter;
 
-  private Image blockLevel;
-  private BitmapFont bitmapFont;
-  private Label labelLevel;
   private Label.LabelStyle style;
-  private TextureAtlas ui;
+//  private TextureAtlas ui;
 
   private float centerX, centerY;
   private boolean isdraw;
   int maxLevel;
   int levelCompleted;
 
-  public HomeScreen(PikachuGame game, Viewport viewport) {
+  public HomeScreen(GMain game, Viewport viewport) {
     this.game = game;
     this.player = game.getPlayer();
     stage = new Stage(viewport);
-    this.assetHelper = game.getAssetHelper();
+    this.gAssetsManager = game.getAssetHelper();
     buttonFactory = new ButtonFactory(game.getSkinManager(), game.getSoundManager());
     maxLevel = 100;
     levelCompleted = 4;
@@ -66,10 +64,10 @@ public class HomeScreen implements Screen {
   }
 
   private void createAssetHome() {
-    ui = assetHelper.get(player.getPathUi());
-    bitmapFont = assetHelper.get("font/arial_uni_30.fnt");
+//    ui = GAssetsManager.get(player.getPathUi());
+//    bitmapFont = GAssetsManager.get("font/arial_uni_30.fnt");
     style = new Label.LabelStyle();
-    style.font = bitmapFont;
+    style.font = GMain.getAssetHelper().getBitmapFont("font/arial_uni_30.fnt");
     createScollPane();
 //    createProfile();
     createBtnPlay();
@@ -77,60 +75,46 @@ public class HomeScreen implements Screen {
   }
 
   private void createBtnSetting() {
-    btnSetting = buttonFactory.createButtonWood("btn_setting", new ClickListener() {
+    GAssetsManager.setTextureAtlas(GConstants.DEFAULT_ATLAS_UI_WOOD);
+    Button setting = BB.New().transform(true).bg("btn_setting").scale(0.5f).pos(centerX * 1.5f, centerY * 1.7f).build();
+    setting.addListener(new ClickListener(){
       @Override
       public void clicked(InputEvent event, float x, float y) {
-        create();
+        UiPopup uiSetting = new UiPopup(game);
+        uiSetting.setUiSetting();
+//        uiSetting.setPosition((stage.getWidth() - uiSetting.getWidth() * 0.8f) * 0.5f, (stage.getHeight() - uiSetting.getHeight() * 0.8f) * 0.5f);
+        uiSetting.setPosition(stage.getWidth()*0.1f, stage.getHeight()*0.1f, Align.bottomLeft);
+        stage.addActor(uiSetting);
       }
     });
-    btnSetting.setSize(GameConstants.TILE_SIZE * 2, GameConstants.TILE_SIZE * 2);
-    btnSetting.setPosition(centerX * 2f - btnSetting.getWidth(), centerY * 2f - btnSetting.getHeight());
-    stage.addActor(btnSetting);
-  }
-
-  private void create() {
-    UiPopup uiSetting = new UiPopup(game);
-    uiSetting.setUiSetting();
-    uiSetting.setPosition((stage.getWidth() - uiSetting.getWidth() * 0.8f) * 0.5f, (stage.getHeight() - uiSetting.getHeight() * 0.8f) * 0.5f);
-    stage.addActor(uiSetting);
-
+    stage.addActor(setting);
   }
 
   private void createBtnPlay() {
-    btnPlay = buttonFactory.createButtonWood("btn_play", new ClickListener() {
+    GAssetsManager.setTextureAtlas(GConstants.DEFAULT_ATLAS_UI_WOOD);
+    Button play = BB.New().transform(true).bg("btn_play").scale(0.75f).pos(centerX * 0.5f, -60).build();
+    play.addListener(new ClickListener(){
       @Override
       public void clicked(InputEvent event, float x, float y) {
         game.getPlayScreen().setLevel(player.getLevel());
         game.setScreen(game.getPlayScreen());
       }
     });
-    btnPlay.setSize(centerX, centerX * 0.5f);
-    btnPlay.setPosition(centerX * 0.5f, 0);
-    stage.addActor(btnPlay);
+    stage.addActor(play);
   }
 
   private void createProfile() {
-//    btnProfile = buttonFactory.createProfileButton(player);
-    btnProfile = buttonFactory.createButtonWood("btn_home", new ClickListener() {
-      @Override
-      public void clicked(InputEvent event, float x, float y) {
-        System.out.println("click btn profile, img: btn_home");
-      }
-    });
 
-//    btnProfile = new Image(new TextureRegion(ui.findRegion("btn_blue")));
-    btnProfile.setSize(GameConstants.TILE_SIZE * 2, GameConstants.TILE_SIZE * 2);
-    btnProfile.setPosition(0, centerY * 2f - btnProfile.getHeight());
-    Label label = new Label("Profile", style);
-    label.setBounds(10, centerY * 2 - 100, 100, 100);
+    GAssetsManager.setTextureAtlas(GConstants.DEFAULT_ATLAS_UI_WOOD);
+    Button btnProfile = BB.New().transform(true).bg("btn_home").scale(0.5f).pos(0,centerY*1.85f).build();
     stage.addActor(btnProfile);
-//    stage.addActor(label);
   }
 
   private void createScollPane() {
     clearScrollPane();
     Table table = new Table();
 
+    GAssetsManager.setTextureAtlas(GConstants.DEFAULT_ATLAS_UI);
     for (int n = 1; n < maxLevel; n++) {
       int i = 0, j = 0;
       final int nlevel = n;
@@ -166,9 +150,13 @@ public class HomeScreen implements Screen {
       int x = i;
       int y = (n / 6) * 4 + j;
 
-      Group level = new Group();
-      level.setSize(stage.getWidth(), 100);
-      blockLevel = new Image(new TextureRegion(ui.findRegion("btn_green")));
+      MapGroup level = MGB.New().size(stage.getWidth(), 50).childs(
+          BB.New().bg("btn_green")/*.label(n + "", "font/arial_uni_30", 0,0, AL.c).fontScale(2)*/.pos(x * 110 + centerX - 220, 0, AL.bl).idx(""),
+          BB.New().bg("btn_red")/*.label(n + "", "font/arial_uni_30", 0,0, AL.c).fontScale(2)*/.pos(x * 110 + centerX - 220, 0, AL.bl).idx("disable").visible(false).touchable(false),
+          LB.New().text(""+n).font("font/arial_uni_30").fontScale(2f).pos(x * 110 + centerX - 140, +10, AL.bl)
+      ).build();
+
+//        Actor btn = BB.New().bg("btn_green").label(n + "", "font/arial_uni_30", 0,0, AL.c).fontScale(2).pos(x * 110 + centerX - 220, 0, AL.bl).parent(level).build()  ;
       levelCenter = buttonFactory.createButtonWood("btn_level", new ClickListener() {
         @Override
         public void clicked(InputEvent event, float x, float y) {
@@ -176,19 +164,11 @@ public class HomeScreen implements Screen {
 
         }
       });
-      levelCenter.setSize(blockLevel.getWidth(), blockLevel.getHeight());
-      blockLevel.setX(x * 110 + centerX - 220);
-      labelLevel = new Label("" + n, style);
-      labelLevel.setBounds(blockLevel.getX(), blockLevel.getY() + 5, blockLevel.getWidth(), blockLevel.getHeight());
-      labelLevel.setFontScale(2f);
-      labelLevel.setAlignment(Align.center);
-      level.addActor(blockLevel);
-//      level.addActor(levelCenter);
-      level.addActor(labelLevel);
+      levelCenter.setSize(level.getWidth(), level.getHeight());
       if (n > levelCompleted) {
-        blockLevel.setColor(0.4f, 0.4f, 0.4f, 0.8f);
+        level.query("disable", Button.class).setVisible(true);
       } else {
-        labelLevel.addListener(new ClickListener() {
+        level.addListener(new ClickListener() {
           @Override
           public void clicked(InputEvent event, float x, float y) {
             game.getPlayScreen().setLevel(nlevel);

@@ -7,7 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.mygdx.game.PikachuGame;
+import com.mygdx.game.GMain;
 import com.mygdx.game.model.Player;
 import com.mygdx.game.view.Board;
 
@@ -160,7 +160,7 @@ public class ButtonFactory {
     });
   }
 
-  public ImageButton createCloseButton(final Player player, final PikachuGame game) {
+  public ImageButton createCloseButton(final Player player, final GMain game) {
     return createButton2("close", new Runnable() {
       @Override
       public void run() {

@@ -1,7 +1,5 @@
 package com.mygdx.game.view;
 
-import static com.mygdx.game.utils.GameConstants.*;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -20,14 +18,14 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
-import com.mygdx.game.PikachuGame;
+import com.mygdx.game.GMain;
 import com.mygdx.game.model.Player;
 import com.mygdx.game.utils.ButtonFactory;
-import com.mygdx.game.utils.GameConstants;
+import com.mygdx.game.utils.GConstants;
 import com.mygdx.game.utils.SkinManager;
 
 public class HUD {
-  private PikachuGame game;
+  private GMain game;
   private Stage stage;
   private SpriteBatch batch;
   private Player player;
@@ -53,7 +51,7 @@ public class HUD {
   private float centerH;
   private boolean stop;
 
-  public HUD(PikachuGame game,Stage stagePlayScreen, Board board) {
+  public HUD(GMain game, Stage stagePlayScreen, Board board) {
     this.game = game;
     this.player = game.getPlayer();
     this.skinManager = game.getSkinManager();
@@ -62,8 +60,8 @@ public class HUD {
     this.batch = new SpriteBatch();
     this.stage = stagePlayScreen;
     this.font = new BitmapFont(Gdx.files.internal("font/arial_uni_30.fnt"));
-    this.timeLeft = GameConstants.LEVEL_TIME_SECONDS;
-    this.maxTime = GameConstants.LEVEL_TIME_SECONDS;
+    this.timeLeft = GConstants.LEVEL_TIME_SECONDS;
+    this.maxTime = GConstants.LEVEL_TIME_SECONDS;
     this.centerW = stage.getWidth()*0.5f;
     this.centerH = stage.getHeight()*0.5f;
 
@@ -270,7 +268,7 @@ public class HUD {
   }
 
   public void resetTime() {
-    timeLeft = GameConstants.LEVEL_TIME_SECONDS;
+    timeLeft = GConstants.LEVEL_TIME_SECONDS;
   }
 
   public void dispose() {
@@ -309,7 +307,8 @@ public class HUD {
     TextButton.TextButtonStyle style = new TextButton.TextButtonStyle();
     style.up = new TextureRegionDrawable(upTexture);
     style.down = new TextureRegionDrawable(downTexture);
-    style.font = game.getAssetHelper().get("font/arial_uni_30.fnt", BitmapFont.class);
+//    style.font = game.getAssetHelper().get("font/arial_uni_30.fnt", BitmapFont.class);
+    style.font = GMain.getAssetHelper().getBitmapFont("font/arial_uni_30.fnt");
     style.fontColor = Color.WHITE;
     return style;
   }

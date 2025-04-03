@@ -10,6 +10,6 @@ public class DesktopLauncher {
 		config.setForegroundFPS(60);
 		config.setWindowedMode(480,840);
 		config.setTitle("Demo");
-		new Lwjgl3Application(new PikachuGame(), config);
+		new Lwjgl3Application(new GMain(), config);
 	}
 }

@@ -1,75 +1,73 @@
 package com.mygdx.game.screen;
 
-import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.Align;
-import com.mygdx.game.PikachuGame;
+import com.mygdx.game.GMain;
+import com.mygdx.game.data.GAssetsManager;
 import com.mygdx.game.model.Player;
 import com.mygdx.game.utils.ButtonFactory;
+import com.mygdx.game.utils.GConstants;
 import com.mygdx.game.utils.SkinManager;
 import com.mygdx.game.utils.SoundManager;
+import com.mygdx.game.utils.hud.AL;
+import com.mygdx.game.utils.hud.MapGroup;
+import com.mygdx.game.utils.hud.builders.BB;
+import com.mygdx.game.utils.hud.Button;
+import com.mygdx.game.utils.hud.builders.IB;
+import com.mygdx.game.utils.hud.builders.LB;
+import com.mygdx.game.utils.hud.builders.MGB;
 import com.mygdx.game.view.Board;
 
-public class UiPopup extends Group {
+public class UiPopup extends MapGroup {
   public UiPopup uiPopup;
-  PikachuGame game;
-  AssetManager assetManager;
+  GMain game;
   SkinManager skinManager;
   SoundManager soundManager;
   Player player;
   ButtonFactory buttonFactory;
 
-  Image boardImage, star1, star2, star3, starEmpty;
-  ImageButton btnLeft, btnRight, btnHome;
-  BitmapFont font;
-  private Label.LabelStyle labelStyle;
+  BitmapFont bitmapFont;
   float centerX, centerY;
-  float x, y, w, h;
   private int level;
   private Image overlay;
-  private Button musicTick, soundTick;
   private boolean isPause;
   private boolean isSetting;
   private boolean isWin;
   private boolean isLose;
 
-  public UiPopup(PikachuGame game) {
+  public UiPopup(GMain game) {
+    super(game.getStage().getWidth(), game.getStage().getHeight() / 2);
     uiPopup = this;
     this.game = game;
-    setSize(game.getStage().getWidth(), game.getStage().getHeight());
-    this.assetManager = game.getAssetHelper();
     this.skinManager = game.getSkinManager();
     this.soundManager = game.getSoundManager();
     this.buttonFactory = game.getHomeScreen().getButtonFactory();
     this.player = game.getPlayer();
-
+    debug();
     setScale(0.8f);
     centerX = getWidth() * 0.5f;
     centerY = getHeight() * 0.5f;
     createUiDefault();
-    setPosition(centerX - getWidth() * 0.5f, centerY - getHeight() * 0.5f);
+
   }
 
   private void createUiDefault() {
-    font = assetManager.get("font/arial_uni_30.fnt");
-    labelStyle = new Label.LabelStyle(font, Color.WHITE);
+    bitmapFont = GMain.getAssetHelper().getBitmapFont(GConstants.BMF + ".fnt");
 
     overlay = createOverlay(game.getStage().getWidth(), game.getStage().getHeight(), 0.6f, Color.BLACK);
     overlay.setOrigin(overlay.getWidth() * 0.5f, overlay.getHeight() * 0.5f);
     overlay.setScale(2f);
     addActor(overlay);
 
-    addUiBoard();
+    GAssetsManager.setTextureAtlas(GConstants.DEFAULT_ATLAS_UI_WOOD);
+    IB.New().drawable("popup_board").pos(0, 0, AL.c).parent(this).build();
+
+
   }
 
   public void updateOverlayImage() {
@@ -78,6 +76,11 @@ public class UiPopup extends Group {
 
   public void setUiWin(int level, int numStar) {
     this.level = level;
+
+    MGB.New().size(getWidth(), getHeight()).childs(
+
+    ).pos(0, 0, AL.c).parent(this).build();
+
     addStarEmpty();
     switch (numStar) {
       case 3:
@@ -87,93 +90,92 @@ public class UiPopup extends Group {
       case 1:
         addStar3();
     }
-    addBtnHome();
+    addBtnHome().addListener(new ClickListener(){
+      @Override
+      public void clicked(InputEvent event, float x, float y) {
+        setVisible(false);
+      }
+    });;
     addBtnLeft();
     addBtnRight();
   }
 
   public void setUiLose(Board board) {
-    Label loseLabel = createLabel("Lost", x, y, w, h, Align.center, 5f);
+    LB.New().text("Lose").font(GConstants.BMF).fontScale(5).pos(0, 0, AL.ct).parent(this).build();
     addStarEmpty();
-    addBtnHome();
-    addBtnLeft();
-    btnLeft.removeListener(new ClickListener(){
+    addBtnHome().addListener(new ClickListener(){
+      @Override
+      public void clicked(InputEvent event, float x, float y) {
+        setVisible(false);
+      }
+    });;
+    addBtnLeft().removeListener(new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
         board.reset();
       }
     });
-    float x = starEmpty.getX(), y = starEmpty.getY() - starEmpty.getHeight() * 1.15f, w = starEmpty.getWidth(), h = starEmpty.getHeight();
   }
 
   public void setUiSetting() {
-    Label titleLabel = createLabel("Setting", x + w * 0.3f, y + h * 0.8f, w * 0.4f, h * 0.2f, Align.center, 4f);
-    createLabelSetting();
+    GAssetsManager.setTextureAtlas(GConstants.DEFAULT_ATLAS_BTN);
+    MapGroup bgMG = MGB.New().size(getWidth(), getHeight()).childs(
+        IB.New().drawable("close").pos(0, 0, AL.tr).idx("close"),
+        LB.New().text("Setting").font(GConstants.BMF).fontScale(3.5f).pos(0, 0, AL.ct)
+    ).pos(0, 0, AL.c).parent(this).build();
 
-    ImageButton btnClose = buttonFactory.createButtonBtn("close", new ClickListener() {
+    bgMG.query("close", Image.class).addListener(new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
-        remove();
-        super.clicked(event, x, y);
+        setVisible(false);
       }
     });
-    btnClose.setPosition(x + boardImage.getWidth() - btnClose.getWidth(), y + boardImage.getHeight() - btnClose.getHeight());
-    addActor(btnClose);
-  }
 
-  private void createLabelSetting() {
-    Label musicLabel = createLabel("Music", x + w * 0.25f, y + h * 0.25f, w * 0.5f, h * 0.2f, Align.left, 3f);
-    Label soundLabel = createLabel("Sound", x + w * 0.25f, y + h * 0.5f, w * 0.5f, h * 0.2f, Align.left, 3f);
+    GAssetsManager.setTextureAtlas(GConstants.DEFAULT_ATLAS_UI_WOOD);
+    MapGroup musicTick = MGB.New().size(getWidth() * 0.5f, 100).childs(
+        LB.New().text("Music").font(GConstants.BMF).fontScale(3f).pos(0, 0, AL.cl),
+        BB.New().bg("check_square_grey").pos(0, 0, AL.cr).idx("").idx("unTick"),
+        BB.New().bg("check_square_grey_checkmark").pos(0, 0, AL.cr).idx("Tick").visible(!soundManager.isMusicMuted())
+    ).pos(0, getHeight() * 0.25f, AL.cb).parent(bgMG).build();
 
-    musicTick = buttonFactory.createButtonTick(new ClickListener() {
+    MapGroup soundTick = MGB.New().size(getWidth() * 0.5f, 100).childs(
+        LB.New().text("Sound").font(GConstants.BMF).fontScale(3).pos(0, 0, AL.cl),
+        BB.New().bg("check_square_grey").pos(0, 0, AL.cr).idx("unTick"),
+        BB.New().bg("check_square_grey_checkmark").pos(0, 0, AL.cr).idx("Tick").visible(!soundManager.isSoundMuted())
+    ).pos(0, getHeight() * 0.25f + 100, AL.cb).parent(bgMG).build();
+
+
+    musicTick.addListener(new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
         boolean newState = !soundManager.isMusicMuted();
         soundManager.setMusicMuted(newState);
-        player.setMusicMuted(newState); // Cập nhật và lưu vào Player
-        musicTick.setChecked(!newState);
+        player.setMusicMuted(newState);
+        musicTick.query("Tick", Button.class).setVisible(!newState);
       }
     });
-    musicTick.setChecked(!soundManager.isMusicMuted());
-    musicTick.setPosition(musicLabel.getX() + musicLabel.getWidth() - musicTick.getWidth(),
-        musicLabel.getY() + musicLabel.getHeight() * 0.5f - musicTick.getHeight() * 0.5f);
-
-    soundTick = buttonFactory.createButtonTick(new ClickListener() {
+    soundTick.addListener(new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
         boolean newState = !soundManager.isSoundMuted();
         soundManager.setSoundMuted(newState);
-        player.setSoundMuted(newState); // Cập nhật và lưu vào Player
-        soundTick.setChecked(!newState);
-      }
-    });
-    soundTick.setChecked(!soundManager.isSoundMuted());
-    soundTick.setPosition(soundLabel.getX() + soundLabel.getWidth() - soundTick.getWidth(),
-        soundLabel.getY() + soundLabel.getHeight() * 0.5f - soundTick.getWidth() * 0.5f);
-
-    addActor(musicTick);
-    addActor(soundTick);
-
-    musicLabel.addListener(new ClickListener() {
-      @Override
-      public void clicked(InputEvent event, float x, float y) {
-        game.getSoundManager().setMusicMuted(!game.getSoundManager().isMusicMuted());
-      }
-    });
-    soundLabel.addListener(new ClickListener() {
-      @Override
-      public void clicked(InputEvent event, float x, float y) {
-        game.getSoundManager().setSoundMuted(!game.getSoundManager().isSoundMuted());
+        player.setSoundMuted(newState);
+        soundTick.query("Tick", Button.class).setVisible(!newState);
       }
     });
   }
 
+
   public void setUiPause() {
-    Label titleLabel = createLabel("Pause", x + w * 0.3f, y + h * 0.8f, w * 0.4f, h * 0.2f, Align.center, 4f);
-    addActor(titleLabel);
-    addBtnHome();
-    addBtnRight();
-    btnRight.addListener(new ClickListener() {
+
+    LB.New().text("Pause").font(GConstants.BMF).fontScale(4).pos(0, 0, AL.ct).debug(true).parent(this).build();
+    addBtnHome().addListener(new ClickListener(){
+      @Override
+      public void clicked(InputEvent event, float x, float y) {
+        setVisible(false);
+      }
+    });;
+    addBtnRight().addListener(new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
         uiPopup.setVisible(false);
@@ -181,109 +183,38 @@ public class UiPopup extends Group {
     });
   }
 
-  private Label createLabel(String text, float x, float y, float width, float height, int type, float scale) {
-    Label lb = new Label(text, labelStyle);
-    lb.setBounds(x, y, width, height);
-    lb.setFontScale(scale);
-    lb.setAlignment(type);
-    addActor(lb);
-    return lb;
+  private Image addStarEmpty() {
+    return IB.New().drawable("stroke").pos(0, -200, AL.ct).parent(this).build();
   }
 
-  private void addUiBoard() {
-    boardImage = skinManager.createImageUI("popup_board");
-//    boardImage.setScale(0.8f);
-    boardImage.setPosition(centerX - boardImage.getWidth() * 0.5f, centerY - boardImage.getHeight() * 0.5f);
-    x = boardImage.getX();
-    y = boardImage.getY();
-    w = boardImage.getWidth();
-    h = boardImage.getHeight();
-    addActor(boardImage);
+  private Image addStar1() {
+    return IB.New().drawable("star1").pos(0, -180, AL.ct).parent(this).build();
   }
 
-  private void addStarEmpty() {
-    starEmpty = skinManager.createImageUI("stroke");
-    starEmpty.setPosition(centerX - starEmpty.getWidth() / 2, boardImage.getY() + boardImage.getHeight() - starEmpty.getHeight() / 2);
-    addActor(starEmpty);
+  private Image addStar2() {
+    return IB.New().drawable("star2").pos(160, -70, AL.ct).parent(this).build();
   }
 
-  private void addStar1() {
-    star1 = skinManager.createImageUI("star1");
-    star1.setPosition(starEmpty.getX() + starEmpty.getWidth() / 2 - star1.getWidth() / 2, starEmpty.getY() + starEmpty.getHeight() / 2 - star1.getHeight() / 2);
-    addActor(star1);
+  private Image addStar3() {
+    return IB.New().drawable("star3").pos(-160, -70, AL.ct).parent(this).build();
   }
 
-  private void addStar2() {
-    star2 = skinManager.createImageUI("star2");
-    star2.setPosition(starEmpty.getX() + starEmpty.getWidth() - star2.getWidth(), starEmpty.getY());
-    addActor(star2);
+  private Button addBtnLeft() {
+    return BB.New().bg("btn_left").pos(0, -80, AL.bl).parent(this).build();
   }
 
-  private void addStar3() {
-    star3 = skinManager.createImageUI("star3");
-    star3.setPosition(starEmpty.getX(), starEmpty.getY());
-    addActor(star3);
+  private Button addBtnRight() {
+    return BB.New().bg("btn_right").pos(0, -80, AL.br).parent(this).build();
   }
 
-  private void addBtnLeft() {
-    btnLeft = buttonFactory.createButtonWood("btn_left", new ClickListener() {
-      @Override
-      public void clicked(InputEvent event, float x, float y) {
-
-      }
-    });
-    btnLeft.setPosition(btnHome.getX() - btnLeft.getWidth(), boardImage.getY() - btnLeft.getHeight() * 0.5f);
-    addActor(btnLeft);
-  }
-
-  private void addBtnRight() {
-    btnRight = buttonFactory.createButtonWood("btn_right", new ClickListener() {
-      @Override
-      public void clicked(InputEvent event, float x, float y) {
-
-      }
-    });
-    btnRight.setPosition(btnHome.getX() + btnHome.getWidth(), boardImage.getY() - btnRight.getHeight() * 0.5f);
-    addActor(btnRight);
-  }
-
-  private void addBtnHome() {
-    btnHome = buttonFactory.createButtonWood("btn_home", new ClickListener() {
-      @Override
-      public void clicked(InputEvent event, float x, float y) {
-        game.setScreen(game.getHomeScreen());
-        setVisible(false);
-      }
-    });
-    btnHome.setPosition(centerX - btnHome.getWidth() / 2, boardImage.getY() - btnHome.getHeight() * 0.4f);
-    addActor(btnHome);
+  private Button addBtnHome() {
+    return BB.New().bg("btn_home").pos(0, -80, AL.cb).parent(this).build();
   }
 
   public void setLabelWin(int core, int time) {
-    Label levelLabel;
-    levelLabel = new Label("Level " + level, labelStyle);
-    levelLabel.setSize(starEmpty.getWidth(), 100);
-    levelLabel.setFontScale(2.5f);
-    levelLabel.setPosition(starEmpty.getX(), starEmpty.getY() - levelLabel.getHeight());
-    levelLabel.setAlignment(Align.center);
-    addActor(levelLabel);
-
-    Label coreLabel;
-    coreLabel = new Label("Core:   " + core, labelStyle);
-    coreLabel.setSize(levelLabel.getWidth(), levelLabel.getHeight());
-    coreLabel.setFontScale(3f);
-    coreLabel.setPosition(levelLabel.getX(), levelLabel.getY() - levelLabel.getHeight() * 1.2f);
-    coreLabel.setAlignment(Align.left);
-    addActor(coreLabel);
-
-    Label timeFinishLabel;
-    timeFinishLabel = new Label("Time:   " + time, labelStyle);
-    timeFinishLabel.setSize(coreLabel.getWidth(), coreLabel.getHeight());
-    timeFinishLabel.setFontScale(3f);
-    timeFinishLabel.setPosition(coreLabel.getX(), coreLabel.getY() - timeFinishLabel.getHeight());
-    timeFinishLabel.setAlignment(Align.left);
-    addActor(timeFinishLabel);
-
+    LB.New().text("Level" + level).font(GConstants.BMF).fontScale(2.5f).pos(0, 150, AL.c).parent(this).build();
+    LB.New().text("Core:   " + core).font(GConstants.BMF).fontScale(2f).pos(0, 40, AL.c).parent(this).build();
+    LB.New().text("Time:   " + time).font(GConstants.BMF).fontScale(2f).pos(0, -40, AL.c).parent(this).build();
   }
 
   public static Image createOverlay(float w, float h, float alpha, Color c) {
@@ -321,11 +252,6 @@ public class UiPopup extends Group {
 
   public boolean isSetting() {
     return isSetting;
-  }
-
-  public UiPopup(AssetManager assetManager, int type) {
-    uiPopup = this;
-    this.assetManager = assetManager;
   }
 
 

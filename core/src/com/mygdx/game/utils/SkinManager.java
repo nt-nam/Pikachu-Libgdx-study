@@ -1,7 +1,7 @@
 package com.mygdx.game.utils;
 
 
-import static com.mygdx.game.utils.GameConstants.*;
+import static com.mygdx.game.utils.GConstants.*;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;

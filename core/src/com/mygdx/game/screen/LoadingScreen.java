@@ -4,13 +4,13 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.mygdx.game.PikachuGame;
+import com.mygdx.game.GMain;
 
 public class LoadingScreen implements Screen {
-  PikachuGame game;
+  GMain game;
   UiPopup uiPopup;
 
-  public LoadingScreen(PikachuGame game, Viewport v) {
+  public LoadingScreen(GMain game, Viewport v) {
     this.game = game;
 //    uiPopup = new UiPopup(game);
 //    uiPopup.setUiWin(3, 1);

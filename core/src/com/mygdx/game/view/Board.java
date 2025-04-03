@@ -1,12 +1,11 @@
 package com.mygdx.game.view;
 
 import static com.badlogic.gdx.math.MathUtils.random;
-import static com.mygdx.game.utils.GameConstants.TILE_SIZE;
+import static com.mygdx.game.utils.GConstants.TILE_SIZE;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -14,12 +13,12 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Timer;
-import com.mygdx.game.data.AssetHelper;
+import com.mygdx.game.GMain;
 import com.mygdx.game.model.Animal;
 import com.mygdx.game.model.Level;
 import com.mygdx.game.model.PathFinder;
 import com.mygdx.game.screen.PlayScreen;
-import com.mygdx.game.utils.GameConstants;
+import com.mygdx.game.utils.GConstants;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,7 +28,6 @@ public class Board extends Group {
   private PlayScreen playScreen;
   private Animal[][] animals;
   private Animal animalSelect;
-  private TextureAtlas animalAtlas, uiAtlas;
   private PathFinder pathFinder;
   private Image background;
   private static Group lineSelect;
@@ -41,10 +39,8 @@ public class Board extends Group {
   private int type;
 
   public Board() {
-    animalAtlas = AssetHelper.getAnimals();
-    uiAtlas = AssetHelper.getUI();
     lineSelect = new Group();
-    pairAni = GameConstants.ANIMAL_TYPES;
+    pairAni = GConstants.ANIMAL_TYPES;
   }
 
   public void setNew(Level lv) {
@@ -91,8 +87,9 @@ public class Board extends Group {
     int index = 0;
     for (int row = 0; row < ROWS; row++) {
       for (int col = 0; col < COLS; col++) {
-        TextureRegion ani = new TextureRegion(animalAtlas.findRegion("" + tileTypes.get(index)));
-        animals[row][col] = new Animal(ani, tileTypes.get(index), row, col, GameConstants.TILE_SIZE);
+        TextureRegion ani = GMain.getAssetHelper().getTextureRegion(GConstants.DEFAULT_ATLAS_ANIMAL,tileTypes.get(index)+"");
+//        TextureRegion ani = new TextureRegion(animalAtlas.findRegion("" + tileTypes.get(index)));
+        animals[row][col] = new Animal(ani, tileTypes.get(index), row, col, GConstants.TILE_SIZE);
         addAnimalListener(animals[row][col]);
         index++;
         addActor(animals[row][col]);
@@ -102,7 +99,8 @@ public class Board extends Group {
 
   private void createLineSelect() {
     int distance = TILE_SIZE;
-    TextureRegion lineRed = new TextureRegion(uiAtlas.findRegion("line_red"));
+//    TextureRegion lineRed = new TextureRegion(uiAtlas.findRegion("line_red"));
+    TextureRegion lineRed = GMain.getAssetHelper().getTextureRegion(GConstants.DEFAULT_ATLAS_UI, "line_red");
     Image line1 = new Image(lineRed);
     Image line2 = new Image(lineRed);
     Image line3 = new Image(lineRed);
@@ -227,7 +225,7 @@ public class Board extends Group {
           float x = (Math.min(pair1[0], pair2[0]) + 0.5f) * TILE_SIZE;
           float y = (Math.min(pair1[1], pair2[1]) + 0.5f) * TILE_SIZE;
 
-          Image lineMath = new Image(new TextureRegion(uiAtlas.findRegion("line_red")));
+          Image lineMath = new Image(GMain.getAssetHelper().getTextureRegion(GConstants.DEFAULT_ATLAS_UI, "line_red"));
           lineMath.setBounds(x, y, width, height);
           addActor(lineMath);
 
@@ -272,7 +270,7 @@ public class Board extends Group {
   }
 
   private void miniLine(int gridX, int gridY, int type) {
-    Image lineMath = new Image(new TextureRegion(uiAtlas.findRegion("line_red")));
+    Image lineMath = new Image(GMain.getAssetHelper().getTextureRegion(GConstants.DEFAULT_ATLAS_UI, "line_red"));
     lineMath.setPosition(animals[gridX][gridY].getX(), animals[gridX][gridY].getY());
     if (type == 0) {
       lineMath.setSize(5, TILE_SIZE);

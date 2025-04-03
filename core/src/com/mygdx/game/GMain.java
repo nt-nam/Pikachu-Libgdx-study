@@ -1,32 +1,30 @@
 package com.mygdx.game;
 
-import static com.mygdx.game.utils.GameConstants.*;
+import static com.mygdx.game.utils.GConstants.*;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.mygdx.game.data.AssetHelper;
+import com.mygdx.game.data.GAssetsManager;
 import com.mygdx.game.model.Player;
 import com.mygdx.game.screen.HomeScreen;
 import com.mygdx.game.screen.LoadingScreen;
 //import com.mygdx.game.screen.MenuScreen;
 import com.mygdx.game.screen.PlayScreen;
 import com.mygdx.game.screen.SettingScreen;
-import com.mygdx.game.screen.TestScreen;
-import com.mygdx.game.screen.UiPopup;
 import com.mygdx.game.utils.SkinManager;
 import com.mygdx.game.utils.SoundManager;
+import com.mygdx.game.utils.hud.BuilderBridge;
+import com.mygdx.game.utils.hud.HUD;
+import com.mygdx.game.utils.hud.builders.AbstractActorBuilder;
 
 
-public class PikachuGame extends Game {
+public class GMain extends Game {
   Stage stage;
-  AssetHelper assetManager;
+  GAssetsManager assetManager;
   OrthographicCamera camera;
   Viewport viewport;
   Player player;
@@ -42,7 +40,7 @@ public class PikachuGame extends Game {
 
   @Override
   public void create() {
-    assetManager = new AssetHelper();
+    assetManager = new GAssetsManager();
 
     float screenWidth = Gdx.graphics.getWidth();
     float screenHeight = Gdx.graphics.getHeight();
@@ -56,13 +54,15 @@ public class PikachuGame extends Game {
     viewport = new FitViewport(worldWidth, worldHeight, camera);
     viewport.apply();
 
+    HUD hud = new HUD(screenHeight, screenWidth);
+    AbstractActorBuilder.adapter = new BuilderBridge(hud);
     stage = new Stage(viewport);
     Gdx.input.setInputProcessor(stage);
+    loadAsset();
 
     getPlayer();
     getSoundManager();
     playMusic();
-    loadAsset();
 
     initScreen();
   }
@@ -101,8 +101,8 @@ public class PikachuGame extends Game {
   public SettingScreen getSettingScreen() {
     return settingScreen;
   }
-  public AssetHelper getAssetHelper() {
-    return assetManager;
+  public static GAssetsManager getAssetHelper(){
+    return  ((GMain) Gdx.app.getApplicationListener()).assetManager;
   }
 
   public Stage getStage() {
@@ -124,10 +124,12 @@ public class PikachuGame extends Game {
   }
 
   private void loadAsset() {
-    assetManager.load(DEFAULT_ANIMAL+LIST_SKIN_ANIMAL[player.getCurrentSkinAniId()], TextureAtlas.class);
-    assetManager.load(DEFAULT_UI+LIST_SKIN_UI[player.getCurrentSkinUiId()], TextureAtlas.class);
-    assetManager.load("sound/bubble_fall.mp3", Sound.class);
-    assetManager.load("font/arial_uni_30.fnt", BitmapFont.class);
+    assetManager.loadTextureAtlas(DEFAULT_ATLAS_ANIMAL);
+    assetManager.loadTextureAtlas(DEFAULT_ATLAS_UI_WOOD);
+    assetManager.loadTextureAtlas(DEFAULT_ATLAS_BTN);
+    assetManager.loadTextureAtlas(DEFAULT_ATLAS_UI);
+    assetManager.loadBitmapFont(BMF+".fnt");
+    assetManager.loadSound("sound/bubble_fall.mp3");
     assetManager.finishLoading();
   }
 

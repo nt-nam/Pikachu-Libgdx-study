@@ -45,7 +45,6 @@ public class PathFinder {
   public List<int[]> findPath(Animal animalStart, Animal animalEnd) {
 
     if (animalStart == null || animalEnd == null || animalStart.getId() != animalEnd.getId()) {
-//      System.out.println("finish top");
       return null;
     }
 
@@ -53,13 +52,74 @@ public class PathFinder {
     int startCol = animalStart.getGridY();
     int endRow = animalEnd.getGridX();
     int endCol = animalEnd.getGridY();
+//
+//    Queue<Node> queue = new ArrayDeque<>();
+//    boolean[][] visited = new boolean[rows + 2][cols + 2];
+//
+//    List<int[]> initialPath = new ArrayList<>();
+//    initialPath.add(new int[]{startRow, startCol});
+//    queue.add(new Node(startRow, startCol, 0, -1, initialPath));
+//
+//    while (!queue.isEmpty()) {
+//      Node current = queue.poll();
+//      int row = current.row;
+//      int col = current.col;
+//      int turns = current.turns;
+//      int prevDir = current.direction;
+//      List<int[]> currentPath = current.path;
+//
+//      visited[row + 1][col + 1] = true;
+//
+//      // Đến đích
+//      if (row == endRow && col == endCol) {
+//        return currentPath;
+//      }
+//
+//
+//      for (int i = 0; i < 4; i++) {
+//        int newRow = row + DIRECTIONS[i][0];
+//        int newCol = col + DIRECTIONS[i][1];
+//        int newTurns = turns;
+//
+//        // Kiểm tra điều kiện
+//        if (!isValid(newRow, newCol)) {
+//          continue;
+//        }
+//        if (visited[newRow + 1][newCol + 1]) {
+//          continue;
+//        }
+//        if (prevDir != -1 && prevDir != i) {
+//          newTurns++;
+//        }
+//        if (newTurns > 2) { // Giới hạn 2 lần rẽ
+//          visited[newRow + 1][newCol + 1] = false;
+//          continue;
+//        }
+//        if (!isEmpty(newRow, newCol) && !(newRow == endRow && newCol == endCol)) {
+//          continue;
+//        }
+//
+//        List<int[]> newPath = new ArrayList<>(currentPath);
+//        newPath.add(new int[]{newRow, newCol});
+//
+//        visited[newRow + 1][newCol + 1] = true;
+//        // Add new node to queue
+//        queue.add(new Node(newRow, newCol, newTurns, i, newPath));
+//      }
+//
+//    }
+    int[][] minTurns = new int[rows + 2][cols + 2]; // Lưu số lần rẽ tối thiểu
+    for (int i = 0; i < rows + 2; i++) {
+      for (int j = 0; j < cols + 2; j++) {
+        minTurns[i][j] = Integer.MAX_VALUE; // Khởi tạo là vô cực
+      }
+    }
 
     Queue<Node> queue = new ArrayDeque<>();
-    boolean[][] visited = new boolean[rows + 2][cols + 2];
-
     List<int[]> initialPath = new ArrayList<>();
     initialPath.add(new int[]{startRow, startCol});
     queue.add(new Node(startRow, startCol, 0, -1, initialPath));
+    minTurns[startRow + 1][startCol + 1] = 0;
 
     while (!queue.isEmpty()) {
       Node current = queue.poll();
@@ -69,45 +129,36 @@ public class PathFinder {
       int prevDir = current.direction;
       List<int[]> currentPath = current.path;
 
-      visited[row + 1][col + 1] = true;
-
-      // Đến đích
       if (row == endRow && col == endCol) {
         return currentPath;
       }
-
 
       for (int i = 0; i < 4; i++) {
         int newRow = row + DIRECTIONS[i][0];
         int newCol = col + DIRECTIONS[i][1];
         int newTurns = turns;
 
-        // Kiểm tra điều kiện
         if (!isValid(newRow, newCol)) {
-          continue;
-        }
-        if (visited[newRow + 1][newCol + 1]) {
           continue;
         }
         if (prevDir != -1 && prevDir != i) {
           newTurns++;
         }
-        if (newTurns > 2) { // Giới hạn 2 lần rẽ
-          visited[newRow + 1][newCol + 1] = false;
+        if (newTurns > 2) {
           continue;
         }
         if (!isEmpty(newRow, newCol) && !(newRow == endRow && newCol == endCol)) {
           continue;
         }
+        if (newTurns >= minTurns[newRow + 1][newCol + 1]) {
+          continue; // Nếu số lần rẽ không tốt hơn, bỏ qua
+        }
 
+        minTurns[newRow + 1][newCol + 1] = newTurns;
         List<int[]> newPath = new ArrayList<>(currentPath);
         newPath.add(new int[]{newRow, newCol});
-
-        visited[newRow + 1][newCol + 1] = true;
-        // Add new node to queue
         queue.add(new Node(newRow, newCol, newTurns, i, newPath));
       }
-
     }
 //    System.out.println("the end");
     return null;

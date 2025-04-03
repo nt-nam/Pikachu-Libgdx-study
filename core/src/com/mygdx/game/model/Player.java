@@ -1,6 +1,6 @@
 package com.mygdx.game.model;
 
-import static com.mygdx.game.utils.GameConstants.*;
+import static com.mygdx.game.utils.GConstants.*;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
@@ -69,7 +69,7 @@ public class Player {
     this.score = prefs.getInteger("score", 0);
     this.coins = prefs.getInteger("coins", 0);
     this.hints = prefs.getInteger("hints", DEFAULT_HINTS);
-    this.shuffles = 20+prefs.getInteger("shuffles", DEFAULT_SHUFFLES);
+    this.shuffles = 200+prefs.getInteger("shuffles", DEFAULT_SHUFFLES);
     this.undos = prefs.getInteger("undos", DEFAULT_UNDOS);
     this.level = prefs.getInteger("level", 1);
     this.currentSkinAniId = prefs.getInteger("currentSkinId", DEFAULT_SKIN);

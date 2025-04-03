@@ -1,31 +1,27 @@
 package com.mygdx.game.screen;
 
-import static com.mygdx.game.utils.GameConstants.*;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.mygdx.game.PikachuGame;
-import com.mygdx.game.data.AssetHelper;
+import com.mygdx.game.GMain;
+import com.mygdx.game.data.GAssetsManager;
 import com.mygdx.game.data.LevelManager;
 import com.mygdx.game.model.Level;
 import com.mygdx.game.model.Player;
 import com.mygdx.game.utils.ButtonFactory;
-import com.mygdx.game.utils.GameConstants;
+import com.mygdx.game.utils.GConstants;
 import com.mygdx.game.view.Board;
 import com.mygdx.game.view.HUD;
 
 public class PlayScreen implements Screen {
   // Game core components
-  private final PikachuGame game;
-  private final AssetHelper assetManager;
+  private final GMain game;
+  private final GAssetsManager assetManager;
   private static Stage stage;
   private Player player;
   private Board board;
@@ -35,11 +31,11 @@ public class PlayScreen implements Screen {
 
   // UI-related components
   private final ButtonFactory buttonFactory;
-  private static TextureAtlas ui;
+//  private static TextureAtlas ui;
   private UiPopup currentPopup;
   private UiPopup pausePopup;
   private Label.LabelStyle style;
-  private BitmapFont bitmapFont;
+//  private BitmapFont bitmapFont;
 
   // Game board dimensions
   private static int ROWS;
@@ -54,7 +50,7 @@ public class PlayScreen implements Screen {
   private static final int POINTS_PER_PAIR = 100;
   private static final int TIME_BONUS_MULTIPLIER = 10;
 
-  public PlayScreen(PikachuGame game) {
+  public PlayScreen(GMain game) {
     // Game core components initialization
     this.game = game;
     assetManager = game.getAssetHelper();
@@ -67,12 +63,12 @@ public class PlayScreen implements Screen {
 
 // UI-related components initialization
     buttonFactory = new ButtonFactory(game.getSkinManager(), game.getSoundManager());
-    ui = assetManager.get(DEFAULT_UI + LIST_SKIN_UI[0]);
+//    ui = assetManager.get(DEFAULT_UI + LIST_SKIN_UI[0]);
     pausePopup = new UiPopup(game);
     hud = new HUD(game, stage, board);
-    bitmapFont = game.getAssetHelper().get("font/arial_uni_30.fnt");
+//    bitmapFont = game.getAssetHelper().get("font/arial_uni_30.fnt");
     style = new Label.LabelStyle();
-    style.font = bitmapFont;
+//    style.font = bitmapFont;
 
 
 // Screen positioning initialization
@@ -112,7 +108,7 @@ public class PlayScreen implements Screen {
         System.out.println("[PlayScreen]: click btnSetting");
       }
     });
-    btnSetting.setSize(GameConstants.TILE_SIZE * 2, GameConstants.TILE_SIZE * 2);
+    btnSetting.setSize(GConstants.TILE_SIZE * 2, GConstants.TILE_SIZE * 2);
     btnSetting.setPosition(centerX * 2f - btnSetting.getWidth(), centerY * 2f - btnSetting.getHeight());
     stage.addActor(btnSetting);
   }
@@ -159,7 +155,7 @@ public class PlayScreen implements Screen {
   public void dispose() {
     clearPopup();
     stage.dispose();
-    assetManager.dispose();
+//    assetManager.dispose();
   }
 
   public void setLevel(int level) {
@@ -182,7 +178,8 @@ public class PlayScreen implements Screen {
       currentPopup = new UiPopup(game);
       currentPopup.setPosition((stage.getWidth() - currentPopup.getWidth() * 0.8f) * 0.5f, (stage.getHeight() - currentPopup.getHeight() * 0.8f) * 0.5f);
     }
-    currentPopup.setUiWin(level, calculateStars(timeLeft));
+//    currentPopup.setUiWin(level, calculateStars(timeLeft));
+    currentPopup.setUiWin(level, 3);
     currentPopup.setLabelWin(player.getScore(), (int) timeLeft);
     stage.addActor(currentPopup);
 
@@ -219,7 +216,7 @@ public class PlayScreen implements Screen {
   }
 
   private int calculateStars(float timeLeft) {
-    float maxTime = GameConstants.LEVEL_TIME_SECONDS;
+    float maxTime = GConstants.LEVEL_TIME_SECONDS;
     if (timeLeft > maxTime * 0.75f) return 3;
     else if (timeLeft > maxTime * 0.25f) return 2;
     else return 1;

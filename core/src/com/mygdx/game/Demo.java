@@ -49,7 +49,7 @@ public class Demo extends Game {
     assetManager.load("sound/bubble_fall.mp3", Sound.class);
     assetManager.load("font/arial_uni_30.fnt", BitmapFont.class);
     assetManager.finishLoading();
-    winPopup = new UiPopup(assetManager,0);
+//    winPopup = new UiPopup(assetManager,0);
 
     TextureAtlas animals = assetManager.get("textureAtlas/ani/ani0.atlas");
     img = new Image(new TextureRegion(animals.findRegion("cucxilau1"))) {
