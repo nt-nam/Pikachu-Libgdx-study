@@ -1,0 +1,139 @@
+package com.mygame.pikachu.utils;
+
+import static com.mygame.pikachu.utils.GConstants.*;
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
+import com.mygame.pikachu.model.Player;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class SoundManager {
+  private Music backgroundMusic;
+  private Map<String, Sound> soundEffects;
+  private float musicVolume;
+  private float soundVolume;
+  private boolean musicMuted;
+  private boolean soundMuted;
+
+  public SoundManager() {
+    this.soundEffects = new HashMap<>();
+    this.musicVolume = MUSIC_VOLUME_DEFAULT;
+    this.soundVolume = SOUND_VOLUME_DEFAULT;
+    this.musicMuted = false;
+    this.soundMuted = false;
+    loadSounds();
+  }
+
+  // Tải âm thanh
+  private void loadSounds() {
+    backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal(MUSIC_PATH));
+    backgroundMusic.setLooping(true);
+    backgroundMusic.setVolume(musicMuted ? 0 : musicVolume);
+
+    soundEffects.put("match", Gdx.audio.newSound(Gdx.files.internal(MATCH_SOUND_PATH)));
+    soundEffects.put("shuffle", Gdx.audio.newSound(Gdx.files.internal(SHUFFLE_SOUND_PATH)));
+    soundEffects.put("click", Gdx.audio.newSound(Gdx.files.internal(CLICK_SOUND_PATH)));
+  }
+
+  // Khởi tạo trạng thái từ Player
+  public void initFromPlayer(Player player) {
+    this.musicMuted = player.isMusicMuted();
+    this.soundMuted = player.isSoundMuted();
+    updateMusicState();
+  }
+
+  // Phát nhạc nền
+  public void playBackgroundMusic() {
+    if (!musicMuted && !backgroundMusic.isPlaying()) {
+      backgroundMusic.play();
+    }
+  }
+
+  // Dừng nhạc nền
+  public void stopBackgroundMusic() {
+    if (backgroundMusic.isPlaying()) {
+      backgroundMusic.stop();
+    }
+  }
+
+  // Phát hiệu ứng âm thanh
+  public void playSound(String soundName) {
+    if (!soundMuted) {
+      Sound sound = soundEffects.get(soundName);
+      if (sound != null) {
+        sound.play(soundVolume);
+      } else {
+        Gdx.app.log("SoundManager", "Sound not found: " + soundName);
+      }
+    }
+  }
+
+  // Điều chỉnh âm lượng nhạc nền
+  public void setMusicVolume(float volume) {
+    if (volume >= 0f && volume <= 1f) {
+      this.musicVolume = volume;
+      if (!musicMuted) {
+        backgroundMusic.setVolume(volume);
+      }
+    }
+  }
+
+  // Điều chỉnh âm lượng hiệu ứng âm thanh
+  public void setSoundVolume(float volume) {
+    if (volume >= 0f && volume <= 1f) {
+      this.soundVolume = volume;
+    }
+  }
+
+  // Bật/tắt nhạc nền
+  public void setMusicMuted(boolean muted) {
+    this.musicMuted = muted;
+    updateMusicState();
+  }
+
+  // Cập nhật trạng thái nhạc
+  private void updateMusicState() {
+    backgroundMusic.setVolume(musicMuted ? 0 : musicVolume);
+    if (musicMuted) {
+      stopBackgroundMusic();
+    } else {
+      playBackgroundMusic();
+    }
+  }
+
+  // Bật/tắt hiệu ứng âm thanh
+  public void setSoundMuted(boolean muted) {
+    this.soundMuted = muted;
+  }
+
+  // Getter
+  public float getMusicVolume() {
+    return musicVolume;
+  }
+
+  public float getSoundVolume() {
+    return soundVolume;
+  }
+
+  public boolean isMusicMuted() {
+    return musicMuted;
+  }
+
+  public boolean isSoundMuted() {
+    return soundMuted;
+  }
+
+  // Giải phóng tài nguyên
+  public void dispose() {
+    if (backgroundMusic != null) {
+      backgroundMusic.dispose();
+    }
+    for (Sound sound : soundEffects.values()) {
+      sound.dispose();
+    }
+    soundEffects.clear();
+  }
+}
