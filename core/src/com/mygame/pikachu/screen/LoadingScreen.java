@@ -16,7 +16,6 @@ public class LoadingScreen implements Screen {
 
   @Override
   public void show() {
-//    game.getStage().addActor(uiPopup);
     game.setScreen(game.getHomeScreen());
   }
 
@@ -24,7 +23,7 @@ public class LoadingScreen implements Screen {
   public void render(float delta) {
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
     Gdx.gl.glClearColor(0.4f, 0.6f, 0.4f, 1);
-    game.getStage().draw();
+//    game.getStage().draw();
   }
 
   @Override

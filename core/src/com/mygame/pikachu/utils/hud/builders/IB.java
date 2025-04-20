@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.mygame.pikachu.screen.UiPopup;
+import com.mygame.pikachu.view.ui.BaseUI;
 
 @SuppressWarnings("unused")
 public class IB extends AbstractActorBuilder<Image> {
@@ -65,7 +65,7 @@ public class IB extends AbstractActorBuilder<Image> {
     else if (ninePatch != null) {
       res = new Image(ninePatch);
     } else if (solidColor != null) {
-      res = UiPopup.createOverlay(w, h, alpha, solidColor);
+      res = BaseUI.createOverlayImage(w, h, alpha, solidColor);
     } else if (texture != null) {
       res = new Image(texture);
     } else if (textureRegion != null) {

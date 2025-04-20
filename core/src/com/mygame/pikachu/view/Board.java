@@ -1,13 +1,14 @@
 package com.mygame.pikachu.view;
 
 import static com.badlogic.gdx.math.MathUtils.random;
-import static com.mygame.pikachu.utils.GConstants.DEFAULT_ATLAS_PLAY;
-import static com.mygame.pikachu.utils.GConstants.TILE_SIZE;
+import static com.mygame.pikachu.utils.GConstants.*;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
@@ -24,6 +25,7 @@ import com.mygame.pikachu.utils.hud.builders.IB;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class Board extends Group {
@@ -40,13 +42,15 @@ public class Board extends Group {
 
   public Board() {
     pairAni = GConstants.ANIMAL_TYPES;
+    debug();
   }
 
   public void setNew(Level lv) {
     System.out.println("[Board]: set new board");
     clear();
-    ROWS = lv.getRows();
-    COLS = lv.getCols();
+    boolean f = !(GMain.stage().getWidth() > GMain.stage().getHeight());
+    ROWS = f ? lv.getRows() : lv.getCols();
+    COLS = f ? lv.getCols() : lv.getRows();
     pairAni = lv.getPairs();
     matchedPairs = 0;
     totalPairs = (ROWS * COLS) / 2;
@@ -73,14 +77,10 @@ public class Board extends Group {
     }
 
     Collections.shuffle(tileTypes, random);
-    TextureRegion cxl = GMain.getAssetHelper().getTextureRegion(GConstants.DEFAULT_ATLAS_ANIMALS, "cucxilau1");
     int index = 0;
     for (int row = 0; row < ROWS; row++) {
-      for (int col = 0; col < COLS; col++) {
-//        TextureRegion ani = GMain.getAssetHelper().getTextureRegion(GConstants.DEFAULT_ATLAS_ANIMAL,tileTypes.get(index)+"");
-//        TextureRegion ani = new TextureRegion(animalAtlas.findRegion("" + tileTypes.get(index)));
-        TextureRegion ani = new TextureRegion(new Texture("atlas/animals/" + tileTypes.get(index) + ".png"));
-        animals[row][col] = new Animal(ani, cxl, tileTypes.get(index), row, col, GConstants.TILE_SIZE);
+      for (int col = COLS - 1; col >= 0; col--) {
+        animals[row][col] = new Animal(tileTypes.get(index), row, col, GConstants.TILE_SIZE);
         addAnimalListener(animals[row][col]);
         index++;
         addActor(animals[row][col]);
@@ -90,27 +90,49 @@ public class Board extends Group {
 
   private void createLineSelect() {
 
-    lineSelect = IB.New().texture(new Texture("atlas/animals/selected.png")).size(animals[0][0].getWidth(), animals[0][0].getHeight()).scale(1.2f).build();
+    lineSelect = IB.New().texture(new Texture("atlas/animals/selected.png")).size(animals[0][0].getWidth(), animals[0][0].getHeight()).build();
     lineSelect.addListener(new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
-        lineSelect.setVisible(false);
+        lineSelect.remove();
         animalSelect = null;
       }
     });
-    lineSelect.setVisible(false);
-    addActor(lineSelect);
 
   }
 
-  private void setBorder(Animal animal) {
+  private void setPosSelect(Animal animal) {
     animalSelect = animal;
     if (animalSelect != null) {
       lineSelect.setPosition(animalSelect.getX(), animalSelect.getY());
-      lineSelect.setVisible(true);
+      addActor(lineSelect);
       return;
     }
-    lineSelect.setVisible(false);
+    lineSelect.remove();
+  }
+
+  public void softAni() {
+    getChildren().sort(new Comparator<Actor>() {
+      @Override
+      public int compare(Actor o1, Actor o2) {
+        if (o1.getX() < o2.getX() && o1.getY() < o2.getY()) {
+          return 1;
+        } else if (o1.getX() > o2.getX() && o1.getY() > o2.getY()) {
+          return -1;
+        }
+        if (o1.getX() < o2.getX()) {
+          return -1;
+        } else if (o1.getX() > o2.getX()) {
+          return 1;
+        }
+        if (o1.getY() > o2.getY()) {
+          return -1;
+        } else if (o1.getY() < o2.getY()) {
+          return 1;
+        }
+        return 0;
+      }
+    });
   }
 
   private void addAnimalListener(Animal animal) {
@@ -120,24 +142,24 @@ public class Board extends Group {
       public void clicked(InputEvent event, float x, float y) {
         System.out.println(animal.getGridX() + "  " + animal.getGridY());
         if (animalSelect == animals[animal.getGridX()][animal.getGridY()]) {
-          setBorder(null);
+          setPosSelect(null);
           return;
         }
 
         if (animalSelect == null) {
-          setBorder(animals[animal.getGridX()][animal.getGridY()]);
+          setPosSelect(animals[animal.getGridX()][animal.getGridY()]);
           return;
         }
 
         List<int[]> path = pathFinder.findPath(animalSelect, animals[animal.getGridX()][animal.getGridY()]);
         if (path != null) {
           createLineMatch(path);
-          setVisibleAnimal(animalSelect, 0.2f);
-          setVisibleAnimal(animals[animal.getGridX()][animal.getGridY()], 0.2f);
-          setBorder(null);
+          setVisibleAnimal(animalSelect, 0.1f);
+          setVisibleAnimal(animals[animal.getGridX()][animal.getGridY()], 0.1f);
+          setPosSelect(null);
           checkCanMatch();
         } else {
-          setBorder(animals[animal.getGridX()][animal.getGridY()]);
+          setPosSelect(animals[animal.getGridX()][animal.getGridY()]);
         }
 
         checkCanMatch();
@@ -191,22 +213,31 @@ public class Board extends Group {
             (Math.abs(pair1[0] - pair2[0]) == 1);
         GAssetsManager.setTextureAtlas(DEFAULT_ATLAS_PLAY);
         Image lineMath = null;
-        float x = (Math.min(pair1[0], pair2[0]) + 0.5f) * TILE_SIZE ;
-        float y = (Math.min(pair1[1], pair2[1]) + 0.5f) * TILE_SIZE ;
-
+        float x = (Math.min(pair1[0], pair2[0]) + 0.5f) * TILE_SIZE;
+        float y = (Math.min(pair1[1], pair2[1]) + 0.5f) * TILE_SIZE;
+        GAssetsManager.setTextureAtlas(DEFAULT_ATLAS_NEWPIKA);
+        Image star6 = IB.New().drawable("star6").pos(x,y).parent(this).scale(0.3f).debug(true).build();
+        star6.addAction(
+            Actions.sequence(
+                Actions.moveTo(0,0,1f),
+                Actions.fadeOut(1f),
+                Actions.removeActor()
+            )
+        );
         if (isVertical) {
-          lineMath = IB.New().drawable("laser1").size(25,TILE_SIZE).pos(x, y+12).build();
+          lineMath = IB.New().drawable("laser1").size(25, TILE_SIZE).pos(x, y + 12).build();
         }
         if (isHorizontal) {
-          lineMath = IB.New().drawable("laser1_2").size(TILE_SIZE,25).pos(x+12, y).build();
+          lineMath = IB.New().drawable("laser1_2").size(TILE_SIZE, 25).pos(x + 12, y).build();
         }
+
 
         if (isVertical || isHorizontal) {
           addActor(lineMath);
           Image finalLineMath = lineMath;
           lineMath.addAction(
               Actions.sequence(
-                  Actions.fadeOut(0.4f),
+                  Actions.fadeOut(0.3f),
                   Actions.run(() -> {
                     finalLineMath.remove();
                     removeActor(finalLineMath);
@@ -214,6 +245,7 @@ public class Board extends Group {
               )
           );
         }
+
       }
     }
     Timer.schedule(new Timer.Task() {
@@ -221,7 +253,7 @@ public class Board extends Group {
       public void run() {
         moveWithLevel();
       }
-    }, 0.53f);
+    }, 0.23f);
 
   }
 
@@ -261,17 +293,26 @@ public class Board extends Group {
       }
     }
     pathFinder.setBoard(this);
+    softAni();
   }
 
   public void showAnimationHint() {
     int[] grid = findHint();
-
+    Color color = Color.RED;
     animals[grid[0]][grid[1]].addAction(Actions.sequence(
-        Actions.color(Color.YELLOW, 0.5f),
+        Actions.color(color, 0.5f),
+        Actions.color(Color.WHITE, 0.5f),
+        Actions.color(color, 0.5f),
+        Actions.color(Color.WHITE, 0.5f),
+        Actions.color(color, 0.5f),
         Actions.color(Color.WHITE, 0.5f)
     ));
     animals[grid[2]][grid[3]].addAction(Actions.sequence(
-        Actions.color(Color.YELLOW, 0.5f),
+        Actions.color(color, 0.5f),
+        Actions.color(Color.WHITE, 0.5f),
+        Actions.color(color, 0.5f),
+        Actions.color(Color.WHITE, 0.5f),
+        Actions.color(color, 0.5f),
         Actions.color(Color.WHITE, 0.5f)
     ));
 
@@ -334,7 +375,12 @@ public class Board extends Group {
       default:
 
     }
-
+    Timer.schedule(new Timer.Task() {
+      @Override
+      public void run() {
+        softAni();
+      }
+    }, 0f, 0.001f);
   }
 
   public void moveTop() {
@@ -435,11 +481,42 @@ public class Board extends Group {
         System.out.print((animals[i][j].getId()) + "-");
       }
     }
+    for (Actor actor : this.getStage().getActors()) {
+      if (actor instanceof Animal) {
+        actor.setZIndex(((Animal) actor).getGridX() + ((Animal) actor).getGridY() + 1);
+      }
+    }
+    softAni();
+
   }
 
   public void updateLineSelect() {
     if (animalSelect != null) {
+//      if(animalSelect.isMoving())
       lineSelect.setPosition(animalSelect.getX(), animalSelect.getY());
     }
+  }
+
+  public boolean levelCompleted() {
+    return matchedPairs == totalPairs;
+  }
+
+  @Override
+  public void act(float delta) {
+    super.act(delta);
+    updateLineSelect();
+  }
+
+  @Override
+  public void draw(Batch batch, float parentAlpha) {
+    super.draw(batch, parentAlpha);
+  }
+
+  public static Vector2 absPos(Actor c, float x, float y, int align) {
+    return c.localToStageCoordinates(new Vector2(c.getX(align) + x - c.getX(), c.getY(align) + y - c.getY()));
+  }
+
+  public static Vector2 absPos(Actor c, int align) {
+    return c.localToStageCoordinates(new Vector2(c.getX(align) - c.getX(), c.getY(align) - c.getY()));
   }
 }

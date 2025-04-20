@@ -15,7 +15,7 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.mygame.pikachu.screen.UiPopup;
+import com.mygame.pikachu.view.ui.PopupUI;
 
 public class Demo extends Game {
   AssetManager assetManager;
@@ -24,7 +24,7 @@ public class Demo extends Game {
   Stage stage;
   Image img;
 
-  UiPopup winPopup;
+  PopupUI winPopup;
 
   @Override
   public void create() {
@@ -61,9 +61,8 @@ public class Demo extends Game {
       }
     };
     img.setOrigin(Align.center);
-    winPopup.scaleBy(0.5f,0.5f);
-//    winPopup.setPosition(worldWidth/2 - winPopup.getCenterX(),worldHeight/2 - winPopup.getCenterY());
-    stage.addActor(winPopup);
+//    winPopup.scaleBy(0.5f,0.5f);
+//    stage.addActor(winPopup);
 
   }
 

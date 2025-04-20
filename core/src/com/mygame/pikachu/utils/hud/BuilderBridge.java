@@ -25,7 +25,7 @@ public class BuilderBridge implements BuilderAdapter {
 
   public BuilderBridge(HUD hud) {
     this.hud = hud;
-    this.debug = false;
+    this.debug = true;
     Pixmap tex = new Pixmap(40, 40, Pixmap.Format.RGB888);
     tex.setColor(Color.BROWN);
     tex.fill();

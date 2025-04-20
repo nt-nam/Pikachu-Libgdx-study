@@ -3,13 +3,8 @@ package com.mygame.pikachu.screen;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.mygame.pikachu.GMain;
@@ -17,25 +12,27 @@ import com.mygame.pikachu.data.GAssetsManager;
 import com.mygame.pikachu.data.LevelManager;
 import com.mygame.pikachu.model.Level;
 import com.mygame.pikachu.model.Player;
-import com.mygame.pikachu.utils.ButtonFactory;
 import com.mygame.pikachu.utils.GConstants;
 import com.mygame.pikachu.utils.hud.AL;
+import com.mygame.pikachu.utils.hud.Button;
+import com.mygame.pikachu.utils.hud.MapGroup;
 import com.mygame.pikachu.utils.hud.builders.BB;
 import com.mygame.pikachu.utils.hud.builders.IB;
+import com.mygame.pikachu.utils.hud.builders.MGB;
+import com.mygame.pikachu.utils.hud.external.EventHandler;
 import com.mygame.pikachu.view.Board;
 import com.mygame.pikachu.view.HUD;
+import com.mygame.pikachu.view.ui.PopupUI;
 
-public class PlayScreen implements Screen {
-  private final GMain game;
-  private static Stage stage;
+public class PlayScreen implements Screen, EventHandler {
   private Player player;
   private Board board;
   private HUD hud;
+  private MapGroup playMG;
   private LevelManager levelManager;
   private int level;
 
-  private UiPopup currentPopup;
-  private UiPopup pausePopup;
+  private PopupUI popup;
 
   private static int ROWS;
   private static int COLUMNS;
@@ -48,19 +45,28 @@ public class PlayScreen implements Screen {
   private static final int TIME_BONUS_MULTIPLIER = 10;
 
   public PlayScreen(GMain game) {
-    this.game = game;
-    stage = new Stage(game.getStage().getViewport());
     player = game.getPlayer();
     this.level = 2;
     levelManager = new LevelManager();
     board = new Board();
 
-    pausePopup = new UiPopup(game);
-    pausePopup.setVisible(false);
-    hud = new HUD(game, stage, board);
+    playMG = MGB.New().size(GMain.stage().getWidth(), GMain.stage().getHeight()).pos(0, 0, AL.tr).parent(GMain.hud()).build();
+    init();
+    popup = new PopupUI(game);
+    hud = new HUD(game, playMG, board);
+    playMG.debug();
 
-    centerX = stage.getWidth() / 2;
-    centerY = stage.getHeight() / 2;
+    centerX = playMG.getWidth() / 2;
+    centerY = playMG.getHeight() / 2;
+    addHandle();
+  }
+
+  private void addHandle() {
+
+  }
+  private void init(){
+    GAssetsManager.setTextureAtlas(GConstants.DEFAULT_ATLAS_NEWPIKA);
+    IB.New().drawable("bg").pos(0,0,AL.c).scale(0.82f).parent(playMG).build();
   }
 
   public void showBoard() {
@@ -70,34 +76,23 @@ public class PlayScreen implements Screen {
     hud.setTime(levelData.getTime());
     board.setPosition(centerX - board.getWidth() / 2, centerY - board.getHeight() / 2);
     board.setOrigin(board.getWidth() / 2, board.getHeight() / 2);
-//    board.setScale(centerX / board.getWidth() * 1.2f);
     board.setScale(centerY / board.getHeight() * 1.2f);
     board.getPathFinder().setBoard(board);
-    stage.addActor(board);
+    playMG.addActor(board);
 
-    Gdx.input.setInputProcessor(stage);
   }
 
   private void createBtn() {
     System.out.println("[PlayScreen]: create btn");
-
-    Image btnSetting = IB.New().textureRegion(new TextureRegion(new Texture("atlas/play/btn_pause.png"))).scale(2).pos(100,100).build();
-    btnSetting.addListener(new ClickListener() {
+    Button pause = BB.New().bg("btn_pause").transform(true).pos(0,0,AL.tr).scale(0.5f).parent(playMG).build();
+    pause.addListener(new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
-        if(!pausePopup.isPause()){
-
-          pausePopup.setUiPause();
-          pausePopup.setVisible(true);
-          pausePopup.setOrigin(Align.center);
-          pausePopup.setPosition(stage.getWidth()/2,stage.getHeight()/2,Align.center);
-//          hud.setStop(true);
-        }
-        stage.addActor(pausePopup);
-        System.out.println("[PlayScreen]: click btnSetting");
+//        if (!pausePopup.isPause()) {
+        System.out.println("[PlayScreen]: click pause");
+        popup.showPauseUI();
       }
     });
-    stage.addActor(btnSetting);
   }
 
   @Override
@@ -105,17 +100,14 @@ public class PlayScreen implements Screen {
     createBtn();
     hud.resetTime();
     showBoard();
-//    hud.setStop(false);
   }
 
   @Override
   public void render(float delta) {
-    hud.setStop(pausePopup.isVisible());
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
     Gdx.gl.glClearColor(0.4f, 0.6f, 0.4f, 1);
     hud.update(delta);
-    stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
-    stage.draw();
+    playMG.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
     board.updateLineSelect();
     if (hud.isTimeUp()) {
       System.out.println("[PlayScreen]: Time end.");
@@ -125,7 +117,7 @@ public class PlayScreen implements Screen {
 
   @Override
   public void resize(int width, int height) {
-    stage.getViewport().update(width, height, true);
+//    stage.getViewport().update(width, height, true);
   }
 
   @Override
@@ -143,7 +135,7 @@ public class PlayScreen implements Screen {
   @Override
   public void dispose() {
     clearPopup();
-    stage.dispose();
+    playMG.clear();
   }
 
   public void setLevel(int level) {
@@ -162,13 +154,13 @@ public class PlayScreen implements Screen {
     int currentScore = player.getScore();
     player.setScore(currentScore + timeBonus);
 
-    if(currentPopup == null){
-      currentPopup = new UiPopup(game);
-      currentPopup.setPosition((stage.getWidth() - currentPopup.getWidth() * 0.8f) * 0.5f, (stage.getHeight() - currentPopup.getHeight() * 0.8f) * 0.5f);
-    }
-    currentPopup.setUiWin(level, 3);
-    currentPopup.setLabelWin(player.getScore(), (int) timeLeft);
-    stage.addActor(currentPopup);
+//    if (currentPopup == null) {
+//      currentPopup = new UiPopup(game);
+//      currentPopup.setPosition((playMG.getWidth() - currentPopup.getWidth() * 0.8f) * 0.5f, (playMG.getHeight() - currentPopup.getHeight() * 0.8f) * 0.5f);
+//    }
+//    currentPopup.setUiWin(level, 3);
+//    currentPopup.setLabelWin(player.getScore(), (int) timeLeft);
+//    playMG.addActor(currentPopup);
 
 //    currentPopup.addAction(Actions.sequence(
 //        Actions.delay(3f),
@@ -186,21 +178,21 @@ public class PlayScreen implements Screen {
   }
 
   private void handleTimeUp() {
-    if (currentPopup == null) {
-      currentPopup = new UiPopup(game);
-      stage.addActor(currentPopup);
-//      currentPopup.addAction(Actions.sequence(
-//          Actions.delay(3f),
-//          Actions.run(() -> {
-//            game.setScreen(game.getHomeScreen());
-////            clearPopup();
-//          })
-//      ));
-    }
-    currentPopup.setUiLose(board);
-    currentPopup.setOrigin(Align.center);
-    currentPopup.setPosition(stage.getWidth()/2,stage.getHeight()/2,Align.center);
-    currentPopup.setVisible(true);
+//    if (currentPopup == null) {
+//      currentPopup = new UiPopup(game);
+//      playMG.addActor(currentPopup);
+////      currentPopup.addAction(Actions.sequence(
+////          Actions.delay(3f),
+////          Actions.run(() -> {
+////            game.setScreen(game.getHomeScreen());
+//////            clearPopup();
+////          })
+////      ));
+//    }
+//    currentPopup.setUiLose(board);
+//    currentPopup.setOrigin(Align.center);
+//    currentPopup.setPosition(playMG.getWidth() / 2, playMG.getHeight() / 2, Align.center);
+//    currentPopup.setVisible(true);
   }
 
   private int calculateStars(float timeLeft) {
@@ -211,17 +203,17 @@ public class PlayScreen implements Screen {
   }
 
   private void clearPopup() {
-    if (currentPopup != null) {
-      currentPopup.remove();
-      currentPopup = null;
-    }
-    if (pausePopup != null) {
-      pausePopup.remove();
-      pausePopup = null;
+    if (popup != null) {
+      popup = null;
     }
   }
 
   public float getTimeLeft() {
     return hud != null ? hud.getTimeLeft() : 0;
+  }
+
+  @Override
+  public void handleEvent(Actor actor, String action, int intParam, Object objParam) {
+
   }
 }

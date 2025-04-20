@@ -4,8 +4,12 @@ import static com.mygame.pikachu.utils.GConstants.*;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygame.pikachu.data.GAssetsManager;
@@ -22,18 +26,19 @@ import com.mygame.pikachu.utils.hud.builders.AbstractActorBuilder;
 
 
 public class GMain extends Game {
-  Stage stage;
-  GAssetsManager assetManager;
-  OrthographicCamera camera;
-  Viewport viewport;
-  Player player;
-  SkinManager skinManager;
-  SoundManager soundManager;
+  private Stage stage;
+  private GAssetsManager assetManager;
+  private OrthographicCamera camera;
+  private Viewport viewport;
+  private Player player;
+  private SkinManager skinManager;
+  private SoundManager soundManager;
 
-  LoadingScreen loadingScreen;
-  HomeScreen homeScreen;
-  PlayScreen playScreen;
-  SettingScreen settingScreen;
+  private LoadingScreen loadingScreen;
+  private HomeScreen homeScreen;
+  private PlayScreen playScreen;
+  private SettingScreen settingScreen;
+  private HUD hud;
 
 
   @Override
@@ -43,8 +48,11 @@ public class GMain extends Game {
     float screenWidth = Gdx.graphics.getWidth();
     float screenHeight = Gdx.graphics.getHeight();
 
-    float worldHeight = 720;
-    float worldWidth = worldHeight * screenWidth / screenHeight;
+    float worldWidth = 720;
+    float worldHeight = worldWidth * screenHeight / screenWidth;
+
+//    float worldHeight = 720;
+//    float worldWidth = worldHeight * screenWidth / screenHeight;
 
     camera = new OrthographicCamera(worldWidth, worldHeight);
     camera.setToOrtho(false);
@@ -52,10 +60,12 @@ public class GMain extends Game {
     viewport = new FitViewport(worldWidth, worldHeight, camera);
     viewport.apply();
 
-    HUD hud = new HUD(screenHeight, screenWidth);
+    hud = new HUD(worldWidth,worldHeight);
     AbstractActorBuilder.adapter = new BuilderBridge(hud);
     stage = new Stage(viewport);
-    Gdx.input.setInputProcessor(stage);
+    stage.addActor(hud);
+    InputMultiplexer ip = new InputMultiplexer(stage);
+    Gdx.input.setInputProcessor(ip);
     loadAsset();
 
     getPlayer();
@@ -89,7 +99,7 @@ public class GMain extends Game {
 
   private void initHomeScreen() {
     if (homeScreen == null) {
-      homeScreen = new HomeScreen(this, viewport);
+      homeScreen = new HomeScreen(this);
     }
   }
 
@@ -107,15 +117,24 @@ public class GMain extends Game {
     return ((GMain) Gdx.app.getApplicationListener()).assetManager;
   }
 
-  public Stage getStage() {
-    return stage;
+  public static HUD hud(){
+    return ((GMain) Gdx.app.getApplicationListener()).hud;
+  }
+
+  public static Player player(){
+    return ((GMain) Gdx.app.getApplicationListener()).player;
+  }
+
+  public static Stage stage() {
+    return ((GMain) Gdx.app.getApplicationListener()).stage;
   }
 
 
   private void initScreen() {
-    loadingScreen = new LoadingScreen(this, viewport);
-    settingScreen = new SettingScreen(this);
-    setScreen(loadingScreen);
+//    loadingScreen = new LoadingScreen(this, viewport);
+//    settingScreen = new SettingScreen(this);
+    initHomeScreen();
+    setScreen(homeScreen);
   }
 
   private void loadAsset() {
@@ -126,14 +145,23 @@ public class GMain extends Game {
     assetManager.loadTextureAtlas(DEFAULT_ATLAS_LEADER_BOARD);
     assetManager.loadTextureAtlas(DEFAULT_ATLAS_ANIMALS);
     assetManager.loadTextureAtlas(DEFAULT_ATLAS_COMMON);
+    assetManager.loadTextureAtlas(DEFAULT_ATLAS_BG);
+    assetManager.loadTextureAtlas(DEFAULT_ATLAS_MENU);
     assetManager.loadTextureAtlas(DEFAULT_ATLAS_CROSS);
     assetManager.loadTextureAtlas(DEFAULT_ATLAS_PARTICLE);
     assetManager.loadTextureAtlas(DEFAULT_ATLAS_PLAY);
+    assetManager.loadTextureAtlas(DEFAULT_ATLAS_NEWPIKA);
     assetManager.loadBitmapFont(BMF + ".fnt");
     assetManager.loadSound("sound/bubble_fall.mp3");
     assetManager.finishLoading();
   }
 
+  @Override
+  public void resize(int width, int height) {
+    super.resize(width, height);
+
+    stage.getViewport().update(width, height, true);
+  }
 
   public Player getPlayer() {
     if (player == null) {
@@ -157,5 +185,13 @@ public class GMain extends Game {
       soundManager.initFromPlayer(player);
     }
     return soundManager;
+  }
+
+  @Override
+  public void render() {
+    Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+    Gdx.gl.glClearColor(0.4f, 0.5f, 0.4f, 1);
+    stage.draw();
+    stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
   }
 }

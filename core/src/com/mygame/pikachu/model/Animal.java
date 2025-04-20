@@ -1,5 +1,7 @@
 package com.mygame.pikachu.model;
 
+import static com.mygame.pikachu.utils.GConstants.*;
+
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -18,19 +20,20 @@ public class Animal extends Actor {
   private final int distance;
   private boolean isSelected;
   private int gridX, gridY;
+  private boolean isMoving;
 
-  public Animal(TextureRegion region,TextureRegion cxl, int id, int gridX, int gridY, int distance) {
+  public Animal(int id, int gridX, int gridY, int distance) {
     this.id = id;
     this.gridX = gridX;
     this.gridY = gridY;
     this.isSelected = false;
     this.distance = distance;
-    this.region = region;
-    this.cxl =cxl;
 
-    setBounds(gridX * distance, gridY * distance, distance - 5, distance - 5);
+    cxl = GMain.getAssetHelper().getTextureRegion(DEFAULT_ATLAS_NEWPIKA, "cxl2");
+    region = new TextureRegion(new Texture("atlas/animals/" + id + ".png"));
+
+    setBounds(gridX * distance, gridY * distance, distance, distance);
     setOrigin(getWidth() / 2, getHeight() / 2);
-
     addClickListener();
   }
 
@@ -61,13 +64,27 @@ public class Animal extends Actor {
 
   @Override
   public void draw(Batch batch, float parentAlpha) {
-
     batch.setColor(color.r, color.g, color.b, color.a * parentAlpha);
     batch.draw(cxl, getX(), getY(), getOriginX(), getOriginY(),
-        getWidth(), getHeight(), getScaleX()*1.1f, getScaleY()*1.1f, getRotation());
+        getWidth(), getHeight(), getScaleX() , getScaleY(), getRotation());
     batch.draw(region, getX(), getY(), getOriginX(), getOriginY(),
-        getWidth(), getHeight(), getScaleX(), getScaleY(), getRotation());
+        getWidth(), getHeight(), getScaleX() * 0.8f, getScaleY() * 0.8f, getRotation());
+  }
 
+  @Override
+  public void act(float delta) {
+    super.act(delta);
+    if (hasActions()) {
+      if (!isMoving) {
+        isMoving = true;
+        System.out.println("Actor đang di chuyển!");
+      }
+    } else {
+      if (isMoving) {
+        isMoving = false;
+        System.out.println("Actor đã dừng di chuyển!");
+      }
+    }
   }
 
   public boolean getSelected() {
@@ -101,5 +118,7 @@ public class Animal extends Actor {
   public void setGridY(int gridY) {
     this.gridY = gridY;
   }
+
+  public boolean isMoving(){return isMoving;}
 
 }

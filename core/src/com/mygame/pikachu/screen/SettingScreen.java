@@ -22,7 +22,7 @@ public class SettingScreen implements Screen {
 
   public SettingScreen(GMain game) {
     this.game = game;
-    this.viewport = game.getStage().getViewport();
+    this.viewport = GMain.stage().getViewport();
     this.stage = new Stage(viewport);
     Gdx.input.setInputProcessor(stage);
     createUI();

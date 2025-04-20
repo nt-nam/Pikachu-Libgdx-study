@@ -9,8 +9,6 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
@@ -21,119 +19,82 @@ import com.badlogic.gdx.utils.Align;
 import com.mygame.pikachu.GMain;
 import com.mygame.pikachu.data.GAssetsManager;
 import com.mygame.pikachu.model.Player;
-import com.mygame.pikachu.utils.ButtonFactory;
 import com.mygame.pikachu.utils.GConstants;
-import com.mygame.pikachu.utils.SkinManager;
-import com.mygame.pikachu.utils.hud.Button;
+import com.mygame.pikachu.utils.hud.AL;
+import com.mygame.pikachu.utils.hud.MapGroup;
 import com.mygame.pikachu.utils.hud.builders.BB;
+import com.mygame.pikachu.utils.hud.builders.MGB;
 
 public class HUD {
   private GMain game;
-  private Stage stage;
+  private MapGroup playMG;
   private SpriteBatch batch;
   private Player player;
-  private SkinManager skinManager;
-  private ButtonFactory buttonFactory; // Để tạo nút
-  private Board board;                 // Tham chiếu đến Board
+  private Board board;
   private BitmapFont font;
   private Label scoreLabel;
   private Label coinsLabel;
   private Label levelLabel;
-  private Label hintsLabel;
-  private Label shufflesLabel;
-  private Label undosLabel;
   private Label timeLabel;
   private ProgressBar timeline;
   private float timeLeft;
   private float maxTime;
-  private ImageButton settingButton;
-  private ImageButton hintButton;
-  private ImageButton shuffleButton;
-  private ImageButton undoButton;
-  private float centerW;
-  private float centerH;
+  private final float centerW;
+  private final float centerH;
   private boolean stop;
 
-  public HUD(GMain game, Stage stagePlayScreen, Board board) {
+  public HUD(GMain game, MapGroup playMG, Board board) {
     this.game = game;
     this.player = game.getPlayer();
-    this.skinManager = game.getSkinManager();
-    this.buttonFactory = game.getHomeScreen().getButtonFactory();
     this.board = board;
     this.batch = new SpriteBatch();
-    this.stage = stagePlayScreen;
+    this.playMG = playMG;
     this.font = new BitmapFont(Gdx.files.internal("font/arial_uni_30.fnt"));
     this.timeLeft = GConstants.LEVEL_TIME_SECONDS;
     this.maxTime = GConstants.LEVEL_TIME_SECONDS;
-    this.centerW = stage.getWidth()*0.5f;
-    this.centerH = stage.getHeight()*0.5f;
+    this.centerW = playMG.getWidth() * 0.5f;
+    this.centerH = playMG.getHeight() * 0.5f;
 
     createButton();
     createLabel();
 
-    stage.addActor(scoreLabel);
-    stage.addActor(coinsLabel);
-    stage.addActor(hintsLabel);
-    stage.addActor(shufflesLabel);
-    stage.addActor(undosLabel);
-    stage.addActor(timeLabel);
-    stage.addActor(timeline);
-
+    playMG.addActor(scoreLabel);
+    playMG.addActor(coinsLabel);
+    playMG.addActor(timeLabel);
+    playMG.addActor(timeline);
   }
 
   private void createLabel() {
     Label.LabelStyle labelStyle = new Label.LabelStyle(font, Color.WHITE);
 
-    // Bên trái: Score, Coins, Time
     scoreLabel = new Label("Score: " + player.getScore(), labelStyle);
-    scoreLabel.setPosition(10, centerH*2 - 30);
+    scoreLabel.setPosition(10, centerH * 2 - 30);
 
     coinsLabel = new Label("Coins: " + player.getCoins(), labelStyle);
-    coinsLabel.setPosition(10, centerH*2 - 60);
+    coinsLabel.setPosition(10, centerH * 2 - 60);
 
     timeLabel = new Label("Time: " + (int) timeLeft, labelStyle);
-    timeLabel.setPosition(scoreLabel.getWidth() + 50, centerH*2 - 30);
+    timeLabel.setPosition(scoreLabel.getWidth() + 50, centerH * 2 - 30);
     timeLabel.setAlignment(Align.left);
 
-    // Giữa: Level và Timeline
     levelLabel = new Label("Level: " + player.getLevel(), labelStyle);
-    levelLabel.setPosition(centerW - 40, centerH*2 - 30);
+    levelLabel.setPosition(centerW - 40, centerH * 2 - 30);
     levelLabel.setAlignment(Align.center);
 
     ProgressBar.ProgressBarStyle style = newStyle();
     timeline = new ProgressBar(0, 100, 1, false, style);
-    timeline.setSize(stage.getWidth() * 0.8f, 30);
-    timeline.setPosition(stage.getWidth() * 0.1f, centerH * 2 - 100);
-
-    // Bên phải: Hints, Shuffles, Undos + Nút
-    hintsLabel = new Label(player.getHints() + " ", labelStyle);
-    hintsLabel.setPosition(hintButton.getX() , hintButton.getY()-10);
-    hintsLabel.debug();
-
-    shufflesLabel = new Label(player.getShuffles()+"", labelStyle);
-    shufflesLabel.setPosition(shuffleButton.getX() , shuffleButton.getY()-10);
-
-    undosLabel = new Label("Undos: " + player.getUndos(), labelStyle);
-    undosLabel.setPosition(undoButton.getX(), undoButton.getY()-10);
+    timeline.setSize(playMG.getWidth() * 0.8f, 30);
+    timeline.setPosition(playMG.getWidth() * 0.1f, centerH * 2 - 100);
   }
 
   private void createButton() {
-    // Tạo nút
-    settingButton = buttonFactory.createButtonWood("btn_setting", new ClickListener() {
-      @Override
-      public void clicked(InputEvent event, float x, float y) {
+    GAssetsManager.setTextureAtlas(GConstants.DEFAULT_ATLAS_NEWPIKA);
 
-      }
-    });
-    settingButton.setPosition(centerW*2 - settingButton.getWidth(), centerH*2 - settingButton.getHeight());
-    GAssetsManager.setTextureAtlas(GConstants.DEFAULT_ATLAS_PLAY);
-
-    hintButton = buttonFactory.createHintButton(player, board);
-    hintButton.setSize(hintButton.getWidth(), hintButton.getHeight());
-    hintButton.setPosition(centerW - hintButton.getWidth() * 2, hintButton.getHeight() * 0.3f);
-    Button btnHint = BB.New().bg("btn_hint").pos(100,200).build();
-    stage.addActor(btnHint);
-    btnHint.addListener(new ClickListener(){
+    MapGroup hint = MGB.New().size(100,100).childs(
+        BB.New().bg("hint").transform(true).pos(0,0,AL.c).scale(0.5f)/*,
+        BB.New().bg("hint").transform(true).label(player.getHints() + "", GConstants.BMF, 0, 0, AL.c).pos(-10,-10,AL.br).scale(0.5f)*/
+    ).pos(100, 100,AL.bl).parent(playMG).build();
+    hint.addListener(new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
         if (player.useHint()) {
@@ -141,14 +102,13 @@ public class HUD {
         }
       }
     });
-//    stage.addActor(hintButton);
 
 
-    shuffleButton = buttonFactory.createShuffleButton(player, board);
-    shuffleButton.setSize(hintButton.getWidth(), hintButton.getHeight());
-    shuffleButton.setPosition(centerW - shuffleButton.getWidth() * 0.5f, shuffleButton.getHeight() * 0.3f);
-    Button btnShuffle = BB.New().bg("btn_random").pos(100,300).build();
-    btnShuffle.addListener(new ClickListener(){
+    MapGroup MGShuffle = MGB.New().size(100,100).childs(
+        BB.New().bg("shuffle").transform(true).pos(0, 0,AL.c).scale(0.5f)/*,
+        BB.New().bg("frm_count").label(player.getHints() + "", GConstants.BMF, 0, 0, AL.c).pos(-10,-10,AL.br)*/
+    ).pos(0, 100,AL.cb).parent(playMG).build();
+    MGShuffle.addListener(new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
         if (player.useShuffle()) {
@@ -157,27 +117,15 @@ public class HUD {
         }
       }
     });
-    stage.addActor(btnShuffle);
 
-    undoButton = buttonFactory.createUndoButton(player, board);
-    undoButton.setSize(hintButton.getWidth(), hintButton.getHeight());
-    undoButton.setPosition(centerW + undoButton.getWidth(), undoButton.getHeight() * 0.3f);
-//    stage.addActor(undoButton);
-
-
-    Button btnRocket = BB.New().bg("btn_rocket").pos(100,400).build();
-    btnRocket.addListener(new ClickListener(){
-      @Override
-      public void clicked(InputEvent event, float x, float y) {
-
-      }
-    });
-    stage.addActor(btnRocket);
+    MapGroup rocket = MGB.New().size(100,100).childs(
+        BB.New().bg("boom").transform(true).pos(0,0,AL.c).scale(0.5f)
+    ).pos(100, 100,AL.br).parent(playMG).build();
 
 
     TextButton.TextButtonStyle buttonStyle = createSimpleButtonStyle();
-    TextButton levelbtn = new TextButton("Level "+player.getLevel(), buttonStyle);
-    levelbtn.setPosition(stage.getWidth() / 2 - 150, stage.getHeight()- 50);
+    TextButton levelbtn = new TextButton("Level " + player.getLevel(), buttonStyle);
+    levelbtn.setPosition(playMG.getWidth() / 2 - 150, playMG.getHeight() - 50);
     levelbtn.setSize(300, 60);
     levelbtn.addListener(new ClickListener() {
       @Override
@@ -185,11 +133,11 @@ public class HUD {
         //TODO
       }
     });
-    stage.addActor(levelbtn);
+    playMG.addActor(levelbtn);
 
     TextButton btnTop = new TextButton("TOP", buttonStyle);
     btnTop.setSize(120, 60);
-    btnTop.setPosition(stage.getWidth() -btnTop.getWidth()-10, stage.getHeight()/2+ 10+btnTop.getHeight());
+    btnTop.setPosition(playMG.getWidth() - btnTop.getWidth() - 10, playMG.getHeight() / 2 + 10 + btnTop.getHeight());
     btnTop.addListener(new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
@@ -197,11 +145,11 @@ public class HUD {
         System.out.println("click Move TOP");
       }
     });
-//    stage.addActor(btnTop);
+//    playMG.addActor(btnTop);
 
     TextButton btnBottom = new TextButton("Bottom", buttonStyle);
     btnBottom.setSize(120, 60);
-    btnBottom.setPosition(stage.getWidth() -btnBottom.getWidth()-10, stage.getHeight()/2 );
+    btnBottom.setPosition(playMG.getWidth() - btnBottom.getWidth() - 10, playMG.getHeight() / 2);
     btnBottom.addListener(new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
@@ -209,11 +157,11 @@ public class HUD {
         System.out.println("click Move Bottom");
       }
     });
-//    stage.addActor(btnBottom);
+//    playMG.addActor(btnBottom);
 
     TextButton btnRight = new TextButton("Right", buttonStyle);
     btnRight.setSize(120, 60);
-    btnRight.setPosition(stage.getWidth() -10 -btnRight.getWidth(), stage.getHeight()/2-btnRight.getHeight() -10);
+    btnRight.setPosition(playMG.getWidth() - 10 - btnRight.getWidth(), playMG.getHeight() / 2 - btnRight.getHeight() - 10);
     btnRight.addListener(new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
@@ -221,11 +169,11 @@ public class HUD {
         System.out.println("click Move Right");
       }
     });
-//    stage.addActor(btnRight);
+//    playMG.addActor(btnRight);
 
     TextButton btnLeft = new TextButton("Left", buttonStyle);
     btnLeft.setSize(120, 60);
-    btnLeft.setPosition(stage.getWidth() -btnLeft.getWidth() -10, stage.getHeight()/2-2*btnLeft.getHeight()-20);
+    btnLeft.setPosition(playMG.getWidth() - btnLeft.getWidth() - 10, playMG.getHeight() / 2 - 2 * btnLeft.getHeight() - 20);
     btnLeft.addListener(new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
@@ -233,7 +181,7 @@ public class HUD {
         System.out.println("click Move Left");
       }
     });
-//    stage.addActor(btnLeft);
+//    playMG.addActor(btnLeft);
 
   }
 
@@ -242,8 +190,8 @@ public class HUD {
     ProgressBar.ProgressBarStyle style = new ProgressBar.ProgressBarStyle();
     final float barHeight = 30;
 
-    TextureRegion backgroundRegion = GMain.getAssetHelper().getTextureRegion(GConstants.DEFAULT_ATLAS_PLAY,"barframe");
-    TextureRegion knobBeforeRegion = GMain.getAssetHelper().getTextureRegion(GConstants.DEFAULT_ATLAS_PLAY,"bar");
+    TextureRegion backgroundRegion = GMain.getAssetHelper().getTextureRegion(GConstants.DEFAULT_ATLAS_PLAY, "barframe");
+    TextureRegion knobBeforeRegion = GMain.getAssetHelper().getTextureRegion(GConstants.DEFAULT_ATLAS_PLAY, "bar");
 
     Drawable customBackground = new TextureRegionDrawable(backgroundRegion) {
       @Override
@@ -274,16 +222,13 @@ public class HUD {
   }
 
   public void update(float deltaTime) {
-    if(stop)return;
+    if (stop) return;
     timeLeft -= deltaTime;
     if (timeLeft < 0) timeLeft = 0;
 
     scoreLabel.setText("Score: " + player.getScore());
     coinsLabel.setText("Coins: " + player.getCoins());
     levelLabel.setText("Level: " + player.getLevel());
-    hintsLabel.setText("Hints: " + player.getHints());
-    shufflesLabel.setText("Shuffles: " + player.getShuffles());
-    undosLabel.setText("Undos: " + player.getUndos());
     timeLabel.setText("Time: " + (int) timeLeft);
 
     if (maxTime > 0) {
@@ -291,14 +236,10 @@ public class HUD {
       timeline.setValue(timeProgress);
     }
 
-//    stage.act(deltaTime);
+//    playMG.act(deltaTime);
   }
 
-  public void render() {
-    batch.begin();
-    stage.draw();
-    batch.end();
-  }
+
 
   public boolean isTimeUp() {
     return timeLeft <= 0;
@@ -310,7 +251,6 @@ public class HUD {
 
   public void dispose() {
     batch.dispose();
-    stage.dispose();
     font.dispose();
   }
 
@@ -319,9 +259,6 @@ public class HUD {
     this.maxTime = time;
   }
 
-  public Stage getStage() {
-    return stage;
-  }
 
   public void setLevelLabel(int n) {
     levelLabel.setText("Level: " + n);
@@ -330,6 +267,7 @@ public class HUD {
   public float getTimeLeft() {
     return timeLeft;
   }
+
   private TextButton.TextButtonStyle createSimpleButtonStyle() {
     Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
     pixmap.setColor(Color.DARK_GRAY);
@@ -344,12 +282,12 @@ public class HUD {
     TextButton.TextButtonStyle style = new TextButton.TextButtonStyle();
     style.up = new TextureRegionDrawable(upTexture);
     style.down = new TextureRegionDrawable(downTexture);
-//    style.font = game.getAssetHelper().get("font/arial_uni_30.fnt", BitmapFont.class);
     style.font = GMain.getAssetHelper().getBitmapFont("font/arial_uni_30.fnt");
     style.fontColor = Color.WHITE;
     return style;
   }
-  public boolean setStop(boolean state){
+
+  public boolean setStop(boolean state) {
     stop = state;
     return stop;
   }
