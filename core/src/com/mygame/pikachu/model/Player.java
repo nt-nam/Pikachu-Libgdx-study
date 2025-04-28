@@ -14,6 +14,7 @@ public class Player {
   private int hints;
   private int shuffles;
   private int undos;
+  private int rockets;
   private int level;
   private int currentSkinAniId;
   private int currentSkinUiId;
@@ -28,6 +29,7 @@ public class Player {
     this.hints = DEFAULT_HINTS;
     this.shuffles = DEFAULT_SHUFFLES;
     this.undos = DEFAULT_UNDOS;
+    this.rockets = DEFAULT_ROCKETS;
     this.level = 1;
     this.currentSkinAniId = DEFAULT_SKIN;
     this.currentSkinUiId = DEFAULT_SKIN;
@@ -37,7 +39,6 @@ public class Player {
     this.soundMuted = false;
   }
 
-  // Lưu dữ liệu vào Preferences
   public void save() {
     Preferences prefs = Gdx.app.getPreferences("PikachuPlayerData");
     prefs.putInteger("score", score);
@@ -45,6 +46,7 @@ public class Player {
     prefs.putInteger("hints", hints);
     prefs.putInteger("shuffles", shuffles);
     prefs.putInteger("undos", undos);
+    prefs.putInteger("rockets", rockets);
     prefs.putInteger("level", level);
     prefs.putInteger("currentSkinAniId", currentSkinAniId);
     prefs.putInteger("currentSkinUiId", currentSkinUiId);
@@ -63,18 +65,18 @@ public class Player {
     prefs.flush();
   }
 
-  // Tải dữ liệu từ Preferences
   public void load() {
     Preferences prefs = Gdx.app.getPreferences("PikachuPlayerData");
     this.score = prefs.getInteger("score", 0);
     this.coins = prefs.getInteger("coins", 0);
     this.hints = prefs.getInteger("hints", DEFAULT_HINTS);
-    this.shuffles = 200+prefs.getInteger("shuffles", DEFAULT_SHUFFLES);
+    this.shuffles = prefs.getInteger("shuffles", DEFAULT_SHUFFLES);
     this.undos = prefs.getInteger("undos", DEFAULT_UNDOS);
+    this.rockets = prefs.getInteger("rockets", DEFAULT_ROCKETS);
     this.level = prefs.getInteger("level", 1);
     this.currentSkinAniId = prefs.getInteger("currentSkinId", DEFAULT_SKIN);
     this.currentSkinUiId = prefs.getInteger("currentUiId", DEFAULT_SKIN);
-    this.musicMuted = prefs.getBoolean("musicMuted", false); // Tải trạng thái Music
+    this.musicMuted = prefs.getBoolean("musicMuted", false);
     this.soundMuted = prefs.getBoolean("soundMuted", false);
 
     // Tải danh sách unlockedSkins
@@ -97,17 +99,14 @@ public class Player {
     pathUi = DEFAULT_UI + LIST_SKIN_UI[currentSkinUiId];
   }
 
-  // Thêm điểm khi nối thành công
   public void addPoints(int points) {
     this.score += points;
   }
 
-  // Thêm xu khi hoàn thành cấp
   public void addCoins(int coins) {
     this.coins += coins;
   }
 
-  // Tiêu xu
   public boolean spendCoins(int amount) {
     if (this.coins >= amount) {
       this.coins -= amount;
@@ -140,6 +139,14 @@ public class Player {
     return false;
   }
 
+  public boolean buyRocket() {
+    if (spendCoins(SHUFFLE_COST)) {
+      this.shuffles++;
+      return true;
+    }
+    return false;
+  }
+
   public boolean useHint() {
     if (this.hints > 0) {
       this.hints--;
@@ -159,6 +166,13 @@ public class Player {
   public boolean useUndo() {
     if (this.undos > 0) {
       this.undos--;
+      return true;
+    }
+    return false;
+  }
+  public boolean useRocket() {
+    if (this.rockets > 0) {
+      this.rockets--;
       return true;
     }
     return false;
@@ -185,7 +199,6 @@ public class Player {
     return false;
   }
 
-  // Getter methods
   public int getScore() {
     return score;
   }
@@ -204,6 +217,10 @@ public class Player {
 
   public int getUndos() {
     return undos;
+  }
+
+  public int getRockets() {
+    return rockets;
   }
 
   public int getLevel() {
@@ -238,13 +255,12 @@ public class Player {
     return soundMuted;
   }
 
-
-
-  // Setter methods (nếu cần thiết)
   public void setScore(int score) {
     this.score = score;
   }
-
+  public void plusScore(int score) {
+    this.score += score;
+  }
   public void setCoins(int coins) {
     this.coins = coins;
   }
@@ -259,6 +275,10 @@ public class Player {
 
   public void setUndos(int undos) {
     this.undos = undos;
+  }
+
+  public void setRockets(int rockets) {
+    this.rockets = rockets;
   }
 
   public void setLevel(int level) {

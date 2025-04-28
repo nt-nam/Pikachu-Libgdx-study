@@ -2,117 +2,205 @@ package com.mygame.pikachu.screen;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.mygame.pikachu.GMain;
 import com.mygame.pikachu.data.GAssetsManager;
 import com.mygame.pikachu.data.LevelManager;
 import com.mygame.pikachu.model.Level;
-import com.mygame.pikachu.model.Player;
+import com.mygame.pikachu.screen.widget.BorderPM;
 import com.mygame.pikachu.utils.GConstants;
+import com.mygame.pikachu.utils.actions.RandomPathAction;
 import com.mygame.pikachu.utils.hud.AL;
-import com.mygame.pikachu.utils.hud.Button;
 import com.mygame.pikachu.utils.hud.MapGroup;
 import com.mygame.pikachu.utils.hud.builders.BB;
 import com.mygame.pikachu.utils.hud.builders.IB;
+import com.mygame.pikachu.utils.hud.builders.LB;
 import com.mygame.pikachu.utils.hud.builders.MGB;
 import com.mygame.pikachu.utils.hud.external.EventHandler;
 import com.mygame.pikachu.view.Board;
-import com.mygame.pikachu.view.HUD;
 import com.mygame.pikachu.view.ui.PopupUI;
 
 public class PlayScreen implements Screen, EventHandler {
-  private Player player;
-  private Board board;
-  private HUD hud;
-  private MapGroup playMG;
-  private LevelManager levelManager;
+  private final Board board;
+  private final MapGroup playMG;
+  private final LevelManager levelManager;
   private int level;
-
+  private Level levelData;
   private PopupUI popup;
-
-  private static int ROWS;
-  private static int COLUMNS;
-  private static int distance;
+  private float timePB;
+  private Pixmap pixmap;
 
   private final float centerX;
   private final float centerY;
-
-  private static final int POINTS_PER_PAIR = 100;
-  private static final int TIME_BONUS_MULTIPLIER = 10;
+  private boolean isPause = false;
 
   public PlayScreen(GMain game) {
-    player = game.getPlayer();
     this.level = 2;
     levelManager = new LevelManager();
     board = new Board();
-
-    playMG = MGB.New().size(GMain.stage().getWidth(), GMain.stage().getHeight()).pos(0, 0, AL.tr).parent(GMain.hud()).build();
-    init();
     popup = new PopupUI(game);
-    hud = new HUD(game, playMG, board);
-    playMG.debug();
-
+    playMG = MGB.New().size(GMain.stage().getWidth(), GMain.stage().getHeight()).pos(0, 0, AL.tr).idx("playMG").parent(GMain.hud()).build();
     centerX = playMG.getWidth() / 2;
     centerY = playMG.getHeight() / 2;
-    addHandle();
+    init();
   }
 
-  private void addHandle() {
 
-  }
-  private void init(){
+  private void init() {
+    pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+    pixmap.setColor(Color.GRAY);
     GAssetsManager.setTextureAtlas(GConstants.DEFAULT_ATLAS_NEWPIKA);
-    IB.New().drawable("bg").pos(0,0,AL.c).scale(0.82f).parent(playMG).build();
+    IB.New().drawable("bg").pos(0, 0, AL.c).scale(0.82f).parent(playMG).build();
+    playMG.debug();
+    pixmap.fillCircle(0, 0, 20);
+
+    MGB.New().size(196, 96).childs(
+        IB.New().texture(new Texture(new BorderPM().get(196, 64, 30, 0x696969FF))).origin(AL.cl).pos(0, 0, AL.cl),
+        IB.New().drawable("coin").idx("coinOrigin").pos(0, 0, AL.cr).scale(0.9f),
+        LB.New().font(GConstants.BMF).text(GMain.player().getCoins() + "").fontScale(1f).pos(25, 0, AL.cl)
+    ).origin(AL.ct).pos(0, 20, AL.ct).parent(playMG).debug(false).build();
+
+    MGB.New().size(196, 96).childs(
+        IB.New().texture(new Texture(new BorderPM().get(196, 64, 30, 0x696969FF))).origin(AL.cl).pos(0, 0, AL.cl),
+        BB.New().bg("star6").idx("starOrigin").pos(0, 0, AL.cr).scale(0.9f),
+        LB.New().font(GConstants.BMF).text(GMain.player().getScore() + "").fontScale(1f).pos(25, 0, AL.cl).idx("scoreLabel")
+    ).origin(AL.tr).pos(20, 20, AL.tr).idx("score").parent(playMG).debug(false).build();
   }
 
   public void showBoard() {
     System.out.println("[PlayScreen]: Show board");
-    Level levelData = levelManager.getLevel(level);
+    levelData = levelManager.getLevel(level);
+
     board.setNew(levelData);
-    hud.setTime(levelData.getTime());
     board.setPosition(centerX - board.getWidth() / 2, centerY - board.getHeight() / 2);
     board.setOrigin(board.getWidth() / 2, board.getHeight() / 2);
-    board.setScale(centerY / board.getHeight() * 1.2f);
+    if (board.getWidth() > centerX * 1.5f) {
+      board.setScale(centerX / board.getWidth() * 1.5f);
+    }
+    if (board.getHeight() > centerY * 1.2f) {
+      board.setScale(centerY / board.getHeight() * 1.2f);
+    }
     board.getPathFinder().setBoard(board);
     playMG.addActor(board);
+  }
 
+  public void completeLevel() {
+    popup.showWinUI();
+  }
+
+  private void createProgressBar() {
+    pixmap.fill();
+    GAssetsManager.setTextureAtlas(GConstants.DEFAULT_ATLAS_PLAY);
+    MGB.New().size(561, 41).childs(
+        IB.New().drawable("barframe").pos(0, 0, AL.c),
+        IB.New().drawable("bar").pos(0, 0, AL.c),
+        IB.New().texture(new Texture(pixmap)).size(547, 30).origin(AL.cr).pos(6, 0, AL.cr).scale(0.5f, 1).idx("barOv")
+    ).pos(0, centerY * 0.75f, AL.c).idx("progress").parent(playMG).build();
+    timePB = 0;
+  }
+
+  private boolean updateProgressBar(float delta) {
+    timePB += delta;
+    Image barOv = playMG.query("progress/barOv", Image.class);
+    float scale = barOv.getScaleX();
+    if (scale > 1) {
+      return true;
+    } else {
+      barOv.setScale((timePB) / levelData.getTime(), 1);
+    }
+    return false;
   }
 
   private void createBtn() {
-    System.out.println("[PlayScreen]: create btn");
-    Button pause = BB.New().bg("btn_pause").transform(true).pos(0,0,AL.tr).scale(0.5f).parent(playMG).build();
-    pause.addListener(new ClickListener() {
-      @Override
-      public void clicked(InputEvent event, float x, float y) {
-//        if (!pausePopup.isPause()) {
-        System.out.println("[PlayScreen]: click pause");
-        popup.showPauseUI();
-      }
-    });
+    GAssetsManager.setTextureAtlas(GConstants.DEFAULT_ATLAS_NEWPIKA);
+    BB.New().bg("btn_pause").transform(true).pos(20, 25, AL.tl).scale(1.3f).origin(AL.tl).idx("btnPause").parent(playMG).build();
+
+    GAssetsManager.setTextureAtlas(GConstants.DEFAULT_ATLAS_NEWPIKA);
+    MapGroup hint = MGB.New().size(100, 100).childs(
+        IB.New().texture(new Texture(new BorderPM().get(100, 50, 20, 0x696969FF))).pos(0, -40, AL.cb),
+        LB.New().font(GConstants.BMF).text(GMain.player().getHints() + "").pos(0, -35, AL.cb).idx("label"),
+        BB.New().bg("hint").transform(true).pos(0, 0, AL.c).debug(false).scale(1.5f)
+    ).pos(100, 100, AL.bl).idx("btnHint").parent(playMG).debug(false).build();
+
+    MapGroup MGShuffle = MGB.New().size(100, 100).childs(
+        IB.New().texture(new Texture(new BorderPM().get(100, 50, 20, 0x696969FF))).pos(0, -40, AL.cb),
+        LB.New().font(GConstants.BMF).text(GMain.player().getShuffles() + "").pos(0, -35, AL.cb).idx("label"),
+        BB.New().bg("shuffle").transform(true).pos(0, 0, AL.c).scale(1.5f)
+    ).pos(0, 100, AL.cb).idx("btnShuffle").parent(playMG).build();
+    ;
+
+    MapGroup rocket = MGB.New().size(100, 100).childs(
+        IB.New().texture(new Texture(new BorderPM().get(100, 50, 20, 0x696969FF))).pos(0, -40, AL.cb),
+        LB.New().font(GConstants.BMF).text(GMain.player().getRockets() + "").pos(0, -35, AL.cb).idx("label"),
+        BB.New().bg("boom").transform(true).pos(0, 0, AL.c).scale(1.5f)
+    ).pos(100, 100, AL.br).idx("btnRocket").parent(playMG).build();
+
+  }
+
+  private void rocketLaunch() {
+    board.updateListAnimal();
+    for (int i = 0; i < 2; i++) {
+      Vector2[] vt = board.getRandomVisibleActor();
+      IB.New().drawable("rocket").size(40, 120).pos(0, centerY * 0.2f * (i + 1), AL.bl).parent(playMG).build().addAction(
+          Actions.sequence(
+              new RandomPathAction(MathUtils.random(centerX, centerX * 3f), centerY * 2, 0.5f, 20),
+              Actions.moveTo(centerX * 1.5f, centerY * 3),
+              new RandomPathAction(vt[0].x, vt[0].y, 0.8f, 20),
+              Actions.removeActor()
+          )
+      );
+
+      IB.New().drawable("rocket").size(40, 120).pos(centerX * 2, centerY * 0.2f * (i + 1), AL.bl).parent(playMG).build().addAction(
+          Actions.sequence(
+              new RandomPathAction(MathUtils.random(-centerX, centerX), centerY * 2, 0.5f, 20),
+              Actions.moveTo(centerX / 2, centerY * 3),
+              new RandomPathAction(vt[1].x, vt[1].y, 0.8f, 20),
+              Actions.removeActor()
+          )
+      );
+    }
+  }
+
+  public void setPause(boolean p) {
+    isPause = p;
   }
 
   @Override
   public void show() {
+    GMain.hud().addActor(playMG);
     createBtn();
-    hud.resetTime();
     showBoard();
+    createProgressBar();
+    addHandle();
+    isPause = false;
   }
 
   @Override
   public void render(float delta) {
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
     Gdx.gl.glClearColor(0.4f, 0.6f, 0.4f, 1);
-    hud.update(delta);
+    if (!isPause) {
+      if (updateProgressBar(delta)) {
+        popup.showFailUI();
+      }
+    }
+
     playMG.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
     board.updateLineSelect();
-    if (hud.isTimeUp()) {
-      System.out.println("[PlayScreen]: Time end.");
-      handleTimeUp();
-    }
   }
 
   @Override
@@ -122,14 +210,18 @@ public class PlayScreen implements Screen, EventHandler {
 
   @Override
   public void pause() {
+    GMain.player().save();
+    isPause = true;
   }
 
   @Override
   public void resume() {
+    isPause = false;
   }
 
   @Override
   public void hide() {
+    playMG.remove();
   }
 
   @Override
@@ -138,68 +230,12 @@ public class PlayScreen implements Screen, EventHandler {
     playMG.clear();
   }
 
+  public int getLevel() {
+    return level;
+  }
+
   public void setLevel(int level) {
     this.level = level;
-  }
-
-  public void onPairMatched() {
-    int currentScore = player.getScore();
-    player.setScore(currentScore + POINTS_PER_PAIR);
-    hud.update(Gdx.graphics.getDeltaTime());
-  }
-
-  public void onLevelCompleted() {
-    float timeLeft = hud.isTimeUp() ? 0 : hud.getTimeLeft();
-    int timeBonus = (int) (timeLeft * TIME_BONUS_MULTIPLIER);
-    int currentScore = player.getScore();
-    player.setScore(currentScore + timeBonus);
-
-//    if (currentPopup == null) {
-//      currentPopup = new UiPopup(game);
-//      currentPopup.setPosition((playMG.getWidth() - currentPopup.getWidth() * 0.8f) * 0.5f, (playMG.getHeight() - currentPopup.getHeight() * 0.8f) * 0.5f);
-//    }
-//    currentPopup.setUiWin(level, 3);
-//    currentPopup.setLabelWin(player.getScore(), (int) timeLeft);
-//    playMG.addActor(currentPopup);
-
-//    currentPopup.addAction(Actions.sequence(
-//        Actions.delay(3f),
-//        Actions.run(() -> {
-//          game.setScreen(game.getHomeScreen());
-//          clearPopup();
-//        })
-//    ));
-
-    level++;
-    hud.setLevelLabel(level);
-    Level nextLevel = levelManager.getLevel(level);
-    board.setNew(nextLevel);
-    hud.setTime(nextLevel.getTime());
-  }
-
-  private void handleTimeUp() {
-//    if (currentPopup == null) {
-//      currentPopup = new UiPopup(game);
-//      playMG.addActor(currentPopup);
-////      currentPopup.addAction(Actions.sequence(
-////          Actions.delay(3f),
-////          Actions.run(() -> {
-////            game.setScreen(game.getHomeScreen());
-//////            clearPopup();
-////          })
-////      ));
-//    }
-//    currentPopup.setUiLose(board);
-//    currentPopup.setOrigin(Align.center);
-//    currentPopup.setPosition(playMG.getWidth() / 2, playMG.getHeight() / 2, Align.center);
-//    currentPopup.setVisible(true);
-  }
-
-  private int calculateStars(float timeLeft) {
-    float maxTime = GConstants.LEVEL_TIME_SECONDS;
-    if (timeLeft > maxTime * 0.75f) return 3;
-    else if (timeLeft > maxTime * 0.25f) return 2;
-    else return 1;
   }
 
   private void clearPopup() {
@@ -208,12 +244,49 @@ public class PlayScreen implements Screen, EventHandler {
     }
   }
 
-  public float getTimeLeft() {
-    return hud != null ? hud.getTimeLeft() : 0;
+  private void addHandle() {
+    GMain.hud().index("mgPlay", playMG);
+    GMain.hud().regisHandler("playHandler", this);
+    GMain.hud().clickConnect("mgPlay/score/starOrigin", "playHandler", "StarOriginAction");
+    GMain.hud().clickConnect("mgPlay/btnPause", "playHandler", "PauseAction");
+    GMain.hud().clickConnect("mgPlay/btnHint", "playHandler", "HintAction");
+    GMain.hud().clickConnect("mgPlay/btnShuffle", "playHandler", "ShuffleAction");
+    GMain.hud().clickConnect("mgPlay/btnRocket", "playHandler", "RocketAction");
+
   }
 
   @Override
   public void handleEvent(Actor actor, String action, int intParam, Object objParam) {
+    switch (action) {
+      case "StarOriginAction":
+        // TODO show rank
+        break;
+      case "PauseAction":
+        System.out.println("[PlayScreen]: click pause");
+        popup.showPauseUI();
+        isPause = true;
+        break;
+      case "HintAction":
+        if (GMain.player().useHint()) {
+          board.showAnimationHint();
+          playMG.query("btnHint/label", Label.class).setText(GMain.player().getHints());
+        }
+        break;
+      case "ShuffleAction":
+        if (GMain.player().useShuffle()) {
+          board.shuffle();
+          playMG.query("btnShuffle/label", Label.class).setText(GMain.player().getShuffles());
+          Gdx.app.log("ButtonFactory", "Board shuffled");
+        }
+        break;
+      case "RocketAction":
+        if(GMain.player().useRocket()){
+          System.out.println("rocket use");
+          playMG.query("btnRocket/label", Label.class).setText(GMain.player().getRockets());
+          rocketLaunch();
+        }
+        break;
 
+    }
   }
 }

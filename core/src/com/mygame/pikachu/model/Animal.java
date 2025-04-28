@@ -11,7 +11,6 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.mygame.pikachu.GMain;
-import com.mygame.pikachu.utils.GConstants;
 
 public class Animal extends Actor {
   private int id;
@@ -77,12 +76,12 @@ public class Animal extends Actor {
     if (hasActions()) {
       if (!isMoving) {
         isMoving = true;
-        System.out.println("Actor đang di chuyển!");
+//        System.out.println("Actor đang di chuyển!");
       }
     } else {
       if (isMoving) {
         isMoving = false;
-        System.out.println("Actor đã dừng di chuyển!");
+//        System.out.println("Actor đã dừng di chuyển!");
       }
     }
   }

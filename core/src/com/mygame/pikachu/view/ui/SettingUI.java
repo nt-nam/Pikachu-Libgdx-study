@@ -56,6 +56,11 @@ public class SettingUI extends BaseUI {
   }
 
   @Override
+  protected void addHandle() {
+
+  }
+
+  @Override
   public void handleEvent(Actor actor, String action, int intParam, Object objParam) {
 
   }

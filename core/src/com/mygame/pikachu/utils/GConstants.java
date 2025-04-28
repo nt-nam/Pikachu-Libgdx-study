@@ -14,7 +14,7 @@ public class GConstants {
   public static final int MAX_LEVEL = 100;
 
   // Kích thước ô (tile)
-  public static final int TILE_SIZE = Math.max(SCREEN_WIDTH / DEFAULT_COLS, SCREEN_HEIGHT / DEFAULT_COLS);
+  public static final int TILE_SIZE = Math.min(Math.max(SCREEN_WIDTH / DEFAULT_COLS, SCREEN_HEIGHT / DEFAULT_COLS),96);
   public static final int TILE_MARGIN = 2;
 
   // Số loại hình thú (animal types)
@@ -23,14 +23,14 @@ public class GConstants {
   // Buffer mặc định
   public static final int DEFAULT_HINTS               = 30; // Số lần gợi ý ban đầu
   public static final int DEFAULT_SHUFFLES            = 40; // Số lần xáo trộn ban đầu
-  public static final int DEFAULT_UNDOS               = 2;  // Số lần hoàn tác ban đầu
+  public static final int DEFAULT_UNDOS               = 30;  // Số lần hoàn tác ban đầu
+  public static final int DEFAULT_ROCKETS             = 30;  // Số lần tên lửa ban đầu
 
   // Giá trị phần thưởng và chi phí
   // Thông số chung của level
-  public static final int LEVEL_TIME_SECONDS         = 200; // Thời gian mỗi cấp (giây)
-  public static final int POINTS_PER_PAIR            = 100; // Điểm cho mỗi cặp
-  public static final int TIME_BONUS_MULTIPLIER      = 10;  // Điểm thưởng dựa trên thời gian còn lại
-  public static final int POINTS_PER_MATCH           = 5;   // Điểm cho mỗi lần nối thành công
+  public static final int SCORE_PER_PAIR             = 1;   // Điểm cho mỗi ngoi sao
+  public static final int TIME_BONUS_SCORE_STAR      = 5;   // Điểm thưởng dựa trên thời gian còn lại
+  public static final int COINS_PER_MATCH            = 2;   // Điểm cho mỗi lần nối thành công
   public static final int COIN_PER_LEVEL             = 50;  // Số xu nhận được sau mỗi cấp
   public static final int HINT_COST                  = 20;  // Giá mua gợi ý (xu)
   public static final int SHUFFLE_COST               = 30;  // Giá mua xáo trộn (xu)

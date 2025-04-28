@@ -2,7 +2,7 @@
   {"levelId": 1, "rows": 6, "cols": 9, "pairs": 3, "time": 20, "type": 0},
   {"levelId": 2, "rows": 6, "cols": 9, "pairs": 12, "time": 320, "type": 0},
   {"levelId": 3, "rows": 6, "cols": 9, "pairs": 12, "time": 130, "type": 1},
-  {"levelId": 4, "rows": 6, "cols": 9, "pairs": 12, "time": 130, "type": 2},
+  {"levelId": 4, "rows": 6, "cols": 9, "pairs": 12, "time": 10, "type": 2},
   {"levelId": 5, "rows": 6, "cols": 9, "pairs": 12, "time": 140, "type": 3},
   {"levelId": 6, "rows": 6, "cols": 9, "pairs": 12, "time": 140, "type": 0},
   {"levelId": 7, "rows": 6, "cols": 9, "pairs": 12, "time": 150, "type": 0},

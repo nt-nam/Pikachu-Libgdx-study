@@ -55,7 +55,7 @@ public class GAssetsManager {
     am.load(name, Sound.class);
   }
 
-  public TextureAtlas getTextureAtlas(String name) {
+  public static TextureAtlas getTextureAtlas(String name) {
     return am.get(name, TextureAtlas.class);
   }
   public TextureRegion getTextureRegion(String nameAtlas, String name) {
