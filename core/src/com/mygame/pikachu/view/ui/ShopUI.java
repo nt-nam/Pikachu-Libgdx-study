@@ -20,37 +20,42 @@ public class ShopUI extends BaseUI {
 
   @Override
   protected void createUI() {
+    int w = (int) (centerX * 1.4f);
+    int h = 100;
+    int cornerRadius = 20;
+    int color = 0x606060FF;
+
     miniUI();
 
     GAssetsManager.setTextureAtlas(GConstants.DEFAULT_ATLAS_LEADER_BOARD);
-    IB.New().drawable("ribbon").scale(0.9f, 1).pos(0, 0, AL.ct).parent(this).build();
-    LB.New().font(GConstants.BMF).text("SHOP").fontScale(2).pos(0,15,AL.ct).parent(this).build();
+    IB.New().drawable("ribbon").scale(0.9f, 1).pos(0, -30, AL.ct).parent(this).build();
+    LB.New().font(GConstants.BMF).text("SHOP").fontScale(2).pos(0,-15,AL.ct).parent(this).build();
 
     GAssetsManager.setTextureAtlas(GConstants.DEFAULT_ATLAS_COMMON);
     BB.New().bg("btn_exit").pos(0, -40, AL.tr).idx("btnClose").parent(this).build();
 
     GAssetsManager.setTextureAtlas(GConstants.DEFAULT_ATLAS_NEWPIKA);
-    MapGroup buyHint = MGB.New().size(centerX * 1.4f, 100).childs(
-        IB.New().texture(new Texture(new BorderPM().get((int) (centerX * 1.4f), 100, 20, 0x606060FF))).pos(0, 0, AL.c),
+    MapGroup buyHint = MGB.New().size(w, h).childs(
+        IB.New().texture(new Texture(new BorderPM().get(w, h, cornerRadius, color))).pos(0, 0, AL.c),
         IB.New().drawable("hint").pos(20, 0, AL.cl).debug(false),
         LB.New().font(GConstants.BMF).text("Hint: " + GMain.player().getHints()).pos(-30, 0, AL.c)
-    ).pos(0, 120, AL.c).idx("buyHint").parent(this).debug(false).build();
+    ).pos(0, 110, AL.c).idx("buyHint").parent(this).debug(false).build();
     GMain.hud().index("buyHint", buyHint);
 
 
-    MapGroup buyShuffle = MGB.New().size(centerX * 1.4f, 100).childs(
-        IB.New().texture(new Texture(new BorderPM().get((int) (centerX * 1.4f), 100, 20, 0x606060FF))).pos(0, 0, AL.c),
+    MapGroup buyShuffle = MGB.New().size(w, h).childs(
+        IB.New().texture(new Texture(new BorderPM().get(w, h, cornerRadius, color))).pos(0, 0, AL.c),
         IB.New().drawable("shuffle").pos(20, 0, AL.cl).debug(false),
         LB.New().font(GConstants.BMF).text("Shuffle: " + GMain.player().getShuffles()).pos(-30, 0, AL.c)
-    ).pos(0, 0, AL.c).idx("buyShuffle").parent(this).build();
+    ).pos(0, -10, AL.c).idx("buyShuffle").parent(this).build();
     GMain.hud().index("buyShuffle", buyShuffle);
 
 
-    MapGroup buyRocket = MGB.New().size(centerX * 1.4f, 100).childs(
-        IB.New().texture(new Texture(new BorderPM().get((int) (centerX * 1.4f), 100, 20, 0x606060FF))).pos(0, 0, AL.c),
+    MapGroup buyRocket = MGB.New().size(w, h).childs(
+        IB.New().texture(new Texture(new BorderPM().get(w, h, cornerRadius, color))).pos(0, 0, AL.c),
         IB.New().drawable("boom").pos(20, 0, AL.cl).debug(false),
         LB.New().font(GConstants.BMF).text("Rocket: " + GMain.player().getRockets()).pos(-30, 0, AL.c)
-    ).pos(0, -120, AL.c).idx("buyRocket").parent(this).build();
+    ).pos(0, -130, AL.c).idx("buyRocket").parent(this).build();
     GMain.hud().index("buyRocket", buyRocket);
 
 
@@ -58,7 +63,7 @@ public class ShopUI extends BaseUI {
     BB.New().bg("btn_yellow").transform(true).label("Buy", GConstants.BMF, 0, 0, AL.c).fontScale(1.5f).size(218, 91).pos(-20, 0, AL.cr).scale(0.75f).idx("btnBuyH").parent(buyHint).build();
     BB.New().bg("btn_yellow").transform(true).label("Buy", GConstants.BMF, 0, 0, AL.c).fontScale(1.5f).size(218, 91).pos(-20, 0, AL.cr).scale(0.75f).idx("btnBuyS").parent(buyShuffle).build();
     BB.New().bg("btn_yellow").transform(true).label("Buy", GConstants.BMF, 0, 0, AL.c).fontScale(1.5f).size(218, 91).pos(-20, 0, AL.cr).scale(0.75f).idx("btnBuyR").parent(buyRocket).build();
-
+debugAll();
   }
 
   @Override

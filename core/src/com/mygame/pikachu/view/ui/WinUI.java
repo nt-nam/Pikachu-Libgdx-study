@@ -40,16 +40,16 @@ public class WinUI extends BaseUI {
     GAssetsManager.setTextureAtlas(GConstants.DEFAULT_ATLAS_LEADER_BOARD);
 
     GAssetsManager.setTextureAtlas(GConstants.DEFAULT_ATLAS_COMMON);
-    BB.New().bg("btn_red").label("Next Level", GConstants.BMF, 0, 0, AL.c)
-        .pos(centerX * 0.2f, 50, AL.bl)
+    BB.New().bg("btn_red").label("Next", GConstants.BMF, 0, 0, AL.c)
+        .pos(centerX * 0.2f, 50, AL.br)
         .idx("btnNextLevel")
         .parent(this).build();
-    BB.New().bg("btn_red").label("Home", GConstants.BMF, 0, 0, AL.c)
-        .pos(centerX * 0.2f, 50, AL.br)
-        .idx("btnHome")
-        .parent(this).build();
-    BB.New().bg("btn_red").label("Restart Level", GConstants.BMF, 0, 0, AL.c)
-        .pos(0, -100, AL.c)
+//    BB.New().bg("btn_red").label("Home", GConstants.BMF, 0, 0, AL.c)
+//        .pos(centerX * 0.2f, 50, AL.br)
+//        .idx("btnHome")
+//        .parent(this).build();
+    BB.New().bg("btn_red").label("Restart", GConstants.BMF, 0, 0, AL.c)
+        .pos(centerX * 0.2f, 50, AL.bl)
         .idx("btnRestart")
         .parent(this).build();
   }
@@ -65,21 +65,27 @@ public class WinUI extends BaseUI {
 
   @Override
   public void handleEvent(Actor actor, String action, int intParam, Object objParam) {
-    GMain g = GMain.instance();
     switch (action) {
       case "NextLevelAction":
         System.out.println("NextLevelAction Click");
+        game.getPlayer().setLevel(game.getPlayScreen().getLevel()+1);
+        game.getPlayScreen().hide();
+        game.getPlayScreen().setLevel(game.getPlayScreen().getLevel());
+        game.getPlayScreen().show();
+        game.getPlayer().save();
+        hide();
         break;
       case "RestartAction":
         System.out.println("RestartAction Click");
-        GMain.player().save();
-        g.getPlayScreen().setLevel(GMain.player().getLevel());
+//        game.getPlayScreen().setLevel(GMain.player().getLevel());
+        game.getPlayScreen().restart();
+        hide();
         break;
       case "HomeAction":
         System.out.println("Home Click Action");
         hide();
-        g.getPlayScreen().hide();
-        g.setScreen(g.getHomeScreen());
+        game.getPlayScreen().hide();
+        game.setScreen(game.getHomeScreen());
         break;
     }
   }

@@ -4,10 +4,13 @@ import static com.mygame.pikachu.utils.GConstants.*;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygame.pikachu.data.GAssetsManager;
@@ -16,6 +19,7 @@ import com.mygame.pikachu.screen.HomeScreen;
 import com.mygame.pikachu.screen.LoadingScreen;
 import com.mygame.pikachu.screen.PlayScreen;
 import com.mygame.pikachu.screen.SettingScreen;
+import com.mygame.pikachu.test.DebugManager;
 import com.mygame.pikachu.utils.SkinManager;
 import com.mygame.pikachu.utils.SoundManager;
 import com.mygame.pikachu.utils.hud.BuilderBridge;
@@ -38,6 +42,9 @@ public class GMain extends Game {
   private SettingScreen settingScreen;
   private HUD hud;
 
+  private DebugManager debugManager;
+//  private TextField consoleInput;
+//  private boolean consoleVisible;
 
   @Override
   public void create() {
@@ -71,6 +78,14 @@ public class GMain extends Game {
     playMusic();
 
     initScreen();
+    debugManager = new DebugManager();
+//    Skin skin = new Skin(Gdx.files.internal("default/uiskin.json"));
+//    consoleInput = new TextField("", skin);
+//    consoleInput.setWidth(200);
+//    consoleInput.setPosition(10, 10);
+//    stage.addActor(consoleInput);
+//    consoleInput.setVisible(false);
+//    consoleVisible = false;
   }
 
   private void playMusic() {
@@ -131,9 +146,11 @@ public class GMain extends Game {
     return (GMain) Gdx.app.getApplicationListener() ;
   }
 
+  public static DebugManager debugManager() {
+    return ((GMain) Gdx.app.getApplicationListener()).debugManager;
+  }
+
   private void initScreen() {
-//    loadingScreen = new LoadingScreen(this, viewport);
-//    settingScreen = new SettingScreen(this);
     initHomeScreen();
     setScreen(homeScreen);
   }
@@ -191,8 +208,48 @@ public class GMain extends Game {
     super.render();
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
     Gdx.gl.glClearColor(0.4f, 0.5f, 0.4f, 1);
+//    // Bật/tắt console bằng phím `
+//    if (Gdx.input.isKeyJustPressed(Input.Keys.GRAVE)) {
+//      consoleInput.setText("");
+//      consoleVisible = !consoleVisible;
+//      consoleInput.setVisible(consoleVisible);
+//      if (consoleVisible) {
+//        stage.setKeyboardFocus(consoleInput);
+//      }
+//    }
+//
+//    // Xử lý lệnh console
+//    if (consoleVisible && Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
+//      String command = consoleInput.getText().trim();
+//      processCommand(command);
+//      consoleInput.setText("");
+//    }
+//
+//    // Vẽ console
+//    if (consoleVisible) {
+//      stage.act();
+//      stage.draw();
+//    }
+    debugManager.update(Gdx.graphics.getDeltaTime());
     stage.act(Gdx.graphics.getDeltaTime());
     stage.draw();
+  }
 
+  @Override
+  public void pause() {
+    super.pause();
+    player.save();
+  }
+  private void processCommand(String command) {
+    if (command.startsWith("p ")) {
+      try {
+        int levelId = Integer.parseInt(command.substring(2));
+        initPlayScreen();
+        playScreen.setLevel(levelId);
+        setScreen(playScreen);
+      } catch (NumberFormatException e) {
+        System.out.println("Invalid level ID");
+      }
+    }
   }
 }

@@ -25,7 +25,7 @@ public class PauseUI extends BaseUI {
         .pos(centerX * 0.2f, 50, AL.bl)
         .idx("btnResume")
         .parent(this).build();
-    BB.New().bg("btn_red").label("home", GConstants.BMF, 0, 0, AL.c)
+    BB.New().bg("btn_red").label("Home", GConstants.BMF, 0, 0, AL.c)
         .pos(centerX * 0.2f, 50, AL.br)
         .idx("btnHome")
         .parent(this).build();

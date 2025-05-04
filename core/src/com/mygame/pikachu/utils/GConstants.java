@@ -21,10 +21,10 @@ public class GConstants {
   public static final int ANIMAL_TYPES = 6;
 
   // Buffer mặc định
-  public static final int DEFAULT_HINTS               = 30; // Số lần gợi ý ban đầu
-  public static final int DEFAULT_SHUFFLES            = 40; // Số lần xáo trộn ban đầu
-  public static final int DEFAULT_UNDOS               = 30;  // Số lần hoàn tác ban đầu
-  public static final int DEFAULT_ROCKETS             = 30;  // Số lần tên lửa ban đầu
+  public static final int DEF_HINTS                  = 3;
+  public static final int DEF_SHUFFLES               = 4;
+  public static final int DEF_UNDOS                  = 3;
+  public static final int DEF_ROCKETS                = 3;
 
   // Giá trị phần thưởng và chi phí
   // Thông số chung của level

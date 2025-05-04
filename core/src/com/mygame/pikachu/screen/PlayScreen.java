@@ -6,17 +6,12 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.mygame.pikachu.GMain;
 import com.mygame.pikachu.data.GAssetsManager;
 import com.mygame.pikachu.data.LevelManager;
@@ -38,18 +33,18 @@ public class PlayScreen implements Screen, EventHandler {
   private final Board board;
   private final MapGroup playMG;
   private final LevelManager levelManager;
-  private int level;
   private Level levelData;
   private PopupUI popup;
-  private float timePB;
   private Pixmap pixmap;
 
+  private int level;
+  private float timePB;
   private final float centerX;
   private final float centerY;
   private boolean isPause = false;
 
   public PlayScreen(GMain game) {
-    this.level = 2;
+    this.level = 1;
     levelManager = new LevelManager();
     board = new Board();
     popup = new PopupUI(game);
@@ -63,16 +58,22 @@ public class PlayScreen implements Screen, EventHandler {
   private void init() {
     pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
     pixmap.setColor(Color.GRAY);
-    GAssetsManager.setTextureAtlas(GConstants.DEFAULT_ATLAS_NEWPIKA);
-    IB.New().drawable("bg").pos(0, 0, AL.c).scale(0.82f).parent(playMG).build();
-    playMG.debug();
     pixmap.fillCircle(0, 0, 20);
+    initConstant();
+    createBtn();
+    addHandle();
+    playMG.addActor(board);
+  }
+
+  private void initConstant() {
+    GAssetsManager.setTextureAtlas(GConstants.DEFAULT_ATLAS_NEWPIKA);
+    IB.New().drawable("bg").size(centerX * 2, centerY * 2).pos(0, 0, AL.c).parent(playMG).build();
 
     MGB.New().size(196, 96).childs(
         IB.New().texture(new Texture(new BorderPM().get(196, 64, 30, 0x696969FF))).origin(AL.cl).pos(0, 0, AL.cl),
         IB.New().drawable("coin").idx("coinOrigin").pos(0, 0, AL.cr).scale(0.9f),
-        LB.New().font(GConstants.BMF).text(GMain.player().getCoins() + "").fontScale(1f).pos(25, 0, AL.cl)
-    ).origin(AL.ct).pos(0, 20, AL.ct).parent(playMG).debug(false).build();
+        LB.New().font(GConstants.BMF).text(GMain.player().getCoins() + "").fontScale(1f).pos(25, 0, AL.cl).idx("coinLabel")
+    ).origin(AL.ct).pos(0, 20, AL.ct).idx("coinT").parent(playMG).debug(false).build();
 
     MGB.New().size(196, 96).childs(
         IB.New().texture(new Texture(new BorderPM().get(196, 64, 30, 0x696969FF))).origin(AL.cl).pos(0, 0, AL.cl),
@@ -81,21 +82,17 @@ public class PlayScreen implements Screen, EventHandler {
     ).origin(AL.tr).pos(20, 20, AL.tr).idx("score").parent(playMG).debug(false).build();
   }
 
-  public void showBoard() {
-    System.out.println("[PlayScreen]: Show board");
+  private void initFlexible() {
     levelData = levelManager.getLevel(level);
-
     board.setNew(levelData);
     board.setPosition(centerX - board.getWidth() / 2, centerY - board.getHeight() / 2);
     board.setOrigin(board.getWidth() / 2, board.getHeight() / 2);
-    if (board.getWidth() > centerX * 1.5f) {
-      board.setScale(centerX / board.getWidth() * 1.5f);
+    if (board.getWidth() > centerX * 1.6f) {
+      board.setScale(centerX / board.getWidth() * 1.6f);
     }
-    if (board.getHeight() > centerY * 1.2f) {
-      board.setScale(centerY / board.getHeight() * 1.2f);
+    if (board.getHeight() > centerY * 1.25f) {
+      board.setScale(centerY / board.getHeight() * 1.25f);
     }
-    board.getPathFinder().setBoard(board);
-    playMG.addActor(board);
   }
 
   public void completeLevel() {
@@ -125,11 +122,14 @@ public class PlayScreen implements Screen, EventHandler {
     return false;
   }
 
+  private void createLabel() {
+    LB.New().font(GConstants.BMF).text("Level " + level).pos(150, 50, AL.tl).parent(playMG).build();
+  }
+
   private void createBtn() {
     GAssetsManager.setTextureAtlas(GConstants.DEFAULT_ATLAS_NEWPIKA);
     BB.New().bg("btn_pause").transform(true).pos(20, 25, AL.tl).scale(1.3f).origin(AL.tl).idx("btnPause").parent(playMG).build();
 
-    GAssetsManager.setTextureAtlas(GConstants.DEFAULT_ATLAS_NEWPIKA);
     MapGroup hint = MGB.New().size(100, 100).childs(
         IB.New().texture(new Texture(new BorderPM().get(100, 50, 20, 0x696969FF))).pos(0, -40, AL.cb),
         LB.New().font(GConstants.BMF).text(GMain.player().getHints() + "").pos(0, -35, AL.cb).idx("label"),
@@ -141,7 +141,6 @@ public class PlayScreen implements Screen, EventHandler {
         LB.New().font(GConstants.BMF).text(GMain.player().getShuffles() + "").pos(0, -35, AL.cb).idx("label"),
         BB.New().bg("shuffle").transform(true).pos(0, 0, AL.c).scale(1.5f)
     ).pos(0, 100, AL.cb).idx("btnShuffle").parent(playMG).build();
-    ;
 
     MapGroup rocket = MGB.New().size(100, 100).childs(
         IB.New().texture(new Texture(new BorderPM().get(100, 50, 20, 0x696969FF))).pos(0, -40, AL.cb),
@@ -152,9 +151,9 @@ public class PlayScreen implements Screen, EventHandler {
   }
 
   private void rocketLaunch() {
-    board.updateListAnimal();
     for (int i = 0; i < 2; i++) {
       Vector2[] vt = board.getRandomVisibleActor();
+      if (vt == null) return;
       IB.New().drawable("rocket").size(40, 120).pos(0, centerY * 0.2f * (i + 1), AL.bl).parent(playMG).build().addAction(
           Actions.sequence(
               new RandomPathAction(MathUtils.random(centerX, centerX * 3f), centerY * 2, 0.5f, 20),
@@ -179,13 +178,28 @@ public class PlayScreen implements Screen, EventHandler {
     isPause = p;
   }
 
+  public void restart(){
+    // TODO caanf hoan thien lai phan nay
+    GMain.player().save();
+//    board.restart();
+    initFlexible();
+    playMG.query("progress/barOv", Image.class).setScale(0, 1);
+  }
+  public void nextLevel(){
+    GMain.player().save();
+    level++;
+    initFlexible();
+    playMG.query("progress/barOv", Image.class).setScale(0, 1);
+  }
+
   @Override
   public void show() {
+    System.out.println("[PlayScreen]: Show");
     GMain.hud().addActor(playMG);
-    createBtn();
-    showBoard();
+    createLabel();
     createProgressBar();
-    addHandle();
+    initFlexible();
+    board.debugAll();
     isPause = false;
   }
 
@@ -280,10 +294,13 @@ public class PlayScreen implements Screen, EventHandler {
         }
         break;
       case "RocketAction":
-        if(GMain.player().useRocket()){
+        if (GMain.player().useRocket()) {
           System.out.println("rocket use");
           playMG.query("btnRocket/label", Label.class).setText(GMain.player().getRockets());
           rocketLaunch();
+          if (board.isComplete()) {
+            completeLevel();
+          }
         }
         break;
 

@@ -6,12 +6,14 @@ import static com.mygame.pikachu.utils.GConstants.*;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.actions.SequenceAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -23,15 +25,9 @@ import com.mygame.pikachu.model.Animal;
 import com.mygame.pikachu.model.Level;
 import com.mygame.pikachu.model.PathFinder;
 import com.mygame.pikachu.utils.GConstants;
-import com.mygame.pikachu.utils.actions.FallingAction;
-import com.mygame.pikachu.utils.actions.RandomPathAction;
 import com.mygame.pikachu.utils.hud.AL;
 import com.mygame.pikachu.utils.hud.Button;
-import com.mygame.pikachu.utils.hud.MapGroup;
 import com.mygame.pikachu.utils.hud.builders.IB;
-import com.mygame.pikachu.view.ui.BaseUI;
-import com.mygame.pikachu.view.ui.PopupUI;
-import com.mygame.pikachu.view.ui.WinUI;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -80,11 +76,17 @@ public class Board extends Group {
       throw new IllegalArgumentException("Tổng số ô trong board phải là số chẵn!");
     }
 
+    List<Integer> listID = new ArrayList<>();
+    for (int i =0; i < 49; i++){
+      listID.add(i);
+    }
+    Collections.shuffle(listID, random);
+
     List<Integer> tileTypes = new ArrayList<>();
     for (int i = 0; i < totalTiles / 2; i++) {
       int type = i % pairAni + 1;
-      tileTypes.add(type);
-      tileTypes.add(type);
+      tileTypes.add(listID.get(type));
+      tileTypes.add(listID.get(type));
     }
 
     Collections.shuffle(tileTypes, random);
@@ -200,7 +202,7 @@ public class Board extends Group {
     addActor(lineSelect);
   }
 
- void deselectAnimal() {
+  void deselectAnimal() {
     animalSelect = null;
     lineSelect.remove();
   }
@@ -224,10 +226,13 @@ public class Board extends Group {
 
   private void handleGameCompletion() {
     System.out.println("Game Completed! All pairs matched.");
-    BaseUI baseUI;
-    baseUI = new WinUI(GMain.instance());
-    baseUI.show();
-    GMain.hud().query("playMG", MapGroup.class).addActor(baseUI);
+    Timer.schedule(new Timer.Task() {
+      @Override
+      public void run() {
+        addCoin();
+      }
+    }, 0.5f);
+
   }
 
   /**
@@ -301,27 +306,65 @@ public class Board extends Group {
   }
 
   private void addScoreStars(List<int[]> path) {
+    GAssetsManager.setTextureAtlas(DEFAULT_ATLAS_NEWPIKA);
+    Button origin = GMain.hud().query("playMG/score/starOrigin", Button.class);
+    Vector2 posMoveBy = absPos(origin, -70, -165, AL.c);
+    float timeAction = 3;
     for (int i = 0; i < path.size(); i++) {
       int[] pair = path.get(i);
-      starAt(pair[0] * TILE_SIZE, pair[1] * TILE_SIZE);
+      starAt2((pair[0] + 0.20f) * TILE_SIZE, (pair[1] + 0.20f) * TILE_SIZE, posMoveBy, timeAction);
+//      Image star6 = IB.New().drawable("star6").size(TILE_SIZE * 0.7f, TILE_SIZE * 0.7f).parent(this).pos((pair[0]+0.20f) * TILE_SIZE, (pair[1]+0.20f) * TILE_SIZE, AL.bl).build();
+//      star6.addAction(
+//          Actions.parallel(
+//              Actions.rotateBy(360, timeAction),
+//              Actions.sequence(
+//                  Actions.delay(0.2f * timeAction),
+//                  Actions.moveTo(posMoveBy.x, posMoveBy.y, 0.4f * timeAction),
+//                  Actions.fadeOut(0.4f * timeAction),
+//                  Actions.run(() -> {
+//                    GMain.player().plusScore(1);
+//                    scoreLabel.setText(GMain.player().getScore() + "");
+//                  }),
+//                  Actions.removeActor()
+//              )
+//          )
+//      );
     }
+  }
+
+  private void starAt2(float x, float y, Vector2 posMoveBy, float timeAction) {
+    Image star6 = IB.New().drawable("star6").size(TILE_SIZE * 0.7f, TILE_SIZE * 0.7f).parent(this).pos(x, y, AL.bl).build();
+    star6.addAction(
+        Actions.parallel(
+            Actions.rotateBy(360, 1.3f * timeAction),
+            Actions.sequence(
+                Actions.delay(0.3f * timeAction),
+                Actions.moveTo(posMoveBy.x, posMoveBy.y, 0.5f * timeAction),
+                Actions.fadeOut(0.5f * timeAction),
+                Actions.run(() -> {
+                  GMain.player().plusScore(1);
+                  GMain.hud().query("playMG/score/scoreLabel", Label.class).setText(GMain.player().getScore() + "");
+                }),
+                Actions.removeActor()
+            )
+        )
+    );
   }
 
   private void starAt(float x, float y) {
     GAssetsManager.setTextureAtlas(DEFAULT_ATLAS_NEWPIKA);
-    Image star6 = IB.New().drawable("star6").size(TILE_SIZE, TILE_SIZE).parent(this).pos(x, y, AL.bl).build();
+    Image star6 = IB.New().drawable("star6").size(TILE_SIZE * 0.7f, TILE_SIZE * 0.7f).parent(this).pos(x, y, AL.bl).build();
     Button origin = GMain.hud().query("playMG/score/starOrigin", Button.class);
     Label scoreLabel = GMain.hud().query("playMG/score/scoreLabel", Label.class);
-    Vector2 posMoveBy = absPos(origin, -40, -55, AL.c);
-
+    Vector2 posMoveBy = absPos(origin, -70, -165, AL.c);
+    float timeAction = 3;
     star6.addAction(
         Actions.parallel(
-            Actions.rotateBy(360, 1.3f),
+            Actions.rotateBy(360, 1.3f * timeAction),
             Actions.sequence(
-
-                Actions.delay(0.3f),
-                Actions.moveTo(posMoveBy.x, posMoveBy.y, 0.5f),
-                Actions.fadeOut(0.5f),
+                Actions.delay(0.3f * timeAction),
+                Actions.moveTo(posMoveBy.x, posMoveBy.y, 0.5f * timeAction),
+                Actions.fadeOut(0.5f * timeAction),
                 Actions.run(() -> {
                   GMain.player().plusScore(1);
                   scoreLabel.setText(GMain.player().getScore() + "");
@@ -332,12 +375,63 @@ public class Board extends Group {
     );
   }
 
+  private void addCoin() {
+    GAssetsManager.setTextureAtlas(DEFAULT_ATLAS_NEWPIKA);
+    Image origin = GMain.hud().query("playMG/coinT/coinOrigin", Image.class);
+    Label coinLabel = GMain.hud().query("playMG/coinT/coinLabel", Label.class);
+    Vector2 coinOrigin = absPos(origin, -70, -165, AL.c);
+    float timed = 0.02f;
+    for (int row = 0; row < ROWS; row++) {
+      for (int col = COLS - 1; col >= 0; col--) {
+        if (!animals[row][col].isVisible()) {
+          Image img = IB.New().drawable("coin").pos(animals[row][col].getX(), animals[row][col].getY(), AL.bl).parent(this).build();
+          timed += 0.02f;
+          Timer.schedule(new Timer.Task() {
+            @Override
+            public void run() {
+              img.addAction(Actions.sequence(
+                  Actions.delay(0.5f),
+                  Actions.rotateTo(90, 1, Interpolation.swing),
+                  Actions.moveTo(coinOrigin.x, coinOrigin.y, 1.5f),
+                  Actions.run(() -> {
+                    GMain.player().plusCoin(1);
+                    coinLabel.setText(GMain.player().getCoins() + "");
+                    
+                  }),
+                  Actions.removeActor()
+              ));
+            }
+          }, timed);
+        }
+
+//        if (!animals[row][col].isVisible()) {
+//          GAssetsManager.setTextureAtlas(DEFAULT_ATLAS_NEWPIKA);
+//          IB.New().drawable("coin").pos(animals[row][col].getX(), animals[row][col].getY(), AL.bl).parent(this).build()
+//              .addAction(Actions.sequence(
+//                  Actions.delay(0.5f),
+//                  Actions.rotateTo(90, 1, Interpolation.swing),
+//                  Actions.moveTo(coinOrigin.x, coinOrigin.y, 1.5f),
+//                  Actions.run(() -> {
+//                    GMain.player().plusCoin(1);
+//                    coinLabel.setText(GMain.player().getCoins() + "");
+//                  }),
+//                  Actions.removeActor()
+//              ));
+//        }
+      }
+    }
+    Timer.schedule(new Timer.Task() {
+      @Override
+      public void run() {
+        System.out.println("Thực hiện sau 2 giây!");
+        GMain.instance().getPlayScreen().completeLevel();
+      }
+    }, 2f);
+  }
+
   public Animal getAnimal(int row, int col) {
     if (row < 0 || col < 0 || row >= ROWS || col >= COLS) return null;
     return animals[row][col];
-  }
-
-  public void undo() {
   }
 
   public void shuffle() {
@@ -357,14 +451,13 @@ public class Board extends Group {
       for (int col = 0; col < COLS && index < remainingTiles.size(); col++) {
         if (animals[row][col].isVisible()) {
           Animal tile = remainingTiles.get(index);
-//          tile.setPosition(row * TILE_SIZE, col * TILE_SIZE);
           tile.addAction(Actions.sequence(Actions.parallel(
 //              Actions.moveTo(ROWS/2 * TILE_SIZE, COLS/2 * TILE_SIZE, 1),
-              Actions.rotateTo(360,1f),
+              Actions.rotateTo(360, 1f),
               Actions.moveTo(row * TILE_SIZE, col * TILE_SIZE, 1f)
 //              ,new RandomPathAction(row * TILE_SIZE, col * TILE_SIZE, 1, 20)
 //              , Actions.rotateTo(0)
-          ),Actions.rotateTo(0)));
+          ), Actions.rotateTo(0)));
           tile.setGridX(row);
           tile.setGridY(col);
           animals[row][col] = tile;
@@ -378,14 +471,21 @@ public class Board extends Group {
     softAni();
   }
 
-  public void boom() {
-
-  }
-
   public void showAnimationHint() {
     int[] grid = findHint();
     Color color = Color.RED;
+//    SequenceAction sequenceAction = Actions.sequence(
+//        Actions.color(color, 0.5f),
+//        Actions.color(Color.WHITE, 0.5f),
+//        Actions.color(color, 0.5f),
+//        Actions.color(Color.WHITE, 0.5f),
+//        Actions.color(color, 0.5f),
+//        Actions.color(Color.WHITE, 0.5f)
+//    );
+//    animals[grid[0]][grid[1]].addAction(sequenceAction);
+//    animals[grid[2]][grid[3]].addAction(sequenceAction);
     animals[grid[0]][grid[1]].addAction(Actions.sequence(
+        Actions.color(Color.YELLOW, 0.5f),
         Actions.color(color, 0.5f),
         Actions.color(Color.WHITE, 0.5f),
         Actions.color(color, 0.5f),
@@ -394,6 +494,7 @@ public class Board extends Group {
         Actions.color(Color.WHITE, 0.5f)
     ));
     animals[grid[2]][grid[3]].addAction(Actions.sequence(
+        Actions.color(Color.YELLOW, 0.5f),
         Actions.color(color, 0.5f),
         Actions.color(Color.WHITE, 0.5f),
         Actions.color(color, 0.5f),
@@ -616,9 +717,7 @@ public class Board extends Group {
   }
 
   public Vector2[] getRandomVisibleActor() {
-    // Tạo danh sách để lưu các Actor thỏa mãn điều kiện
     Vector2[] vt = new Vector2[2];
-    // Nếu không có Actor nào thỏa mãn, trả về null
     if (visibleActors.size == 0) {
       return null;
     }
@@ -626,12 +725,11 @@ public class Board extends Group {
     Animal a0 = visibleActors.get(removeIndex);
     visibleActors.removeIndex(removeIndex);
     Animal a1 = animals[0][0];
-    for (int i = 0; i < animals.length; i++) {
-      for (int j = 0; j < animals[i].length; j++) {
-        Animal actor = animals[i][j];
-        if (actor != null && actor.isVisible() && actor.getId() == a0.getId() && actor != a0) {
-          a1 = animals[i][j];
-        }
+    for (Animal animalN : visibleActors) {
+      if (animalN != null && animalN.isVisible() && animalN.getId() == a0.getId() && animalN != a0) {
+        a1 = animalN;
+        visibleActors.removeValue(animalN, true);
+        break;
       }
     }
     a0.addAction(Actions.sequence(
@@ -639,7 +737,6 @@ public class Board extends Group {
         , Actions.run(() -> {
           starAt(a0.getX(), a0.getY());
         })
-//        ,new FallingAction(-100, 500,false)
         , Actions.scaleTo(0, 0, 0.5f)
         , Actions.run(() -> {
           a0.setVisible(false);
@@ -654,7 +751,6 @@ public class Board extends Group {
         , Actions.run(() -> {
           starAt(finalA.getX(), finalA.getY());
         })
-//        ,new FallingAction(-100, 500,false)
         , Actions.scaleTo(0, 0, 0.5f)
         , Actions.run(() -> {
           finalA.setVisible(false);
@@ -664,11 +760,12 @@ public class Board extends Group {
     ));
     vt[0] = absPos(a0, AL.c);
     vt[1] = absPos(a1, AL.c);
-
+    matchedPairs++;
+    System.out.println(matchedPairs + "");
     return vt;
   }
 
   public boolean isComplete() {
-    return matchedPairs == totalPairs;
+    return matchedPairs >= totalPairs;
   }
 }

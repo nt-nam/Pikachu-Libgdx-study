@@ -82,13 +82,7 @@ public class MenuUI extends BaseUI {
     IB.New().drawable("ribbon").scale(0.9f, 1).pos(0, 75, AL.ct).parent(this).build();
 
     GAssetsManager.setTextureAtlas(GConstants.DEFAULT_ATLAS_NEWPIKA);
-    BB.New().bg("btn_pause").transform(true).scale(0.5f).pos(0, 0, AL.tr).idx("closeMenu").parent(this).build();
-//    this.query("closeMenu", Button.class).addListener(new ClickListener(){
-//      @Override
-//      public void clicked(InputEvent event, float x, float y) {
-//        hide();
-//      }
-//    });
+    BB.New().bg("btn_pause").transform(true).pos(50, 50, AL.tr).idx("closeMenu").parent(this).build();
   }
 
   @Override

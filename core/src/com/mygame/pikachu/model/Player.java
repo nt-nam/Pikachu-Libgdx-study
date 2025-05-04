@@ -26,10 +26,10 @@ public class Player {
   public Player() {
     this.score = 0;
     this.coins = 0;
-    this.hints = DEFAULT_HINTS;
-    this.shuffles = DEFAULT_SHUFFLES;
-    this.undos = DEFAULT_UNDOS;
-    this.rockets = DEFAULT_ROCKETS;
+    this.hints = DEF_HINTS;
+    this.shuffles = DEF_SHUFFLES;
+    this.undos = DEF_UNDOS;
+    this.rockets = DEF_ROCKETS;
     this.level = 1;
     this.currentSkinAniId = DEFAULT_SKIN;
     this.currentSkinUiId = DEFAULT_SKIN;
@@ -69,10 +69,10 @@ public class Player {
     Preferences prefs = Gdx.app.getPreferences("PikachuPlayerData");
     this.score = prefs.getInteger("score", 0);
     this.coins = prefs.getInteger("coins", 0);
-    this.hints = prefs.getInteger("hints", DEFAULT_HINTS);
-    this.shuffles = prefs.getInteger("shuffles", DEFAULT_SHUFFLES);
-    this.undos = prefs.getInteger("undos", DEFAULT_UNDOS);
-    this.rockets = prefs.getInteger("rockets", DEFAULT_ROCKETS);
+    this.hints = prefs.getInteger("hints", DEF_HINTS);
+    this.shuffles = prefs.getInteger("shuffles", DEF_SHUFFLES);
+    this.undos = prefs.getInteger("undos", DEF_UNDOS);
+    this.rockets = prefs.getInteger("rockets", DEF_ROCKETS);
     this.level = prefs.getInteger("level", 1);
     this.currentSkinAniId = prefs.getInteger("currentSkinId", DEFAULT_SKIN);
     this.currentSkinUiId = prefs.getInteger("currentUiId", DEFAULT_SKIN);
@@ -260,6 +260,9 @@ public class Player {
   }
   public void plusScore(int score) {
     this.score += score;
+  }
+  public void plusCoin(int coin) {
+    this.coins += coin;
   }
   public void setCoins(int coins) {
     this.coins = coins;

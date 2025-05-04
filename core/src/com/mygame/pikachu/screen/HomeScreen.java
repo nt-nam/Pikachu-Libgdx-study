@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.utils.Align;
 import com.mygame.pikachu.GMain;
 import com.mygame.pikachu.data.GAssetsManager;
 import com.mygame.pikachu.model.Player;
@@ -18,6 +19,7 @@ import com.mygame.pikachu.utils.hud.builders.BB;
 import com.mygame.pikachu.utils.hud.builders.IB;
 import com.mygame.pikachu.utils.hud.builders.MGB;
 import com.mygame.pikachu.utils.hud.external.EventHandler;
+import com.mygame.pikachu.view.SparkleEffect;
 import com.mygame.pikachu.view.ui.PopupUI;
 
 
@@ -27,11 +29,13 @@ public class HomeScreen implements Screen, EventHandler {
 
   private MapGroup homeMG;
   private PopupUI popup;
+  private SparkleEffect sparkleEffect;
 
   private float centerX, centerY;
   int levelCompleted;
 
   public HomeScreen(GMain game) {
+    super();
     this.game = game;
     this.player = game.getPlayer();
     levelCompleted = 4;
@@ -57,7 +61,10 @@ public class HomeScreen implements Screen, EventHandler {
 
   private void createBG() {
     GAssetsManager.setTextureAtlas(GConstants.DEFAULT_ATLAS_NEWPIKA);
-    IB.New().drawable("bg").pos(0, 0, AL.c).scale(0.84f).parent(homeMG).build();
+    IB.New().drawable("bg").size(centerX*2,centerY*2).pos(0, 0, AL.c).parent(homeMG).build();
+    sparkleEffect = new SparkleEffect(centerX*1.8f,centerY*1.8f);
+    homeMG.addActor(sparkleEffect, Align.center);
+    sparkleEffect.start();
   }
 
   private void createMoreGame() {
@@ -67,7 +74,7 @@ public class HomeScreen implements Screen, EventHandler {
 
   private void createTitle() {
     GAssetsManager.setTextureAtlas(GConstants.DEFAULT_ATLAS_MENU);
-    IB.New().drawable("logo_vi").pos(0, 100, AL.ct).parent(homeMG).build().addAction(
+    IB.New().drawable("logo").pos(0, 100, AL.ct).parent(homeMG).build().addAction(
         Actions.forever(Actions.sequence(
             Actions.scaleTo(1.1f, 1f, 2),
             Actions.scaleTo(1, 1, 2)
@@ -97,16 +104,13 @@ public class HomeScreen implements Screen, EventHandler {
 
   private void createTag() {
     GAssetsManager.setTextureAtlas(GConstants.DEFAULT_ATLAS_LEADER_BOARD);
-    BB.New().bg("tag").transform(true).label("Menu", GConstants.BMF, 0, 10, AL.c).pos(20, 10, AL.bl).idx("menu").parent(homeMG).build()
-        .addAction(Actions.parallel(Actions.sequence(
-            Actions.scaleTo(0.5f,1,2,Interpolation.smooth),
-            Actions.scaleTo(1f,1,2,Interpolation.smooth))));
+    BB.New().bg("tag").label("Menu", GConstants.BMF, 0, 10, AL.c).pos(20, 10, AL.bl).idx("menu").parent(homeMG).build();
     BB.New().bg("tag").label("Shop", GConstants.BMF, 0, 10, AL.c).pos(20, 110, AL.bl).idx("shop").parent(homeMG).build();
   }
 
   private void createBtnPlay() {
     GAssetsManager.setTextureAtlas(GConstants.DEFAULT_ATLAS_COMMON);
-    BB.New().bg("btn_yellow").label("Bắt đầu", GConstants.BMF, 0, 0, AL.c).origin(AL.c).pos(0, 0, AL.c).idx("btnPlay").parent(homeMG).build();
+    BB.New().bg("btn_yellow").label("Play", GConstants.BMF, 0, 0, AL.c).origin(AL.c).pos(0, 0, AL.c).idx("btnPlay").parent(homeMG).build();
   }
 
   @Override
@@ -158,7 +162,8 @@ public class HomeScreen implements Screen, EventHandler {
   public void handleEvent(Actor actor, String action, int intParam, Object objParam) {
     switch (action) {
       case "showOtherGame":
-        System.out.println("show other game - " + intParam + " - " + ((Player) objParam).getLevel());
+//        System.out.println("show other game - " + intParam + " - " + ((Player) objParam).getLevel());
+        GMain.debugManager().onDebugConsole();
         break;
       case "playGame":
         System.out.println("click play game");
