@@ -15,7 +15,7 @@ public class LevelManager {
 
   private void loadLevels() {
     Json json = new Json();
-    String jsonString = Gdx.files.internal("level/level.json").readString();
+    String jsonString = Gdx.files.internal("level/levelDefault.json").readString();
     levels = json.fromJson(Array.class, Level.class, jsonString);
   }
 

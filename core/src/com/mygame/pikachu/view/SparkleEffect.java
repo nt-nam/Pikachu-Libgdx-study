@@ -23,7 +23,7 @@ public class SparkleEffect extends Group {
     this.h = h;
     setSize(w,h);
     imageList = new ArrayList<>();
-    sparkleTexture = new Texture(Gdx.files.internal("eff/flare_01_0.png"));
+    sparkleTexture = new Texture(Gdx.files.internal("particle/flare_01_0.png"));
     numberEffect = 6;
     init();
   }

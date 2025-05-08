@@ -1,5 +1,6 @@
 package com.mygame.pikachu.view.ui;
 
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -19,13 +20,15 @@ import com.mygame.pikachu.utils.hud.external.EventHandler;
 
 public abstract class BaseUI extends MapGroup implements EventHandler {
   protected GMain game;
+  protected Screen screen;
   protected SoundManager soundManager;
   protected float centerX, centerY;
   protected Image overlay;
 
-  public BaseUI(GMain game) {
+  public BaseUI(Screen screen) {
     super(GMain.stage().getWidth(), GMain.stage().getHeight());
-    this.game = game;
+    this.game = GMain.instance();
+    this.screen = screen;
     this.soundManager = game.getSoundManager();
     this.centerX = getWidth() * 0.5f;
     this.centerY = getHeight() * 0.5f;

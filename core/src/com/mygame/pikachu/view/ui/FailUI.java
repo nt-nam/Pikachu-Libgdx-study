@@ -1,5 +1,6 @@
 package com.mygame.pikachu.view.ui;
 
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.mygame.pikachu.GMain;
@@ -14,8 +15,8 @@ import com.mygame.pikachu.utils.hud.builders.MGB;
 
 public class FailUI extends BaseUI {
 
-  public FailUI(GMain game) {
-    super(game);
+  public FailUI(Screen screen) {
+    super(screen);
     createUI();
     addHandle();
   }

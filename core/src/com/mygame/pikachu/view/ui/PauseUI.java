@@ -1,5 +1,6 @@
 package com.mygame.pikachu.view.ui;
 
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.mygame.pikachu.GMain;
@@ -12,8 +13,8 @@ import com.mygame.pikachu.utils.hud.builders.MGB;
 
 public class PauseUI extends BaseUI {
 
-  public PauseUI(GMain game) {
-    super(game);
+  public PauseUI(Screen screen) {
+    super(screen);
   }
 
   @Override

@@ -1,5 +1,6 @@
 package com.mygame.pikachu.view.ui;
 
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -15,8 +16,8 @@ import com.mygame.pikachu.utils.hud.builders.MGB;
 
 public class SettingUI extends BaseUI {
 
-  public SettingUI(GMain game) {
-    super(game);
+  public SettingUI(Screen screen) {
+    super(screen);
     createUI();
   }
 

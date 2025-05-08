@@ -39,6 +39,23 @@ public class Player {
     this.soundMuted = false;
   }
 
+  public void clearData() {
+    this.score = 0;
+    this.coins = 0;
+    this.hints = DEF_HINTS;
+    this.shuffles = DEF_SHUFFLES;
+    this.undos = DEF_UNDOS;
+    this.rockets = DEF_ROCKETS;
+    this.level = 1;
+    this.currentSkinAniId = DEFAULT_SKIN;
+    this.currentSkinUiId = DEFAULT_SKIN;
+    this.unlockedSkins = new ArrayList<>();
+    this.unlockedSkins.add(DEFAULT_SKIN);
+    this.musicMuted = false;
+    this.soundMuted = false;
+  }
+
+
   public void save() {
     Preferences prefs = Gdx.app.getPreferences("PikachuPlayerData");
     prefs.putInteger("score", score);
@@ -99,6 +116,8 @@ public class Player {
     pathUi = DEFAULT_UI + LIST_SKIN_UI[currentSkinUiId];
   }
 
+
+
   public void addPoints(int points) {
     this.score += points;
   }
@@ -140,8 +159,8 @@ public class Player {
   }
 
   public boolean buyRocket() {
-    if (spendCoins(SHUFFLE_COST)) {
-      this.shuffles++;
+    if (spendCoins(ROCKET_COST)) {
+      this.rockets++;
       return true;
     }
     return false;

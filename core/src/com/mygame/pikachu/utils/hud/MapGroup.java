@@ -19,6 +19,7 @@ Support:
 public class MapGroup extends Group {
   protected ObjectMap<String, Actor> indexer;
   protected String jsonSerialized;
+  private boolean flag = true;
 
   public MapGroup(float w, float h) {
     setSize(w,h);
@@ -93,6 +94,14 @@ public class MapGroup extends Group {
     child.setPosition(posX, posY, align);
   }
 
+  @Override
+  public void act(float delta) {
+    if(flag)
+     super.act(delta);
+    else super.act(delta/4);
+
+  }
+  public void setPause(boolean a){flag =!a;}
   public void setJsonSerialized(String jsonSerialized) {
     this.jsonSerialized = jsonSerialized;
   }

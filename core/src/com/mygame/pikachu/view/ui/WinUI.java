@@ -1,5 +1,6 @@
 package com.mygame.pikachu.view.ui;
 
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.mygame.pikachu.GMain;
@@ -14,8 +15,8 @@ import com.mygame.pikachu.utils.hud.builders.MGB;
 
 public class WinUI extends BaseUI {
 
-  public WinUI(GMain game) {
-    super(game);
+  public WinUI(Screen screen) {
+    super(screen);
   }
 
   @Override
@@ -68,11 +69,13 @@ public class WinUI extends BaseUI {
     switch (action) {
       case "NextLevelAction":
         System.out.println("NextLevelAction Click");
-        game.getPlayer().setLevel(game.getPlayScreen().getLevel()+1);
+        if(game.getPlayScreen().getLevel() == game.getPlayer().getLevel()){
+          game.getPlayer().setLevel(game.getPlayScreen().getLevel()+1);
+          game.getPlayer().save();
+        }
         game.getPlayScreen().hide();
-        game.getPlayScreen().setLevel(game.getPlayScreen().getLevel());
+        game.getPlayScreen().setLevel(game.getPlayScreen().getLevel()+1);
         game.getPlayScreen().show();
-        game.getPlayer().save();
         hide();
         break;
       case "RestartAction":

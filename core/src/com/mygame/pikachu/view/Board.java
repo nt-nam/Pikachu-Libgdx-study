@@ -13,7 +13,6 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.badlogic.gdx.scenes.scene2d.actions.SequenceAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -26,7 +25,6 @@ import com.mygame.pikachu.model.Level;
 import com.mygame.pikachu.model.PathFinder;
 import com.mygame.pikachu.utils.GConstants;
 import com.mygame.pikachu.utils.hud.AL;
-import com.mygame.pikachu.utils.hud.Button;
 import com.mygame.pikachu.utils.hud.builders.IB;
 
 import java.util.ArrayList;
@@ -77,7 +75,7 @@ public class Board extends Group {
     }
 
     List<Integer> listID = new ArrayList<>();
-    for (int i =0; i < 49; i++){
+    for (int i = 0; i < 45; i++) {
       listID.add(i);
     }
     Collections.shuffle(listID, random);
@@ -103,7 +101,7 @@ public class Board extends Group {
 
   private void createLineSelect() {
     GAssetsManager.setTextureAtlas(DEFAULT_ATLAS_CROSS);
-    lineSelect = IB.New().drawable("boder").origin(AL.c).size(animals[0][0].getWidth(), animals[0][0].getHeight()).debug(false).build();
+    lineSelect = IB.New().drawable("boder").origin(AL.c).size(animals[0][0].getWidth(), animals[0][0].getHeight()).build();
 
     lineSelect.addListener(new ClickListener() {
       @Override
@@ -216,11 +214,22 @@ public class Board extends Group {
     fadeOutAnimal(animalSelect, 0.1f);
     fadeOutAnimal(secondAnimal, 0.1f);
 
+    removeAnimalList(animalSelect);
+    removeAnimalList(secondAnimal);
+
     matchedPairs++;
     deselectAnimal();
 
     if (matchedPairs >= totalPairs) {
       handleGameCompletion();
+    }
+  }
+
+  private void removeAnimalList(Animal secondAnimal) {
+    for (Animal a : visibleActors) {
+      if (a == animalSelect || a == secondAnimal) {
+        visibleActors.removeValue(a, true);
+      }
     }
   }
 
@@ -307,8 +316,11 @@ public class Board extends Group {
 
   private void addScoreStars(List<int[]> path) {
     GAssetsManager.setTextureAtlas(DEFAULT_ATLAS_NEWPIKA);
-    Button origin = GMain.hud().query("playMG/score/starOrigin", Button.class);
-    Vector2 posMoveBy = absPos(origin, -70, -165, AL.c);
+    Image origin = GMain.hud().query("playMG/score/starOrigin", Image.class);
+    Vector2 posMoveBy = absPos(origin, -3 * origin.getWidth() * getScaleX(), -3 * origin.getHeight() * getScaleY(), AL.tl);
+    System.out.println(posMoveBy.toString());
+    System.out.println(getStage().getWidth() + " - " + getStage().getHeight());
+    System.out.println(getScaleX());
     float timeAction = 3;
     for (int i = 0; i < path.size(); i++) {
       int[] pair = path.get(i);
@@ -330,6 +342,7 @@ public class Board extends Group {
 //          )
 //      );
     }
+    debugAll();
   }
 
   private void starAt2(float x, float y, Vector2 posMoveBy, float timeAction) {
@@ -338,15 +351,19 @@ public class Board extends Group {
         Actions.parallel(
             Actions.rotateBy(360, 1.3f * timeAction),
             Actions.sequence(
-                Actions.delay(0.3f * timeAction),
-                Actions.moveTo(posMoveBy.x, posMoveBy.y, 0.5f * timeAction),
-                Actions.fadeOut(0.5f * timeAction),
+                Actions.delay(0.4f * timeAction),
+                Actions.moveTo(getWidth() / 2 + posMoveBy.x / getScaleX() / 2, getHeight() / 2 + (posMoveBy.y / getScaleY()) / 2, 0.7f * timeAction),
                 Actions.run(() -> {
                   GMain.player().plusScore(1);
                   GMain.hud().query("playMG/score/scoreLabel", Label.class).setText(GMain.player().getScore() + "");
-                }),
+                })
+            ),
+            Actions.sequence(
+                Actions.delay(0.4f * timeAction),
+                Actions.fadeOut(0.9f * timeAction),
                 Actions.removeActor()
             )
+
         )
     );
   }
@@ -354,16 +371,17 @@ public class Board extends Group {
   private void starAt(float x, float y) {
     GAssetsManager.setTextureAtlas(DEFAULT_ATLAS_NEWPIKA);
     Image star6 = IB.New().drawable("star6").size(TILE_SIZE * 0.7f, TILE_SIZE * 0.7f).parent(this).pos(x, y, AL.bl).build();
-    Button origin = GMain.hud().query("playMG/score/starOrigin", Button.class);
+    Image origin = GMain.hud().query("playMG/score/starOrigin", Image.class);
     Label scoreLabel = GMain.hud().query("playMG/score/scoreLabel", Label.class);
-    Vector2 posMoveBy = absPos(origin, -70, -165, AL.c);
+    Vector2 posMoveBy = absPos(origin, -3 * origin.getWidth() * getScaleX(), -3 * origin.getHeight() * getScaleY(), AL.c);
     float timeAction = 3;
     star6.addAction(
         Actions.parallel(
             Actions.rotateBy(360, 1.3f * timeAction),
             Actions.sequence(
                 Actions.delay(0.3f * timeAction),
-                Actions.moveTo(posMoveBy.x, posMoveBy.y, 0.5f * timeAction),
+                Actions.moveTo(/*posMoveBy.x * getScaleX(), posMoveBy.y * getScaleY()*/
+                    getWidth() / 2 + posMoveBy.x / getScaleX() / 2, getHeight() / 2 + (posMoveBy.y / getScaleY()) / 2, 0.5f * timeAction),
                 Actions.fadeOut(0.5f * timeAction),
                 Actions.run(() -> {
                   GMain.player().plusScore(1);
@@ -373,6 +391,7 @@ public class Board extends Group {
             )
         )
     );
+    debugAll();
   }
 
   private void addCoin() {
@@ -396,7 +415,7 @@ public class Board extends Group {
                   Actions.run(() -> {
                     GMain.player().plusCoin(1);
                     coinLabel.setText(GMain.player().getCoins() + "");
-                    
+
                   }),
                   Actions.removeActor()
               ));
@@ -423,7 +442,7 @@ public class Board extends Group {
     Timer.schedule(new Timer.Task() {
       @Override
       public void run() {
-        System.out.println("Thực hiện sau 2 giây!");
+        System.out.println("Thực hiện win sau 2 giây!");
         GMain.instance().getPlayScreen().completeLevel();
       }
     }, 2f);

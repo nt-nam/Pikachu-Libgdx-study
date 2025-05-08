@@ -47,7 +47,8 @@ public class DebugManager {
       consoleInput.setText("");
     }
   }
-  public void onDebugConsole(){
+
+  public void onDebugConsole() {
     consoleInput.setText("");
     consoleVisible = !consoleVisible;
     consoleInput.setVisible(consoleVisible);
@@ -58,6 +59,7 @@ public class DebugManager {
 //        Gdx.input.setInputProcessor(null);
     }
   }
+
   private void processCommand(String command) {
     if (command.startsWith("p ")) {
       try {
@@ -67,14 +69,21 @@ public class DebugManager {
       } catch (NumberFormatException e) {
         System.out.println("Invalid level ID");
       }
-    }else if (command.startsWith("r")) {
+    } else if (command.startsWith("r")) {
       try {
 
-        GMain.instance().getPlayScreen().dispose();
-        GMain.instance().getPlayScreen().show();
+//        GMain.instance().getPlayScreen().dispose();
+//        GMain.instance().getPlayScreen().show();
+        System.out.println("Not restart");
 //        GMain.instance().setScreen(GMain.instance().getPlayScreen());
       } catch (NumberFormatException e) {
         System.out.println("Not restart");
+      }
+    } else if (command.startsWith("--r")) {
+      try {
+        GMain.player().clearData();
+      } catch (NumberFormatException e) {
+        System.out.println("Not clear data ");
       }
     }
   }

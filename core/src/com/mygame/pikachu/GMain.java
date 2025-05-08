@@ -14,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygame.pikachu.data.GAssetsManager;
+import com.mygame.pikachu.exSprite.particle.GParticleSystem;
 import com.mygame.pikachu.model.Player;
 import com.mygame.pikachu.screen.HomeScreen;
 import com.mygame.pikachu.screen.LoadingScreen;
@@ -171,6 +172,11 @@ public class GMain extends Game {
     assetManager.loadTextureAtlas(DEFAULT_ATLAS_NEWPIKA);
     assetManager.loadBitmapFont(BMF + ".fnt");
     assetManager.loadSound("sound/bubble_fall.mp3");
+    new GParticleSystem("sparkleParticle.p","particle",5,10);
+    new GParticleSystem("simple.p","particle",5,10);
+    new GParticleSystem("firework.p","particle",5,10);
+    new GParticleSystem("fallLight.p","particle",5,10);
+    new GParticleSystem("fallLight_modified.p","particle",5,10);
     assetManager.finishLoading();
   }
 

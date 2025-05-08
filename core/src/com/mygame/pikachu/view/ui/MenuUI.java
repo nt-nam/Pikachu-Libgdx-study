@@ -1,5 +1,6 @@
 package com.mygame.pikachu.view.ui;
 
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
@@ -18,8 +19,8 @@ import com.mygame.pikachu.utils.hud.builders.LB;
 import com.mygame.pikachu.utils.hud.builders.MGB;
 
 public class MenuUI extends BaseUI {
-  public MenuUI(GMain game) {
-    super(game);
+  public MenuUI(Screen screen) {
+    super(screen);
     index("menu", this);
   }
 
@@ -81,8 +82,8 @@ public class MenuUI extends BaseUI {
     GAssetsManager.setTextureAtlas(GConstants.DEFAULT_ATLAS_LEADER_BOARD);
     IB.New().drawable("ribbon").scale(0.9f, 1).pos(0, 75, AL.ct).parent(this).build();
 
-    GAssetsManager.setTextureAtlas(GConstants.DEFAULT_ATLAS_NEWPIKA);
-    BB.New().bg("btn_pause").transform(true).pos(50, 50, AL.tr).idx("closeMenu").parent(this).build();
+    GAssetsManager.setTextureAtlas(GConstants.DEFAULT_ATLAS_COMMON);
+    BB.New().bg("btn_exit").transform(true).pos(50, 50, AL.tr).idx("closeMenu").parent(this).build();
   }
 
   @Override
@@ -91,6 +92,7 @@ public class MenuUI extends BaseUI {
       case "close":
         System.out.println("click CloseMenu");
         hide();
+        screen.resume();
         break;
       case "playlevel":
         game.getPlayScreen().setLevel(intParam);

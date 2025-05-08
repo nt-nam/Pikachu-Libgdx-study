@@ -1,5 +1,7 @@
 package com.mygame.pikachu.model;
 
+import com.badlogic.gdx.utils.JsonValue;
+
 public class Level {
   private int levelId;
   private int rows;
@@ -7,6 +9,10 @@ public class Level {
   private int pairs;
   private float time;
   private int type;
+  public int animalTypes;
+  public int obstacles;
+  public JsonValue moveRules;
+  public JsonValue connectionRules;
 
   public Level() {}
 
@@ -16,4 +22,14 @@ public class Level {
   public int getPairs() { return pairs; }
   public float getTime() { return time; }
   public int getType(){return type;}
+
+  public int getAnimalTypes() {return animalTypes;}
+
+  public int getObstacles() {return obstacles;}
+
+  public JsonValue getMoveRules() {return moveRules;}
+
+  public JsonValue getConnectionRules() {
+    return connectionRules;
+  }
 }

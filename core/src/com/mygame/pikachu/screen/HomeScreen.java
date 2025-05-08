@@ -6,11 +6,16 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.mygame.pikachu.GMain;
 import com.mygame.pikachu.data.GAssetsManager;
+import com.mygame.pikachu.exSprite.particle.GParticleSprite;
+import com.mygame.pikachu.exSprite.particle.GParticleSystem;
 import com.mygame.pikachu.model.Player;
 import com.mygame.pikachu.utils.GConstants;
 import com.mygame.pikachu.utils.hud.AL;
@@ -32,20 +37,17 @@ public class HomeScreen implements Screen, EventHandler {
   private SparkleEffect sparkleEffect;
 
   private float centerX, centerY;
-  int levelCompleted;
 
   public HomeScreen(GMain game) {
     super();
     this.game = game;
     this.player = game.getPlayer();
-    levelCompleted = 4;
     centerX = GMain.stage().getWidth() / 2;
     centerY = GMain.stage().getHeight() / 2;
     homeMG = new MapGroup(centerX * 2, centerY * 2);
     GMain.hud().addActor(homeMG);
 
-    player.setLevel(levelCompleted);
-    popup = new PopupUI(game);
+    popup = new PopupUI(this);
 
     createAssetHome();
     addHandler();
@@ -61,8 +63,8 @@ public class HomeScreen implements Screen, EventHandler {
 
   private void createBG() {
     GAssetsManager.setTextureAtlas(GConstants.DEFAULT_ATLAS_NEWPIKA);
-    IB.New().drawable("bg").size(centerX*2,centerY*2).pos(0, 0, AL.c).parent(homeMG).build();
-    sparkleEffect = new SparkleEffect(centerX*1.8f,centerY*1.8f);
+    IB.New().drawable("bg").size(centerX * 2, centerY * 2).pos(0, 0, AL.c).parent(homeMG).build();
+    sparkleEffect = new SparkleEffect(centerX * 1.8f, centerY * 1.8f);
     homeMG.addActor(sparkleEffect, Align.center);
     sparkleEffect.start();
   }
@@ -80,6 +82,18 @@ public class HomeScreen implements Screen, EventHandler {
             Actions.scaleTo(1, 1, 2)
         )));
 
+    Group p = new Group();
+    p.setSize(100, 100);
+    p.addListener(new ClickListener() {
+      @Override
+      public void clicked(InputEvent event, float x, float y) {
+        player.setCoins(5000);
+        player.setHints(200);
+        player.setShuffles(200);
+        player.setRockets(200);
+      }
+    });
+    homeMG.addActor(p, Align.topRight);
 
     createLight(0, 0, -30, 920);
     createLight(1, -150, -30, 1000);
@@ -116,14 +130,15 @@ public class HomeScreen implements Screen, EventHandler {
   @Override
   public void show() {
     GMain.hud().addActor(homeMG);
+//    GParticleSprite gParticleSprite = GParticleSystem.getGParticleSystem("sparkleParticle.p").create(homeMG,10,10);
   }
 
   @Override
   public void render(float delta) {
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
     Gdx.gl.glClearColor(0.4f, 0.5f, 0.4f, 1);
-    GMain.stage().draw();
     GMain.stage().act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
+    GMain.stage().draw();
   }
 
   @Override
@@ -133,10 +148,12 @@ public class HomeScreen implements Screen, EventHandler {
 
   @Override
   public void pause() {
+    homeMG.setPause(true);
   }
 
   @Override
   public void resume() {
+    homeMG.setPause(false);
   }
 
   @Override
@@ -172,10 +189,12 @@ public class HomeScreen implements Screen, EventHandler {
         break;
       case "showMenu":
         System.out.println("click menu");
-        popup.showMenuUI();
+        pause();
+        popup.showMenuUI(this);
         break;
       case "showShop":
         System.out.println("click shop");
+        pause();
         popup.showShopUI();
         break;
       default:

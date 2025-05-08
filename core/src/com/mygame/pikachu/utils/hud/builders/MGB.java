@@ -51,7 +51,7 @@ public class MGB extends AbstractActorBuilder<MapGroup> {
             @Override
             public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
               if (bd.index != null && !bd.index.isEmpty()) {
-                out.setDebug(true);
+                out.setDebug(false);
                 adapter.debugMsg(bd.name + "/" + bd.index);
               }
             }

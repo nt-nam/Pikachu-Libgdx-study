@@ -35,6 +35,7 @@ public class GConstants {
   public static final int HINT_COST                  = 20;  // Giá mua gợi ý (xu)
   public static final int SHUFFLE_COST               = 30;  // Giá mua xáo trộn (xu)
   public static final int UNDO_COST                  = 25;  // Giá mua hoàn tác (xu)
+  public static final int ROCKET_COST                  = 25;  // Giá mua hoàn tác (xu)
 
   // Cài đặt âm thanh
   public static final float MUSIC_VOLUME_DEFAULT = 0.5f; // Âm lượng nhạc mặc định (0.0f - 1.0f)

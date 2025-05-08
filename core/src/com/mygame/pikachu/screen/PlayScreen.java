@@ -6,15 +6,20 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.utils.Align;
 import com.mygame.pikachu.GMain;
 import com.mygame.pikachu.data.GAssetsManager;
 import com.mygame.pikachu.data.LevelManager;
+import com.mygame.pikachu.data.ParticleActor;
+import com.mygame.pikachu.exSprite.particle.GParticleSprite;
+import com.mygame.pikachu.exSprite.particle.GParticleSystem;
 import com.mygame.pikachu.model.Level;
 import com.mygame.pikachu.screen.widget.BorderPM;
 import com.mygame.pikachu.utils.GConstants;
@@ -27,6 +32,7 @@ import com.mygame.pikachu.utils.hud.builders.LB;
 import com.mygame.pikachu.utils.hud.builders.MGB;
 import com.mygame.pikachu.utils.hud.external.EventHandler;
 import com.mygame.pikachu.view.Board;
+import com.mygame.pikachu.view.SparkleEffect;
 import com.mygame.pikachu.view.ui.PopupUI;
 
 public class PlayScreen implements Screen, EventHandler {
@@ -36,6 +42,7 @@ public class PlayScreen implements Screen, EventHandler {
   private Level levelData;
   private PopupUI popup;
   private Pixmap pixmap;
+  GParticleSprite gParticleSprite2;
 
   private int level;
   private float timePB;
@@ -47,7 +54,7 @@ public class PlayScreen implements Screen, EventHandler {
     this.level = 1;
     levelManager = new LevelManager();
     board = new Board();
-    popup = new PopupUI(game);
+    popup = new PopupUI(this);
     playMG = MGB.New().size(GMain.stage().getWidth(), GMain.stage().getHeight()).pos(0, 0, AL.tr).idx("playMG").parent(GMain.hud()).build();
     centerX = playMG.getWidth() / 2;
     centerY = playMG.getHeight() / 2;
@@ -61,6 +68,8 @@ public class PlayScreen implements Screen, EventHandler {
     pixmap.fillCircle(0, 0, 20);
     initConstant();
     createBtn();
+    createLabel();
+    createProgressBar();
     addHandle();
     playMG.addActor(board);
   }
@@ -69,17 +78,42 @@ public class PlayScreen implements Screen, EventHandler {
     GAssetsManager.setTextureAtlas(GConstants.DEFAULT_ATLAS_NEWPIKA);
     IB.New().drawable("bg").size(centerX * 2, centerY * 2).pos(0, 0, AL.c).parent(playMG).build();
 
-    MGB.New().size(196, 96).childs(
-        IB.New().texture(new Texture(new BorderPM().get(196, 64, 30, 0x696969FF))).origin(AL.cl).pos(0, 0, AL.cl),
-        IB.New().drawable("coin").idx("coinOrigin").pos(0, 0, AL.cr).scale(0.9f),
-        LB.New().font(GConstants.BMF).text(GMain.player().getCoins() + "").fontScale(1f).pos(25, 0, AL.cl).idx("coinLabel")
-    ).origin(AL.ct).pos(0, 20, AL.ct).idx("coinT").parent(playMG).debug(false).build();
+    createParticle();
 
-    MGB.New().size(196, 96).childs(
-        IB.New().texture(new Texture(new BorderPM().get(196, 64, 30, 0x696969FF))).origin(AL.cl).pos(0, 0, AL.cl),
-        BB.New().bg("star6").idx("starOrigin").pos(0, 0, AL.cr).scale(0.9f),
-        LB.New().font(GConstants.BMF).text(GMain.player().getScore() + "").fontScale(1f).pos(25, 0, AL.cl).idx("scoreLabel")
-    ).origin(AL.tr).pos(20, 20, AL.tr).idx("score").parent(playMG).debug(false).build();
+    float w = centerX * 1.6f, h = 100;
+    int brownColor2 = 0x964800FF;
+    int brownColor1 = 0xB87333FF;
+    MGB.New().size(w * 0.35f, h).childs(
+        IB.New().texture(new Texture(new BorderPM().get(w * 3 / 10, h * 8 / 10, 25, brownColor1))).pos(0, 0, AL.cr),
+        IB.New().texture(new Texture(new BorderPM().get(w * 25 / 100, h * 70 / 100, 25, brownColor2))).pos(5f, 0, AL.cr),
+        LB.New().font(GConstants.BMF).text("" + GMain.player().getCoins()).pos(20, 0, AL.cr).idx("coinLabel"),
+        IB.New().drawable("coin").idx("coinOrigin").pos(10, 0, AL.cl).scale(0.9f)
+    ).pos(0, 20, AL.ct).idx("coinT").parent(playMG).build();
+
+    MGB.New().size(w * 0.35f, h).childs(
+        IB.New().texture(new Texture(new BorderPM().get(w * 3 / 10, h * 8 / 10, 25, brownColor1))).pos(0, 0, AL.cr),
+        IB.New().texture(new Texture(new BorderPM().get(w * 25 / 100, h * 70 / 100, 25, brownColor2))).pos(5f, 0, AL.cr),
+        LB.New().font(GConstants.BMF).text("" + GMain.player().getScore()).pos(20, 0, AL.cr).idx("scoreLabel"),
+        IB.New().drawable("star6").idx("starOrigin").pos(10, 0, AL.cl).scale(0.9f)
+    ).pos(20, 20, AL.tr).idx("score").parent(playMG).build();
+    playMG.debugAll();
+  }
+
+  private void createParticle() {
+
+//    ParticleEffect effect2 = new ParticleEffect();
+//    effect2.load(Gdx.files.internal("particle/sparkleParticle.p"), Gdx.files.internal("particle/"));
+//    ParticleActor particleActor = new ParticleActor(effect2);
+//    particleActor.setPosition(200, 400);
+//    playMG.addActor(particleActor);
+
+//    GParticleSprite gParticleSprite = GParticleSystem.getGParticleSystem("sparkleParticle.p").create(playMG,0,0);
+//    gParticleSprite.setLoop(true);
+//    gParticleSprite.debug();
+
+    SparkleEffect sparkleEffect = new SparkleEffect(centerX * 2f, centerY * 2f);
+    playMG.addActor(sparkleEffect, Align.center);
+    sparkleEffect.start();
   }
 
   private void initFlexible() {
@@ -102,12 +136,14 @@ public class PlayScreen implements Screen, EventHandler {
   private void createProgressBar() {
     pixmap.fill();
     GAssetsManager.setTextureAtlas(GConstants.DEFAULT_ATLAS_PLAY);
-    MGB.New().size(561, 41).childs(
+    MapGroup pro = MGB.New().size(561, 41).childs(
         IB.New().drawable("barframe").pos(0, 0, AL.c),
         IB.New().drawable("bar").pos(0, 0, AL.c),
         IB.New().texture(new Texture(pixmap)).size(547, 30).origin(AL.cr).pos(6, 0, AL.cr).scale(0.5f, 1).idx("barOv")
     ).pos(0, centerY * 0.75f, AL.c).idx("progress").parent(playMG).build();
     timePB = 0;
+    gParticleSprite2 = GParticleSystem.getGParticleSystem("fallLight.p").create(playMG, pro.getX(), pro.getY() + pro.getHeight() - 5);
+//    gParticleSprite.setName("simple");
   }
 
   private boolean updateProgressBar(float delta) {
@@ -118,12 +154,14 @@ public class PlayScreen implements Screen, EventHandler {
       return true;
     } else {
       barOv.setScale((timePB) / levelData.getTime(), 1);
+      gParticleSprite2.setPosition(90 + barOv.getWidth() - barOv.getWidth() * barOv.getScaleX(), gParticleSprite2.getY());
+//      playMG.query("sparkleParticle",GParticleSprite.class).setPosition(barOv.getX(),barOv.getY(),AL.tl);
     }
     return false;
   }
 
   private void createLabel() {
-    LB.New().font(GConstants.BMF).text("Level " + level).pos(150, 50, AL.tl).parent(playMG).build();
+    LB.New().font(GConstants.BMF).text("Level " + level).pos(150, 50, AL.tl).idx("numberLevel").parent(playMG).build();
   }
 
   private void createBtn() {
@@ -151,11 +189,14 @@ public class PlayScreen implements Screen, EventHandler {
   }
 
   private void rocketLaunch() {
+    GAssetsManager.setTextureAtlas(GConstants.DEFAULT_ATLAS_NEWPIKA);
+    float fullDuration = 5;
     for (int i = 0; i < 2; i++) {
       Vector2[] vt = board.getRandomVisibleActor();
       if (vt == null) return;
       IB.New().drawable("rocket").size(40, 120).pos(0, centerY * 0.2f * (i + 1), AL.bl).parent(playMG).build().addAction(
           Actions.sequence(
+              Actions.delay(i * 0.5f + 1),
               new RandomPathAction(MathUtils.random(centerX, centerX * 3f), centerY * 2, 0.5f, 20),
               Actions.moveTo(centerX * 1.5f, centerY * 3),
               new RandomPathAction(vt[0].x, vt[0].y, 0.8f, 20),
@@ -163,8 +204,9 @@ public class PlayScreen implements Screen, EventHandler {
           )
       );
 
-      IB.New().drawable("rocket").size(40, 120).pos(centerX * 2, centerY * 0.2f * (i + 1), AL.bl).parent(playMG).build().addAction(
+      IB.New().drawable("rocket").size(40, 120).pos(centerX * 2 - 50, centerY * 0.2f * (i + 1), AL.bl).parent(playMG).build().addAction(
           Actions.sequence(
+              Actions.delay(i * 0.5f + 1),
               new RandomPathAction(MathUtils.random(-centerX, centerX), centerY * 2, 0.5f, 20),
               Actions.moveTo(centerX / 2, centerY * 3),
               new RandomPathAction(vt[1].x, vt[1].y, 0.8f, 20),
@@ -178,14 +220,15 @@ public class PlayScreen implements Screen, EventHandler {
     isPause = p;
   }
 
-  public void restart(){
+  public void restart() {
     // TODO caanf hoan thien lai phan nay
     GMain.player().save();
 //    board.restart();
     initFlexible();
     playMG.query("progress/barOv", Image.class).setScale(0, 1);
   }
-  public void nextLevel(){
+
+  public void nextLevel() {
     GMain.player().save();
     level++;
     initFlexible();
@@ -196,11 +239,25 @@ public class PlayScreen implements Screen, EventHandler {
   public void show() {
     System.out.println("[PlayScreen]: Show");
     GMain.hud().addActor(playMG);
-    createLabel();
-    createProgressBar();
+    reloadLabel();
+    reloadProgessBar();
     initFlexible();
-    board.debugAll();
     isPause = false;
+    playMG.debugAll();
+  }
+
+  private void reloadProgessBar() {
+    playMG.query("progress/barOv", Image.class).setScale(0, 1);
+    timePB = 0;
+  }
+
+  private void reloadLabel() {
+    playMG.query("numberLevel", Label.class).setText("Level " + level);
+    playMG.query("coinT/coinLabel", Label.class).setText(GMain.player().getCoins());
+    playMG.query("score/scoreLabel", Label.class).setText(GMain.player().getScore());
+    playMG.query("btnHint/label", Label.class).setText(GMain.player().getHints());
+    playMG.query("btnShuffle/label", Label.class).setText(GMain.player().getShuffles());
+    playMG.query("btnRocket/label", Label.class).setText(GMain.player().getRockets());
   }
 
   @Override
@@ -303,7 +360,6 @@ public class PlayScreen implements Screen, EventHandler {
           }
         }
         break;
-
     }
   }
 }

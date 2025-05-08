@@ -7,8 +7,8 @@ public class BorderPM {
   public BorderPM(){
   }
 
-  public Pixmap get(int width, int height, float cornerRadius, int color) {
-    pixmap = new Pixmap(width, height, Pixmap.Format.RGBA8888);
+  public Pixmap get(float width, float height, float cornerRadius, int color) {
+    pixmap = new Pixmap((int) width, (int) height, Pixmap.Format.RGBA8888);
     pixmap.setColor(color); // Màu của hình chữ nhật (ví dụ: màu trắng)
 
     // Vẽ hình chữ nhật bo góc
@@ -19,8 +19,8 @@ public class BorderPM {
     pixmap.fillCircle((int) (width - cornerRadius), (int) (height - cornerRadius), (int) cornerRadius); // Góc dưới-phải
 
     // Vẽ các cạnh và phần giữa
-    pixmap.fillRectangle((int) cornerRadius, 0, width - 2 * (int) cornerRadius, height); // Cạnh trên và dưới
-    pixmap.fillRectangle(0, (int) cornerRadius, width, height - 2 * (int) cornerRadius); // Cạnh trái và phải
+    pixmap.fillRectangle((int) cornerRadius, 0, (int) (width - 2 * cornerRadius), (int) height); // Cạnh trên và dưới
+    pixmap.fillRectangle(0, (int) cornerRadius, (int) width, (int) (height - 2 * cornerRadius)); // Cạnh trái và phải
     return pixmap;
   }
 }

@@ -1,263 +1,294 @@
 package com.mygame.pikachu.exSprite.particle;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.ParticleEmitter;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.Pool;
+//import com.core.util.GLayer;
+//import com.core.util.GRes;
+//import com.core.util.GStage;
 import com.mygame.pikachu.GMain;
+import com.mygame.pikachu.util.GRes;
 
 import java.util.Iterator;
 
 public class GParticleSystem extends Pool implements Disposable {
-   private static ObjectMap particleManagerTable = new ObjectMap();
-   private boolean autoFree;
-   private Array buff = new Array();
-   private Group defaultGroup;
-   private ParticleEffect effectSample;
-   int freeMin;
-   private boolean isAdditiveGroup;
-   private boolean isLoop;
-   private String particleName;
+  private static ObjectMap particleManagerTable = new ObjectMap();
+  private boolean autoFree;
+  private Array buff = new Array();
+  private Group defaultGroup;
+  public ParticleEffect effectSample;
+  int freeMin;
+  private boolean isAdditiveGroup;
+  private boolean isLoop;
+  private String particleName;
 
-   static {
-      registerParticleSystemUpdate();
-   }
+  static {
+    registerParticleSystemUpdate();
+  }
 
-   public GParticleSystem(String name, int initialCapacity, int max) {
-      super(initialCapacity, max);
-      this.defaultGroup = GMain.hud();
-      this.isLoop = false;
-      this.autoFree = true;
-      this.isAdditiveGroup = false;
-      this.init(name, max);
-   }
+  public GParticleSystem(String name, int initialCapacity, int max) {
+    super(initialCapacity, max);
+//    this.defaultGroup = GLayer.ui.getGroup();
+    this.defaultGroup = GMain.hud();
+    this.isLoop = false;
+    this.autoFree = true;
+    this.isAdditiveGroup = false;
+    this.init(name, max);
+  }
 
-//   public GParticleSystem(String name, FileHandle var2, int initialCapacity, int max) {
-//      super(initialCapacity, max);
-//      this.defaultGroup = GMain.hud();
-//      this.isLoop = false;
-//      this.autoFree = true;
-//      this.isAdditiveGroup = false;
-//      if(!GMain.getAssetHelper().isLoaded(GRes.getParticlePath(name))) {
-//         GMain.getAssetHelper().addToLog(GMain.getAssetHelper().loadParticleEffectAsImageDir(name, var2) + "---------" + "ParticleEffect.class");
-//         GMain.getAssetHelper().finishLoading();
-//         GMain.getAssetHelper().initParticle(GMain.getAssetHelper().getParticleEffect(name));
+  public GParticleSystem(String name, FileHandle file, int initialCapacity, int max) {
+    super(initialCapacity, max);
+//    this.defaultGroup = GLayer.ui.getGroup();
+    this.defaultGroup = GMain.hud();
+    this.isLoop = false;
+    this.autoFree = true;
+    this.isAdditiveGroup = false;
+    if (!GMain.getAssetHelper().isLoaded(name)) {
+      GMain.getAssetHelper().addToLog(GMain.getAssetHelper().loadParticleEffectAsImageDir(name, file) + "---------" + "ParticleEffect.class");
+      GMain.getAssetHelper().finishLoading();
+      GMain.getAssetHelper().initParticle(GMain.getAssetHelper().getParticleEffect(name));
+    }
+
+    this.init(name, max);
+  }
+
+  public GParticleSystem(String pname, String atlas, int initialCapacity, int max) {
+    super(initialCapacity, max);
+//    this.defaultGroup = GLayer.ui.getGroup();
+    this.defaultGroup = GMain.hud();
+    this.isLoop = false;
+    this.autoFree = true;
+    this.isAdditiveGroup = false;
+    if (!GMain.getAssetHelper().isLoaded(GRes.getParticlePath(pname))) {
+      GMain.getAssetHelper().addToLog(GMain.getAssetHelper().loadParticleEffectAsTextureAtlas(pname, atlas) + "---------" + "ParticleEffect.class");
+      GMain.getAssetHelper().finishLoading();
+      GMain.getAssetHelper().initParticle(GMain.getAssetHelper().getParticleEffect(pname));
+    }
+
+    this.init(pname, max);
+  }
+
+  public GParticleSystem(String name, boolean forceLoad, int initialCapacity, int max) {
+    super(initialCapacity, max);
+//    this.defaultGroup = GLayer.ui.getGroup();
+    this.defaultGroup = GMain.hud();
+    this.isLoop = false;
+    this.autoFree = true;
+    this.isAdditiveGroup = false;
+    if (!GMain.getAssetHelper().isLoaded(GRes.getParticlePath(name)) && forceLoad) {
+      GMain.getAssetHelper().addToLog(GMain.getAssetHelper().loadParticleEffectAsTextureAtlas(name) + "---------" + "ParticleEffect.class");
+      GMain.getAssetHelper().finishLoading();
+      GMain.getAssetHelper().initParticle(GMain.getAssetHelper().getParticleEffect(name));
+    }
+
+    this.init(name, max);
+  }
+
+  public static void disposeAll() {
+    Iterator it = particleManagerTable.keys().iterator();
+
+    while (it.hasNext()) {
+      String name = (String) it.next();
+      ((GParticleSystem) particleManagerTable.get(name)).dispose();
+    }
+
+    particleManagerTable.clear();
+  }
+
+  public static void freeAll() {
+    Iterator it = particleManagerTable.values().iterator();
+
+    while (it.hasNext()) {
+      GParticleSystem particleSys = (GParticleSystem) it.next();
+      if (particleSys.autoFree) {
+        particleSys.clear();
+      }
+    }
+
+  }
+
+  public static GParticleSystem getGParticleSystem(String name) {
+    GParticleSystem particleSystem = (GParticleSystem) particleManagerTable.get(name);
+    if (particleSystem == null) {
+//      GMain.platform().TrackCustomKey("particle_null", name);
+    }
+    return particleSystem;
+  }
+
+  private void init(String name, int freeMin) {
+    this.particleName = name;
+    this.effectSample = GMain.getAssetHelper().getParticleEffect(name);
+    particleManagerTable.put(name, this);
+    this.freeMin = freeMin;
+
+    for (int i = 0; i < freeMin; ++i) {
+      this.free(this.newObject());
+    }
+
+  }
+
+  private static void registerParticleSystemUpdate() {
+//    GStage.registerUpdateService("particleSystemUpdate", new GStage.GUpdateService() {
+//      public boolean update(float delta) {
+//        Iterator it = GParticleSystem.particleManagerTable.values().iterator();
+//
+//        while (it.hasNext()) {
+//          ((GParticleSystem) it.next()).update();
+//        }
+//        return false;
 //      }
-//
-//      this.init(name, max);
-//   }
-//
-//   public GParticleSystem(String name, String atlasname, int initialCapacity, int max) {
-//      super(initialCapacity, max);
-//      this.defaultGroup = GLayer.ui.getGroup();
-//      this.isLoop = false;
-//      this.autoFree = true;
-//      this.isAdditiveGroup = false;
-//      if(!GMain.getAssetHelper().isLoaded(GRes.getParticlePath(name))) {
-//         GMain.getAssetHelper().addToLog(GMain.getAssetHelper().loadParticleEffectAsTextureAtlas(name, atlasname) + "---------" + "ParticleEffect.class");
-//         GMain.getAssetHelper().finishLoading();
-//         GMain.getAssetHelper().initParticle(GMain.getAssetHelper().getParticleEffect(name));
-//      }
-//
-//      this.init(name, max);
-//   }
-//
-//   public GParticleSystem(String name, boolean var2, int initialCapacity, int max) {
-//      super(initialCapacity, max);
-//      this.defaultGroup = GLayer.ui.getGroup();
-//      this.isLoop = false;
-//      this.autoFree = true;
-//      this.isAdditiveGroup = false;
-//      if(!GMain.getAssetHelper().isLoaded(GRes.getParticlePath(name)) && var2) {
-//         GMain.getAssetHelper().addToLog(GMain.getAssetHelper().loadParticleEffectAsTextureAtlas(name) + "---------" + "ParticleEffect.class");
-//         GMain.getAssetHelper().finishLoading();
-//         GMain.getAssetHelper().initParticle(GMain.getAssetHelper().getParticleEffect(name));
-//      }
-//
-//      this.init(name, max);
-//   }
+//    });
+  }
 
-   public static void disposeAll() {
-      Iterator var0 = particleManagerTable.keys().iterator();
+  public static void saveAllFreeMin() {
+    FileHandle var0 = Gdx.files.local("GPoolInfo.txt");
+    var0.writeString("\r\n_________GParticleSystem__________\r\n\r\n", true);
+    Iterator it = particleManagerTable.values().iterator();
 
-      while(var0.hasNext()) {
-         String var1 = (String)var0.next();
-         ((GParticleSystem)particleManagerTable.get(var1)).dispose();
+    while (it.hasNext()) {
+      GParticleSystem particleSys = (GParticleSystem) it.next();
+      var0.writeString(particleSys.particleName + "  ___  " + particleSys.freeMin + " / " + particleSys.max + "\r\n", true);
+    }
+
+  }
+
+  private void update() {
+    Iterator it = this.buff.iterator();
+
+    while (it.hasNext()) {
+      GParticleSprite particle = (GParticleSprite) it.next();
+      if (particle.isComplete()) {
+        if (this.isLoop) {
+          particle.reset();
+        } else {
+          this.free(particle);
+        }
       }
+    }
 
-      particleManagerTable.clear();
-   }
+  }
 
-   public static void freeAll() {
-      Iterator var0 = particleManagerTable.values().iterator();
+  public void clear() {
+    Iterator it = this.buff.iterator();
 
-      while(var0.hasNext()) {
-         GParticleSystem var1 = (GParticleSystem)var0.next();
-         if(var1.autoFree) {
-            var1.clear();
-         }
-      }
+    while (it.hasNext()) {
+      GParticleSprite particleSprite = (GParticleSprite) it.next();
+      particleSprite.remove();
+      this.free(particleSprite);
+    }
 
-   }
+    this.buff.clear();
+    super.clear();
+  }
 
-   public static GParticleSystem getGParticleSystem(String var0) {
-      return (GParticleSystem)particleManagerTable.get(var0);
-   }
+  public GParticleSprite create(float x, float y) {
+    return this.create(this.defaultGroup, x, y);
+  }
 
-   private void init(String var1, int var2) {
-      this.particleName = var1;
-      this.effectSample = GMain.getAssetHelper().getParticleEffect(var1);
-      particleManagerTable.put(var1, this);
-      this.freeMin = var2;
+  public GParticleSprite create(Group group, float x, float y) {
+    GParticleSprite var4 = this.obtain();
+    if (var4 == null)
+      return null;
+    var4.setName(this.particleName);
+    var4.setPool(this);
+    if (group != null)
+      group.addActor(var4);
+    this.buff.add(var4);
+    var4.setPosition(x, y);
+    var4.reset();
+    return var4;
+  }
 
-      for(int var3 = 0; var3 < var2; ++var3) {
-         this.free(this.newObject());
-      }
+  public GParticleSprite create(Group group, Actor actorBefore, float x, float y) {
+    GParticleSprite var4 = this.obtain();
+    if (var4 == null)
+      return null;
+    var4.setName(this.particleName);
+    var4.setPool(this);
+    if (group != null)
+      group.addActorBefore(actorBefore, var4);
+    this.buff.add(var4);
+    var4.setPosition(x, y);
+    var4.reset();
+    return var4;
+  }
 
-   }
+  public void dispose() {
+    particleManagerTable.remove(this.particleName);
+    Iterator it = this.buff.iterator();
 
-   private static void registerParticleSystemUpdate() {
-//      GStage.registerUpda
+    while (it.hasNext()) {
+      GParticleSprite particleSprite = (GParticleSprite) it.next();
+      particleSprite.remove();
+      this.free(particleSprite);
+      particleSprite.dispose();
+    }
 
-   }
+    this.buff.clear();
+    this.effectSample.dispose();
+    this.effectSample = null;
+  }
 
-   public static void saveAllFreeMin() {
-//      FileHandle var0 = Gdx.files.local("GPoolInfo.txt");
-//      var0.writeString("\r\n_________GParticleSystem__________\r\n\r\n", true);
-//      Iterator var1 = particleManagerTable.values().iterator();
-//
-//      while(var1.hasNext()) {
-//         GParticleSystem var2 = (GParticleSystem)var1.next();
-//         var0.writeString(var2.particleName + "  ___  " + var2.freeMin + " / " + var2.max + "\r\n", true);
-//      }
+  public void free(GParticleSprite particle) {
+    if (particle != null) {
+      particle.setName((String) null);
+      particle.remove();
+      particle.setScale(1.0F, 1.0F);
+      particle.setRotation(0.0F);
+      particle.setPosition(0.0F, 0.0F);
+      particle.setEmittersPosition(0.0F, 0.0F);
+      particle.setTransform(true);
+      particle.clearActions();
+      particle.clearListeners();
+      this.buff.removeValue(particle, true);
+      particle.setPool(null);
+      super.free(particle);
+    }
 
-   }
+  }
 
-   private void update() {
-      Iterator var1 = this.buff.iterator();
+  public boolean isAdditiveGroup() {
+    return this.isAdditiveGroup;
+  }
 
-      while(var1.hasNext()) {
-         GParticleSprite var2 = (GParticleSprite)var1.next();
-         if(var2.isComplete()) {
-            if(this.isLoop) {
-               var2.reset();
-            } else {
-               this.free(var2);
-            }
-         }
-      }
+  protected GParticleSprite newObject() {
+    return new GParticleSprite(this.effectSample);
+  }
 
-   }
+  public GParticleSprite obtain() {
+    int freeCount = this.getFree();
+    if (freeCount == 0) {
+      System.err.println(this.max + " : Particle obtain  _______  " + this.particleName + " : " + this.getFree());
+    }
+    this.freeMin = Math.min(freeCount, this.freeMin);
+    return (GParticleSprite) super.obtain();
+  }
 
-   public void clear() {
-      Iterator var1 = this.buff.iterator();
+  public void setAutoFree(boolean autoFree) {
+    this.autoFree = autoFree;
+  }
 
-      while(var1.hasNext()) {
-         GParticleSprite var2 = (GParticleSprite)var1.next();
-         var2.remove();
-         this.free(var2);
-      }
+  public void setDefaultGroup(Group group) {
+    this.defaultGroup = group;
+  }
 
-      this.buff.clear();
-      super.clear();
-   }
+  public void setLoop(boolean isLoop) {
+    Iterator it = this.effectSample.getEmitters().iterator();
 
-   public GParticleSprite create(float x, float y) {
-      return this.create(this.defaultGroup, x, y);
-   }
+    while (it.hasNext()) {
+      ((ParticleEmitter) it.next()).setContinuous(isLoop);
+    }
 
-   public GParticleSprite create(Group group, float x, float y) {
-      GParticleSprite particle = this.obtain();
-      particle.setName(this.particleName);
-      particle.setPool(this);
-      if(group != null)
-         group.addActor(particle);
-      this.buff.add(particle);
-      particle.setPosition(x, y);
-      particle.reset();
-      return particle;
-   }
+  }
 
-
-   public void dispose() {
-      particleManagerTable.remove(this.particleName);
-      Iterator var1 = this.buff.iterator();
-
-      while(var1.hasNext()) {
-         GParticleSprite var2 = (GParticleSprite)var1.next();
-         var2.remove();
-         this.free(var2);
-         var2.dispose();
-      }
-
-      this.buff.clear();
-      this.effectSample.dispose();
-      this.effectSample = null;
-   }
-
-   public void free(GParticleSprite var1) {
-      if(var1 != null) {
-
-         var1.setName((String)null);
-         var1.remove();
-         var1.setScale(1.0F, 1.0F);
-         var1.setRotation(0.0F);
-         var1.setPosition(0.0F, 0.0F);
-         var1.setEmittersPosition(0.0F, 0.0F);
-         var1.setTransform(true);
-         var1.clearActions();
-         var1.clearListeners();
-         this.buff.removeValue(var1, true);
-         var1.setPool((GParticleSystem)null);
-         super.free(var1);
-         //System.err.println(this.max + " : Particle free  _______  " + this.particleName + " : " + this.getFree());
-      }
-
-   }
-
-   public boolean isAdditiveGroup() {
-      return this.isAdditiveGroup;
-   }
-
-   protected GParticleSprite newObject() {
-      return new GParticleSprite(this.effectSample);
-   }
-
-   public GParticleSprite obtain() {
-      int var1 = this.getFree();
-      if(var1 == 0) {
-         System.err.println(this.max + " : Particle obtain  _______  " + this.particleName + " : " + this.getFree());
-      }
-//      else{
-//         System.err.println(this.max + " : Particle get  _______  " + this.particleName + " : " + this.getFree());
-//      }
-
-      this.freeMin = Math.min(var1, this.freeMin);
-      return (GParticleSprite)super.obtain();
-   }
-
-   public void setAutoFree(boolean var1) {
-      this.autoFree = var1;
-   }
-
-   public void setDefaultGroup(Group var1) {
-      this.defaultGroup = var1;
-   }
-
-   public void setLoop(boolean var1) {
-      Iterator var2 = this.effectSample.getEmitters().iterator();
-
-      while(var2.hasNext()) {
-         ((ParticleEmitter)var2.next()).setContinuous(var1);
-      }
-
-   }
-
-   public void setToAdditiveGroup(boolean var1) {
-      this.isAdditiveGroup = var1;
-   }
+  public void setToAdditiveGroup(boolean isAdditiveGroup) {
+    this.isAdditiveGroup = isAdditiveGroup;
+  }
 }
