@@ -96,7 +96,7 @@ public class PlayScreen implements Screen, EventHandler {
         LB.New().font(GConstants.BMF).text("" + GMain.player().getScore()).pos(20, 0, AL.cr).idx("scoreLabel"),
         IB.New().drawable("star6").idx("starOrigin").pos(10, 0, AL.cl).scale(0.9f)
     ).pos(20, 20, AL.tr).idx("score").parent(playMG).build();
-    playMG.debugAll();
+//    playMG.debugAll();
   }
 
   private void createParticle() {
@@ -243,7 +243,7 @@ public class PlayScreen implements Screen, EventHandler {
     reloadProgessBar();
     initFlexible();
     isPause = false;
-    playMG.debugAll();
+//    playMG.debugAll();
   }
 
   private void reloadProgessBar() {

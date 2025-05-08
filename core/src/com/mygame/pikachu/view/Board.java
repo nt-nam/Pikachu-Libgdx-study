@@ -317,14 +317,17 @@ public class Board extends Group {
   private void addScoreStars(List<int[]> path) {
     GAssetsManager.setTextureAtlas(DEFAULT_ATLAS_NEWPIKA);
     Image origin = GMain.hud().query("playMG/score/starOrigin", Image.class);
-    Vector2 posMoveBy = absPos(origin, -3 * origin.getWidth() * getScaleX(), -3 * origin.getHeight() * getScaleY(), AL.tl);
-    System.out.println(posMoveBy.toString());
+//    Vector2 posMoveBy = absPos(origin, -4 * origin.getWidth() * getScaleX(), -3 * origin.getHeight() * getScaleY(), AL.cl);
+    Vector2 posThat = absPos(origin, AL.bl);
+    Vector2 posThis = absPos(this, AL.c);
+    Vector2 move = new Vector2(posThat.x - posThis.x, posThat.y - posThis.y);
+    System.out.println(move.toString());
     System.out.println(getStage().getWidth() + " - " + getStage().getHeight());
     System.out.println(getScaleX());
     float timeAction = 3;
     for (int i = 0; i < path.size(); i++) {
       int[] pair = path.get(i);
-      starAt2((pair[0] + 0.20f) * TILE_SIZE, (pair[1] + 0.20f) * TILE_SIZE, posMoveBy, timeAction);
+      starAt2((pair[0] + 0.20f) * TILE_SIZE, (pair[1] + 0.20f) * TILE_SIZE, move, timeAction);
 //      Image star6 = IB.New().drawable("star6").size(TILE_SIZE * 0.7f, TILE_SIZE * 0.7f).parent(this).pos((pair[0]+0.20f) * TILE_SIZE, (pair[1]+0.20f) * TILE_SIZE, AL.bl).build();
 //      star6.addAction(
 //          Actions.parallel(
@@ -342,17 +345,16 @@ public class Board extends Group {
 //          )
 //      );
     }
-    debugAll();
   }
 
-  private void starAt2(float x, float y, Vector2 posMoveBy, float timeAction) {
+  private void starAt2(float x, float y, Vector2 move, float timeAction) {
     Image star6 = IB.New().drawable("star6").size(TILE_SIZE * 0.7f, TILE_SIZE * 0.7f).parent(this).pos(x, y, AL.bl).build();
     star6.addAction(
         Actions.parallel(
             Actions.rotateBy(360, 1.3f * timeAction),
             Actions.sequence(
                 Actions.delay(0.4f * timeAction),
-                Actions.moveTo(getWidth() / 2 + posMoveBy.x / getScaleX() / 2, getHeight() / 2 + (posMoveBy.y / getScaleY()) / 2, 0.7f * timeAction),
+                Actions.moveTo(getWidth() / 2 + move.x / getScaleX(), getHeight() / 2 + (move.y / getScaleY()), 0.7f * timeAction),
                 Actions.run(() -> {
                   GMain.player().plusScore(1);
                   GMain.hud().query("playMG/score/scoreLabel", Label.class).setText(GMain.player().getScore() + "");
@@ -373,7 +375,10 @@ public class Board extends Group {
     Image star6 = IB.New().drawable("star6").size(TILE_SIZE * 0.7f, TILE_SIZE * 0.7f).parent(this).pos(x, y, AL.bl).build();
     Image origin = GMain.hud().query("playMG/score/starOrigin", Image.class);
     Label scoreLabel = GMain.hud().query("playMG/score/scoreLabel", Label.class);
-    Vector2 posMoveBy = absPos(origin, -3 * origin.getWidth() * getScaleX(), -3 * origin.getHeight() * getScaleY(), AL.c);
+//    Vector2 posMoveBy = absPos(origin, -4 * origin.getWidth() * getScaleX(), -3 * origin.getHeight() * getScaleY(), AL.cl);
+    Vector2 posThat = absPos(origin, AL.bl);
+    Vector2 posThis = absPos(this, AL.c);
+    Vector2 move = new Vector2(posThat.x - posThis.x, posThat.y - posThis.y);
     float timeAction = 3;
     star6.addAction(
         Actions.parallel(
@@ -381,7 +386,7 @@ public class Board extends Group {
             Actions.sequence(
                 Actions.delay(0.3f * timeAction),
                 Actions.moveTo(/*posMoveBy.x * getScaleX(), posMoveBy.y * getScaleY()*/
-                    getWidth() / 2 + posMoveBy.x / getScaleX() / 2, getHeight() / 2 + (posMoveBy.y / getScaleY()) / 2, 0.5f * timeAction),
+                    getWidth() / 2 + move.x / getScaleX(), getHeight() / 2 + (move.y / getScaleY()), 0.5f * timeAction),
                 Actions.fadeOut(0.5f * timeAction),
                 Actions.run(() -> {
                   GMain.player().plusScore(1);
@@ -391,14 +396,16 @@ public class Board extends Group {
             )
         )
     );
-    debugAll();
   }
 
   private void addCoin() {
     GAssetsManager.setTextureAtlas(DEFAULT_ATLAS_NEWPIKA);
     Image origin = GMain.hud().query("playMG/coinT/coinOrigin", Image.class);
     Label coinLabel = GMain.hud().query("playMG/coinT/coinLabel", Label.class);
-    Vector2 coinOrigin = absPos(origin, -70, -165, AL.c);
+    Vector2 posThat = absPos(origin, AL.bl);
+    Vector2 posThis = absPos(this, AL.c);
+    Vector2 move = new Vector2(posThat.x - posThis.x, posThat.y - posThis.y);
+
     float timed = 0.02f;
     for (int row = 0; row < ROWS; row++) {
       for (int col = COLS - 1; col >= 0; col--) {
@@ -411,7 +418,7 @@ public class Board extends Group {
               img.addAction(Actions.sequence(
                   Actions.delay(0.5f),
                   Actions.rotateTo(90, 1, Interpolation.swing),
-                  Actions.moveTo(coinOrigin.x, coinOrigin.y, 1.5f),
+                  Actions.moveTo(getWidth() / 2 + move.x / getScaleX(), getHeight() / 2 + (move.y / getScaleY()), 1.5f),
                   Actions.run(() -> {
                     GMain.player().plusCoin(1);
                     coinLabel.setText(GMain.player().getCoins() + "");
